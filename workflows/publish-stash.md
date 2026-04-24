@@ -53,8 +53,7 @@ For every skill, agent, command, and workflow, add YAML frontmatter with a
 `knowledge:akm-stash-structure` for templates.
 
 Optional but recommended: a root `akm.json` (preferred) or `stash.json`
-manifest with `name`, `description`, `tags`, and `assetTypes`. The legacy
-`kit.json` name is still accepted.
+manifest with `name`, `description`, `tags`, and `assetTypes`.
 
 **Done when:** `akm show <ref>` prints meaningful metadata for each asset.
 
@@ -71,9 +70,6 @@ Pick one (or more — they compose):
   an object to `manual-entries.json`. Required fields: `id`, `name`, `ref`,
   `source`. Use this to override auto-discovered metadata or list non-npm /
   non-GitHub stashes.
-
-> Legacy `akm-kit` and `agentikit` keywords/topics are still honored by the
-> registry auto-discovery during the migration window.
 
 **Done when:** the publish path's prerequisites (package published, topic
 added, or PR merged) are in place.

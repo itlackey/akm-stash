@@ -61,6 +61,17 @@ Examples:
 `akm show <ref>` inspects any asset. `akm run <ref>` executes scripts,
 commands, workflows, or agents as appropriate.
 
+## What's new in v0.6.0 (2026-04-24)
+
+- **Clean break on terminology.** Every remaining "kit" reference has been
+  renamed to "stash". The registry index wire format is now `stashes[]`
+  (schema v3); `kits[]` is no longer accepted. The legacy `kit.json`
+  manifest filename and `akm-kit` keyword/topic are also gone — use
+  `akm.json` / `stash.json` and the `akm-stash` keyword/topic.
+- See the Stash Maker's Guide (`docs/stash-makers.md` in
+  [itlackey/akm](https://github.com/itlackey/akm)) for the migration
+  checklist.
+
 ## What's new in v0.5.0 (2026-04-24)
 
 - **Workflow** is now a first-class asset type with stateful `akm workflow`

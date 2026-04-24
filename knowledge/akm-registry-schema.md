@@ -1,9 +1,14 @@
 # akm Registry Index Schema
 
-The official registry publishes a static `index.json` (version 2). The akm
+The official registry publishes a static `index.json` (version 3). The akm
 CLI fetches and caches that file, then searches it for matching stashes. This
 document describes the schema an agent or author needs to produce valid
 entries — whether via auto-discovery (npm/GitHub) or a manual PR.
+
+> **Breaking change in akm 0.6.0:** the top-level array was renamed from
+> `kits` to `stashes` and the schema bumped from version 2 to version 3.
+> Any registry index served to akm-cli >= 0.6.0 MUST use `stashes[]`; older
+> indexes using `kits[]` are no longer accepted.
 
 Schema file: [`scripts/registry-index.schema.json`](../scripts/registry-index.schema.json)
 
@@ -11,19 +16,19 @@ Schema file: [`scripts/registry-index.schema.json`](../scripts/registry-index.sc
 
 ```json
 {
-  "version": 2,
+  "version": 3,
   "updatedAt": "2026-04-24T00:00:00Z",
-  "kits": []
+  "stashes": []
 }
 ```
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `version` | `2` | yes | Consumers reject unknown versions. |
+| `version` | `3` | yes | Consumers reject unknown versions. |
 | `updatedAt` | ISO 8601 string | yes | Set by the build. |
-| `kits` | array of Stash | yes | Wire-format name retained; semantically each element is a published stash. Order is not semantically meaningful. |
+| `stashes` | array of Stash | yes | Each element is a published stash. Order is not semantically meaningful. |
 
-## Stash object (each element of `kits`)
+## Stash object (each element of `stashes`)
 
 ```json
 {
