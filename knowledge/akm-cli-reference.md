@@ -1,7 +1,19 @@
 # akm CLI Reference
 
 Quick reference for every top-level `akm` command, organized by task. Current
-as of **v0.5.0** (2026-04-24). For authoritative help, run `akm <cmd> --help`.
+as of **v0.6.0** (2026-04-24). For authoritative help, run `akm <cmd> --help`.
+
+> **Breaking changes in 0.6.0 (clean break from "kit" terminology):**
+>
+> - Registry index wire format renamed `kits[]` → `stashes[]` (schema
+>   bumped from v2 to v3). Indexes serving older `kits[]` arrays are no
+>   longer accepted by akm-cli >= 0.6.0.
+> - `akm registry` help text now reads "Manage stash registries" (was
+>   "Manage kit registries").
+> - Legacy `akm-kit` keyword/topic and `kit.json` manifest filename are no
+>   longer honored. Use `akm-stash` and `akm.json`/`stash.json` instead.
+> - See the Stash Maker's Guide (`docs/stash-makers.md` in itlackey/akm)
+>   for the full migration checklist.
 
 ## Setup & system
 

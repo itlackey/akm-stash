@@ -1,6 +1,6 @@
 ---
 name: akm-quickstart
-description: Use when an agent needs to bootstrap akm (Agent Stash Manager) in a fresh environment — installs the CLI, initializes the stash, configures the registry, and verifies the toolchain before any install/search operations.
+description: Use when an agent needs to bootstrap akm (Agent Kit Manager) in a fresh environment — installs the CLI, initializes the stash, configures the registry, and verifies the toolchain before any install/search operations.
 ---
 
 # akm Quickstart

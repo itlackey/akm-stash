@@ -4,8 +4,8 @@ The **official akm stash** — a curated collection of akm assets that teach
 coding agents (Claude Code, OpenCode, Codex, Cursor, Copilot, Qwen, etc.)
 how to use [akm](https://github.com/itlackey/akm) effectively.
 
-If akm is the package manager for agent assets, this stash is the
-"getting started" kit: install it once and any akm-aware agent gains the
+If akm is the package manager for agent assets, this is the
+"getting started" stash: install it once and any akm-aware agent gains the
 skills, commands, knowledge, and workflows it needs to discover, install,
 publish, and reason about other stashes.
 

@@ -21,8 +21,7 @@ akm show {{args.ref}}//skill:<name>         # spot-check 1–2 individual assets
 ```
 
 If the ref is a GitHub repo, also fetch `README.md`, `LICENSE`, and any
-`package.json` / `akm.json` / `stash.json` (legacy: `kit.json`) at the repo
-root.
+`package.json` / `akm.json` / `stash.json` at the repo root.
 
 ## Evaluate
 
