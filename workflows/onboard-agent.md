@@ -1,105 +1,87 @@
 ---
-name: onboard-agent
-description: Bootstrap a coding agent (Claude Code, OpenCode, Codex, Cursor, etc.) so it can discover, install, and run akm assets in the current environment.
-steps:
-  - id: install-cli
-    title: Install the akm CLI and verify it is on PATH
-  - id: init-stash
-    title: Initialize the working stash and build the search index
-    requires: [install-cli]
-  - id: wire-plugin
-    title: Wire the host agent's akm plugin (Claude Code / OpenCode / etc.)
-    requires: [init-stash]
-  - id: load-core-assets
-    title: Install the official onboarding stash (this registry)
-    requires: [wire-plugin]
-  - id: smoke-test
-    title: Verify the agent can search, show, and run an asset
-    requires: [load-core-assets]
+description: Bootstrap a coding agent so it can discover, install, search, and improve akm assets in the current environment.
+tags: [onboarding, akm]
+params:
+  host: Host agent or tool being onboarded
 ---
 
-# Onboard an Agent onto akm
+# Workflow: Onboard an agent onto akm
 
-Use this when a fresh agent/environment needs to reach the point where it can
-answer "is there an akm skill for X?" and install one if the answer is yes.
+## Step: Install the CLI
+Step ID: install-cli
 
-## Step 1 — Install the akm CLI
+### Instructions
+Install `akm-cli` with the package manager already in use, or use the
+standalone installer from the akm repository. Verify with `akm --version` and
+`akm info`.
 
-```bash
-# Pick one:
-bun add -g akm-cli@latest
-npm install -g akm-cli
-pnpm add -g akm-cli
-# or download the standalone binary: https://github.com/itlackey/akm/releases
-```
+### Completion Criteria
+- `akm --version` succeeds.
+- `akm info` succeeds.
 
-Verify:
+## Step: Initialize the working stash
+Step ID: init-stash
 
-```bash
-akm --version
-akm info
-```
+### Instructions
+Run `akm setup` for the guided flow, or `akm init && akm index` for a direct
+setup. Confirm the stash contains the standard asset directories, including
+`lessons/`.
 
-If `akm` is not on PATH, add the global bin directory (e.g.
-`$(npm bin -g)` or `~/.bun/bin`) to `PATH`.
+### Completion Criteria
+- The working stash exists.
+- `akm index` succeeds.
 
-## Step 2 — Initialize the working stash and index
+## Step: Wire the host agent integration
+Step ID: wire-plugin
 
-```bash
-akm setup        # interactive: embeddings, default registry, first index build
-# or:
-akm init && akm index
-```
+### Instructions
+Install the appropriate plugin or prompt snippet for the host agent so it can
+call `akm` from inside a task.
 
-Outcome: `~/akm/{scripts,skills,commands,agents,knowledge,workflows,wikis,vaults}`
-exists and `akm search ""` returns (likely empty) results without error.
+### Completion Criteria
+- The host agent can execute an `akm` command.
 
-## Step 3 — Wire the host agent's akm plugin
+## Step: Load the official onboarding stash
+Step ID: load-core-assets
 
-| Host | Plugin | Install |
-|---|---|---|
-| Claude Code | `akm-plugins/claude-code` | follow [itlackey/akm-plugins](https://github.com/itlackey/akm-plugins) |
-| OpenCode | `akm-opencode` | same repo |
-| Codex / Cursor / Copilot / Qwen | drop `AGENTS.md` into the project root | copy from akm-plugins repo |
-
-Goal: the agent can call an `akm` tool (search / show / dispatch / run) from
-inside its turn, not just from a separate shell.
-
-## Step 4 — Install the official onboarding stash
-
-The official registry (this repo) ships skills, knowledge, and workflows
-about using akm itself. Load them so the agent has a ready-made context:
+### Instructions
+Install this repo as a source and reindex.
 
 ```bash
-akm add github:itlackey/akm-registry
+akm add github:itlackey/akm-stash
 akm index
 akm show skill:akm-quickstart
-akm show knowledge:akm-overview
-```
-
-Optionally install the plugins stash for your host:
-
-```bash
-akm add github:itlackey/akm-plugins
-```
-
-## Step 5 — Smoke test
-
-```bash
-akm search "deploy" --source registry
-akm curate "code review"
-akm clone github:itlackey/akm-registry//knowledge:akm-cli-reference
 akm show knowledge:akm-cli-reference
 ```
 
-If all four commands succeed, the agent is onboarded. It can now use
-`skill:install-akm-stash` to add more stashes as needs arise.
+### Completion Criteria
+- `skill:akm-quickstart` is retrievable.
+- `knowledge:akm-cli-reference` is retrievable.
 
-## Troubleshooting
+## Step: Learn the v0.7.0 asset lifecycle
+Step ID: learn-lifecycle
 
-- **`akm registry list` is empty** → `akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/index.json --name official`
-- **Search returns nothing after install** → run `akm index`.
-- **Private GitHub sources fail** → set `GITHUB_TOKEN` (or store it in the
-  vault and re-run).
-- **Embeddings errors at setup** → choose "none" to fall back to lexical
-  search; you can configure embeddings later via `akm config set`.
+### Instructions
+Review how v0.7.0 handles feedback, lessons, and proposals. Inspect
+`knowledge:akm-proposals-and-lessons`, then verify the proposal queue commands
+exist with `akm proposal list`.
+
+### Completion Criteria
+- The operator understands `feedback`, `distill`, and `proposal` basics.
+- `akm proposal list` runs successfully.
+
+## Step: Smoke test discovery
+Step ID: smoke-test
+
+### Instructions
+Run a quick search-and-show flow:
+
+```bash
+akm curate "code review"
+akm search "proposal queue" --type knowledge --source both
+akm show knowledge:akm-proposals-and-lessons --detail=agent
+```
+
+### Completion Criteria
+- Search returns results.
+- `akm show` returns readable content.

@@ -1,105 +1,107 @@
 # akm CLI Reference
 
-Quick reference for every top-level `akm` command, organized by task. Current
-as of **v0.6.0** (2026-04-24). For authoritative help, run `akm <cmd> --help`.
+Quick reference for the main `akm` surfaces an agent is likely to use.
+Current as of **v0.7.0** (2026-05-04). For authoritative syntax, run
+`akm <cmd> --help`.
 
-> **Breaking changes in 0.6.0 (clean break from "kit" terminology):**
->
-> - Registry index wire format renamed `kits[]` → `stashes[]` (schema
->   bumped from v2 to v3). Indexes serving older `kits[]` arrays are no
->   longer accepted by akm-cli >= 0.6.0.
-> - `akm registry` help text now reads "Manage stash registries" (was
->   "Manage kit registries").
-> - Legacy `akm-kit` keyword/topic and `kit.json` manifest filename are no
->   longer honored. Use `akm-stash` and `akm.json`/`stash.json` instead.
-> - See the Stash Maker's Guide (`docs/stash-makers.md` in itlackey/akm)
->   for the full migration checklist.
+## Global output controls
+
+| Flag | Purpose |
+|---|---|
+| `--format json\|text\|yaml\|jsonl` | Choose the output format. |
+| `--detail brief\|normal\|full\|summary\|agent` | Choose how much data to return. |
+| `--detail=agent` | Preferred compact mode for agents; replaces deprecated `--for-agent`. |
+| `--quiet` / `--verbose` | Suppress warnings or emit extra diagnostics. |
 
 ## Setup & system
 
 | Command | Purpose |
 |---|---|
-| `akm setup` | Interactive first-run wizard: embeddings provider, default registry, initial index build. |
-| `akm init` | Create the working-stash skeleton (`~/akm/{scripts,skills,commands,agents,knowledge,workflows,wikis,vaults}`). |
-| `akm index` | Build or refresh the local search index across all configured sources. |
-| `akm info` | Print system capabilities, working-stash path, registry count, and index state. Use this to verify readiness. |
-| `akm config get <key>` / `akm config set <key> <val>` | Read or write configuration. |
-| `akm upgrade` | Self-update the akm binary; works with npm/bun/pnpm/binary installs. |
+| `akm setup` | Guided first-run wizard: config, stash dir, providers, registries, and initial index. |
+| `akm init [--dir <path>]` | Create the working stash skeleton (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`, `lessons/`). |
+| `akm index [--full]` | Build or refresh the local search index. |
+| `akm info` | Print version, configured sources, registries, and index/search capabilities. |
+| `akm config get <key>` / `set <key> <value>` | Read or write configuration. |
+| `akm upgrade` | Self-update the CLI. |
+| `akm help migrate <version>` | Preview release notes and migration guidance. |
 
 ## Discovery
 
 | Command | Purpose |
 |---|---|
-| `akm search <query>` | Search working stash + registries. Flags: `--type`, `--source`, `--limit`. |
-| `akm curate <query>` | Like `search` but returns a compact, follow-up-friendly summary. Prefer this for agent-driven discovery. |
-| `akm show <ref>` | Display an asset. For knowledge, supports `--mode` (summary/full/toc). |
-| `akm registry list` | List configured registries. |
-| `akm registry add <url> --name <n>` | Register an additional registry. |
-| `akm registry search <query>` | Search only the registries (not the working stash). |
+| `akm search <query>` | Search local stash content by default. |
+| `akm search <query> --source registry` | Search only registries. |
+| `akm search <query> --source both` | Merge local and registry discovery. |
+| `akm search <query> --type <type>` | Filter by asset type (`script`, `skill`, `command`, `agent`, `knowledge`, `workflow`, `wiki`, `vault`, `memory`, `lesson`). |
+| `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
+| `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
+| `akm curate <query>` | Return a compact shortlist plus suggested next commands. |
+| `akm show <ref> [toc\|frontmatter\|section\|lines ...]` | Display an asset; knowledge supports additional view modes. |
+| `akm show <ref> --scope key=value` | Require a scope match when resolving the asset. |
+| `akm registry list` / `search <query>` / `add <url> --name <alias>` | Manage discovery registries. |
 
-## Sources (managed stashes)
+## Sources and install flows
 
 | Command | Purpose |
 |---|---|
-| `akm add <ref>` | Register a source. Accepts `./path`, `npm:pkg`, `github:owner/repo[#ref]`, `git+https://...`, or a website URL. |
+| `akm add <source>` | Register a source such as `./path`, `github:owner/repo`, `npm:@scope/pkg`, `git+https://...`, or a website URL. |
 | `akm list` | List configured sources. |
-| `akm remove <id>` | Remove a source (id from `akm list`) and reindex. |
-| `akm update` | Pull latest versions of managed sources. |
+| `akm update` | Refresh managed sources. |
+| `akm remove <id>` | Remove a configured source and reindex. |
+| `akm clone <ref> [--dest <dir>] [--name <new-name>]` | Copy a single asset or stash into a writable location. |
 
-## Copying into the working stash
-
-| Command | Purpose |
-|---|---|
-| `akm clone <ref>` | Copy a single asset (or a whole published stash) from any source into the writable working stash. Type subdirectories are appended automatically on the destination side. |
-| `akm import <file>` | Ingest a knowledge document. |
-
-## Execution
+## Execution and authoring
 
 | Command | Purpose |
 |---|---|
-| `akm run <ref>` | Execute a runnable asset (script, command, agent, workflow). Command assets expand placeholders from flags or stdin. |
-| `akm workflow create <name>` | Scaffold a new workflow asset. |
-| `akm workflow start <ref>` | Begin a stateful workflow run. |
-| `akm workflow next` / `akm workflow complete` | Advance or finish a running workflow. |
+| `akm run <ref>` | Execute a runnable asset. |
+| `akm workflow start <ref>` / `next` / `complete` / `status` | Run stateful workflows. |
+| `akm workflow create <name>` / `validate <ref\|path>` | Author or validate workflow files. |
+| `akm remember "<text>"` | Append a memory fragment to the working stash. |
+| `akm import <file>` | Ingest a knowledge or lesson-style document into the stash. |
+| `akm feedback <ref> --positive` | Record positive feedback. |
+| `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
+| `akm save -m "msg" [--push]` | Commit and optionally push the git-backed working stash. |
 
-## Content authoring
-
-| Command | Purpose |
-|---|---|
-| `akm remember "<text>"` | Append a memory fragment to the working stash as markdown. |
-| `akm feedback <ref> --positive\|--negative` | Rate an asset; feedback is used to rerank future searches. |
-| `akm save -m "<msg>" [--push]` | Commit (and optionally push) a git-backed working stash. Uses `git clone` under the hood for writable working stashes. |
-
-## Wikis (v0.5.0+)
+## Proposal queue and self-improvement (v0.7.0+)
 
 | Command | Purpose |
 |---|---|
-| `akm wiki list` | List registered wikis. |
-| `akm wiki ingest <path-or-url>` | Add a new wiki from a local dir or remote source. |
-| `akm wiki lint <name>` | Validate page structure, links, and frontmatter. |
-| `akm wiki register <url>` | Register an external wiki without copying it into the working stash. |
+| `akm reflect [ref] [--task "..."]` | Ask the configured agent to propose an improvement to an existing asset or stash context. |
+| `akm propose <type> <name> --task "..."` | Ask the configured agent to propose a brand-new asset. |
+| `akm distill <ref>` | Turn feedback and usage history into a lesson proposal. |
+| `akm proposal list` | List pending proposals. |
+| `akm proposal show <id>` | Render a proposal. |
+| `akm proposal diff <id>` | Diff a proposal against the live asset. |
+| `akm proposal accept <id>` | Validate and promote a proposal into the stash. |
+| `akm proposal reject <id> --reason "..."` | Reject and archive a proposal. |
 
-## Vaults (v0.5.0+)
+## Wikis and vaults
 
 | Command | Purpose |
 |---|---|
-| `akm vault set <KEY> <value>` | Store a secret (masked on display). |
-| `akm vault get <KEY>` | Retrieve a secret. |
-| `akm vault list` | List keys (values masked). |
-| `akm vault export <file>` | Export to a `.env` file (handle with care). |
+| `akm wiki list` / `ingest` / `register` / `lint` | Manage multi-page wiki assets. |
+| `akm vault set <KEY> <value>` / `get` / `list` / `export` | Manage secret or configuration key-value pairs. |
 
-## Common flag conventions
+## Workflow authoring contract (v0.7.0)
 
-- `--source <stash|registry|both>` — scope of a search (`stash` = local working stash).
-- `--type <script|skill|command|agent|knowledge|workflow|wiki|vault|memory>` — filter by asset type.
-- `--json` — machine-readable output on most commands.
-- `--name <alias>` — local alias when adding sources or registries.
+akm v0.7.0 workflows are markdown documents with:
 
-## Environment variables
+- optional frontmatter keys: `description`, `tags`, `params`
+- exactly one `# Workflow: <title>` heading
+- one `## Step: <title>` section per step
+- one `Step ID: <id>` line per step
+- one `### Instructions` section per step
+- optional `### Completion Criteria` list per step
 
-| Variable | Effect |
-|---|---|
-| `AKM_REGISTRY_URL` | Override the default registry URL. |
-| `AKM_STASH_DIR` | Override `~/akm`. |
-| `GITHUB_TOKEN` | Auth for private GitHub sources. |
-| `AKM_LOG_LEVEL` | `debug\|info\|warn\|error`. |
+Older frontmatter-only step arrays are not the current contract.
+
+## Good defaults for agents
+
+- Prefer `akm show <ref> --detail=agent` when you need execution-ready output.
+- Prefer `akm curate <query>` before raw `search` when the task is “find the
+  best asset for this job.”
+- Treat `proposal` content as draft material until it has been explicitly
+  accepted.
+- Use `--source both` only when you intentionally want local + registry results
+  in one pass.

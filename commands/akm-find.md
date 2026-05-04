@@ -1,38 +1,29 @@
 ---
-name: akm-find
-description: Compact prompt template for discovering akm assets matching a need. Produces a short ranked shortlist instead of raw search output.
-args:
-  - name: need
-    description: What the agent is trying to accomplish (e.g. "review a TypeScript PR", "deploy a Node app to Fly").
-    required: true
-  - name: type
-    description: Optional asset type filter — script, skill, command, agent, knowledge, workflow, wiki, vault, memory.
+description: Use when you need a compact ranked shortlist of akm assets for a task. The first argument is the need; the optional second argument is an asset type filter.
 ---
 
-You are helping choose the best akm asset for this need:
+You are helping choose the best akm asset for this need.
 
-**Need:** {{args.need}}
-{{#if args.type}}**Asset type filter:** {{args.type}}{{/if}}
+Need: $1
+Optional asset type filter: $2
 
-1. Run `akm curate "{{args.need}}"{{#if args.type}} --type {{args.type}}{{/if}}`.
-   If it returns nothing useful, fall back to
-   `akm search "{{args.need}}"{{#if args.type}} --type {{args.type}}{{/if}} --source both --limit 20`.
+1. Start with `akm curate "$1"`.
+2. If the first pass is weak or a type filter was supplied, use raw search to
+   deepen: `akm search "$1" --source both --limit 20` and add `--type "$2"`
+   when a second argument is available.
+3. Rank the best candidates by:
+   - how specifically the description matches the need,
+   - whether the asset looks official, well-maintained, or high quality,
+   - how actionable the next step is for the caller.
+4. Output a shortlist in this format:
 
-2. Rank the top 5 candidates by:
-   - how specifically the `description` matches `{{args.need}}` (trigger-sentence fit),
-   - whether the stash is `curated: true` or well-known,
-   - recency (`updatedAt`) and license compatibility.
+```text
+1. <ref> — <one-line why it fits>
+2. <ref> — <one-line why it fits>
+3. <ref> — <one-line why it fits>
+```
 
-3. Output a shortlist in this format:
+5. End with exactly one suggested next command, usually `akm show <ref>`,
+   `akm add <source>`, or `akm clone <ref>`.
 
-   ```
-   1. <ref>  — <one-line why it fits>
-   2. <ref>  — <one-line why it fits>
-   3. <ref>  — <one-line why it fits>
-   ```
-
-4. End with ONE recommended next command, either:
-   - `akm show <ref>` to inspect the top candidate, or
-   - `akm add <source>` / `akm clone <ref>` to install it.
-
-Do NOT install anything without user confirmation.
+Do not install anything without confirmation.

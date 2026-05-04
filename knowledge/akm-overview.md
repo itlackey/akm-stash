@@ -1,110 +1,103 @@
 # akm Overview for Agents
 
+> **Version target:** akm-cli v0.7.0 (2026-05-04)
+
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
-Qwen, etc.) a unified way to discover, install, and run the skills, commands,
-agents, knowledge, workflows, wikis, vaults, and memories they need — without
-reinventing a storage layer per tool.
+Qwen, etc.) a unified way to discover, install, run, and improve the skills,
+commands, agents, knowledge, workflows, wikis, vaults, memories, and lessons
+they need.
 
 Canonical repo: <https://github.com/itlackey/akm>
 Official registry: <https://github.com/itlackey/akm-registry>
 
-> **Terminology.** akm has two related concepts that both use the word
-> "stash":
+> **Terminology.** akm uses both:
 >
-> - **working stash** — your local editable directory (default `~/akm`).
-> - **stash** (unqualified) — a shareable, publishable directory of assets.
+> - **working stash** — the local editable directory (default `~/akm`).
+> - **stash** — a shareable directory of assets published to GitHub, npm, git,
+>   a website source, or another provider.
 
 ## The three moving parts
 
 | Concept | What it is | Default location |
 |---|---|---|
-| **Working stash** | Your personal, editable directory of assets. | `~/akm` |
-| **Source** | A place assets come from (local dir, npm pkg, GitHub repo, website, remote provider). | configured via `akm add` |
-| **Registry** | A discovery index of published stashes you don't know about yet. | `itlackey/akm-registry` (pre-configured) |
+| **Working stash** | Personal writable asset directory. | `~/akm` |
+| **Source** | Place assets come from (filesystem, git/GitHub, npm, website, provider). | configured via `akm add` |
+| **Registry** | Discovery index of published stashes you do not already have installed. | `itlackey/akm-registry` |
 
-A **(published) stash** is just a shareable directory of assets. Nothing in
-the directory layout is required — akm classifies by file extension and
-content — but using conventional subdirectory names (`scripts/`, `skills/`,
-`commands/`, etc.) improves indexing.
+A published stash is just a shareable directory of assets. akm classifies by
+file extension and content, but conventional directories (`skills/`,
+`commands/`, `knowledge/`, etc.) improve indexing confidence and maintainability.
 
 ## Asset types
 
 | Type | One-liner | Typical file |
 |---|---|---|
-| `script` | Executable code for automation. | `scripts/deploy.sh` |
-| `skill` | Step-by-step instructions an agent follows. | `skills/<name>/SKILL.md` |
-| `command` | Prompt template with placeholders. | `commands/review-pr.md` |
-| `agent` | System prompt + model hint + tool policy. | `agents/security-reviewer.md` |
+| `script` | Executable automation. | `scripts/deploy.sh` |
+| `skill` | Step-by-step instructions an agent follows. | `skills/release/SKILL.md` |
+| `command` | Prompt template with placeholders. | `commands/review-stash.md` |
+| `agent` | Specialized subagent prompt. | `agents/security-reviewer.md` |
 | `knowledge` | Reference docs with navigation. | `knowledge/api-reference.md` |
-| `workflow` | Structured multi-step procedure with state (v0.5.0+). | `workflows/release.md` |
-| `wiki` | Pages in multi-wiki knowledge bases (v0.5.0+). | `wikis/engineering/<page>.md` |
-| `vault` | Environment key-value pairs; secrets masked (v0.5.0+). | `vaults/prod.env` |
-| `memory` | Context fragments from external systems. | `memories/<slug>.md` |
+| `workflow` | Structured stateful procedure. | `workflows/release.md` |
+| `wiki` | Multi-page knowledge base. | `wikis/engineering/index.md` |
+| `vault` | Environment key-value pairs; secrets masked. | `vaults/prod.env` |
+| `memory` | Context fragments recalled from external systems. | `memories/team-notes.md` |
+| `lesson` | Distilled guidance learned from feedback or reflection. | `lessons/search-ranking.md` |
 
 ## Ref format
 
 Every asset is addressed by a **ref**:
 
-```
+```text
 [origin//]type:name[#version]
 ```
 
 Examples:
 
-- `script:deploy.sh` — in the working stash
-- `skill:review-pr` — in the working stash
-- `github:acme/stash//skill:review-pr` — from a GitHub source
-- `npm:@acme/stash//knowledge:runbook` — from an npm package
-- `github:acme/stash#v1.2.3//workflow:release` — pinned to a tag
+- `skill:review-pr`
+- `workflow:publish-stash`
+- `github:itlackey/akm-stash//knowledge:akm-cli-reference`
+- `npm:@acme/stash//lesson:docker-healthchecks`
 
-`akm show <ref>` inspects any asset. `akm run <ref>` executes scripts,
-commands, workflows, or agents as appropriate.
+Use `akm show <ref>` to inspect an asset. Use `akm run <ref>` for runnable
+asset types such as commands, agents, workflows, and scripts.
 
-## What's new in v0.6.0 (2026-04-24)
+## What's new in v0.7.0
 
-- **Clean break on terminology.** Every remaining "kit" reference has been
-  renamed to "stash". The registry index wire format is now `stashes[]`
-  (schema v3); `kits[]` is no longer accepted. The legacy `kit.json`
-  manifest filename and `akm-kit` keyword/topic are also gone — use
-  `akm.json` / `stash.json` and the `akm-stash` keyword/topic.
-- See the Stash Maker's Guide (`docs/stash-makers.md` in
-  [itlackey/akm](https://github.com/itlackey/akm)) for the migration
-  checklist.
-
-## What's new in v0.5.0 (2026-04-24)
-
-- **Workflow** is now a first-class asset type with stateful `akm workflow`
-  subcommands (`create`, `start`, `next`, `complete`).
-- **Wiki** support: ingest and lint multi-page markdown wikis; register
-  external wikis.
-- **Vault** asset type: manage `.env` files with masked secrets via
-  `akm vault`.
-- **`akm save`** commits & optionally pushes a git-backed working stash; save
-  now uses `git clone` instead of tarballs and supports a writable stash.
-- **`akm upgrade`** works across npm, bun, pnpm, and binary installs.
+- **Proposal queue.** `akm reflect`, `akm propose`, and `akm distill` write to a
+  durable queue; `akm proposal *` lists, diffs, accepts, and rejects proposals
+  before they touch the live stash.
+- **`lesson` asset type.** Lessons are first-class assets stored under
+  `lessons/` and are normally produced by distillation from feedback.
+- **Quality states.** Search hits can carry `quality` such as `generated`,
+  `curated`, or `proposed`. Proposed content is excluded from default search
+  unless you pass `--include-proposed`.
+- **Agent-friendly output.** `--detail=agent` is the preferred way to ask for
+  compact action-ready output; `--for-agent` is only a deprecated alias.
+- **Scoped search and show.** `akm search --filter key=value` and
+  `akm show --scope key=value` let agents work with multi-tenant or
+  per-run content safely.
+- **Bench support.** `akm-bench` adds paired utility benchmarking and a shared
+  fixture-stash format for measuring whether akm assets actually help agents.
 
 ## Essential commands at a glance
 
 ```bash
-akm setup                       # one-time configuration wizard
-akm search <query>              # search working stash + registries
-akm curate <query>              # summarized, follow-up-friendly search
-akm add <source>                # register a source (local/npm/github/url)
-akm clone <ref>                 # copy one asset into the working stash
-akm show <ref>                  # view asset contents
-akm run <ref>                   # execute a runnable asset
-akm workflow start <ref>        # start a stateful workflow
-akm vault set KEY value         # store a secret
-akm save -m "msg"               # commit (and optionally push) the working stash
-akm upgrade                     # update akm itself
+akm setup
+akm search "deploy"
+akm show skill:review-pr --detail=agent
+akm add github:owner/repo
+akm workflow start workflow:release
+akm feedback skill:review-pr --negative --reason "too generic"
+akm distill skill:review-pr
+akm proposal list
 ```
 
 ## Where to go next
 
-- Authoring a stash → `skill:publish-akm-stash`
-- Installing a stash → `skill:install-akm-stash`
-- Bootstrapping akm from scratch → `skill:akm-quickstart`
-- End-to-end stash publishing → `workflow:publish-stash`
-- Registry index format → `knowledge:akm-registry-schema`
-- Full CLI reference → `knowledge:akm-cli-reference`
+- Install or clone a stash → `skill:install-akm-stash`
+- Publish a stash → `skill:publish-akm-stash`
+- Review proposals → `skill:manage-akm-proposals`
+- Distill feedback into lessons → `skill:distill-feedback-into-lessons`
+- Understand fixture and corpus layout → `knowledge:akm-benchmark-fixtures`
+- Full command list → `knowledge:akm-cli-reference`

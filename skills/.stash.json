@@ -1,0 +1,44 @@
+{
+  "entries": [
+    {
+      "name": "akm-quickstart",
+      "type": "skill",
+      "filename": "akm-quickstart/SKILL.md",
+      "description": "Use when an environment needs akm installed, initialized, and verified before any other akm action.",
+      "quality": "curated",
+      "searchHints": ["install akm", "bootstrap akm", "akm setup"]
+    },
+    {
+      "name": "install-akm-stash",
+      "type": "skill",
+      "filename": "install-akm-stash/SKILL.md",
+      "description": "Use when the user wants to add a stash source or clone a specific akm asset into the working stash.",
+      "quality": "curated",
+      "searchHints": ["install stash", "akm add", "clone asset"]
+    },
+    {
+      "name": "publish-akm-stash",
+      "type": "skill",
+      "filename": "publish-akm-stash/SKILL.md",
+      "description": "Use when a team wants to publish a stash with strong metadata and current akm v0.7.0 conventions.",
+      "quality": "curated",
+      "searchHints": ["publish stash", "akm registry", "akm.json"]
+    },
+    {
+      "name": "manage-akm-proposals",
+      "type": "skill",
+      "filename": "manage-akm-proposals/SKILL.md",
+      "description": "Use when a pending proposal needs review, acceptance, or rejection in akm-cli v0.7.0.",
+      "quality": "curated",
+      "searchHints": ["proposal review", "proposal accept", "proposal reject"]
+    },
+    {
+      "name": "distill-feedback-into-lessons",
+      "type": "skill",
+      "filename": "distill-feedback-into-lessons/SKILL.md",
+      "description": "Use when repeated feedback should become a reusable lesson through akm distill and the proposal queue.",
+      "quality": "curated",
+      "searchHints": ["distill lesson", "feedback to lesson", "akm distill"]
+    }
+  ]
+}
