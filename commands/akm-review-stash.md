@@ -1,51 +1,38 @@
 ---
-name: akm-review-stash
-description: Prompt template for reviewing a candidate akm stash before installing it — checks metadata quality, asset trigger sentences, license, and obvious red flags.
-args:
-  - name: ref
-    description: The stash or asset ref to review (e.g. github:owner/repo or npm:@scope/pkg).
-    required: true
+description: Use when you need to review a candidate akm stash before installing it. The first argument is the stash or asset ref to inspect.
 ---
 
-Review the akm stash at `{{args.ref}}` before the user installs it. Do not
-`akm add` it as part of this review.
+Review the akm stash at `$1` before the user installs it. Do not run `akm add`
+as part of this review.
 
 ## Inspect
 
 Run these in order:
 
 ```bash
-akm registry search {{args.ref}}
-akm show {{args.ref}}                       # stash-level summary if supported
-akm show {{args.ref}}//skill:<name>         # spot-check 1–2 individual assets
+akm registry search "$1"
+akm show "$1"
 ```
 
-If the ref is a GitHub repo, also fetch `README.md`, `LICENSE`, and any
-`package.json` / `akm.json` / `stash.json` at the repo root.
+If the ref points at a GitHub repo, also inspect `README.md`, `LICENSE`, and
+any root `akm.json`, `stash.json`, or `package.json`.
 
 ## Evaluate
 
-Score each dimension and give ONE short justification per line:
+Score each dimension with one short justification:
 
-1. **Metadata quality** — Does the stash have a meaningful `description`,
-   `tags`, and `assetTypes`? Are they specific or generic?
-2. **Asset trigger sentences** — Do skills/agents/commands have
-   "Use when …" frontmatter descriptions, or are they titles?
-3. **License clarity** — Is there a root LICENSE file? Is it a permissive /
-   compatible license for the user's intended use?
-4. **Maintenance** — Recent commits or releases? Open-issue backlog size?
-5. **Security red flags** — Any of the following warrant a hard pause:
-   - Real secrets committed in `vaults/`
-   - Scripts that curl-pipe-to-sh or exfiltrate env vars
-   - Agents that disable tool policies wholesale
-   - Obfuscated or minified scripts in `scripts/`
+1. **Metadata quality** — are descriptions, tags, and asset types specific?
+2. **Asset trigger sentences** — do skills, commands, agents, and lessons say
+   when to use them?
+3. **License clarity** — is there a clear root license?
+4. **Maintenance** — does it look current enough for the caller's need?
+5. **Security red flags** — secrets, exfiltration, obfuscated scripts, or
+   unsafe agent policies are blocking issues.
 
 ## Recommend
 
-End with one of:
+End with exactly one of:
 
-- **Install** — safe to `akm add {{args.ref}}`. Suggest the exact command.
-- **Install with caveats** — list what to audit post-install.
-- **Skip** — state the blocking reason.
-
-Never recommend Install if any security red flag is present.
+- **Install** — safe to `akm add $1`
+- **Install with caveats** — say what to audit next
+- **Skip** — state the blocking reason

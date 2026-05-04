@@ -1,122 +1,72 @@
 ---
 name: publish-akm-stash
-description: Use when the user wants to publish a new akm stash so it appears in the official registry — covers repo layout, required metadata, the three listing paths (npm keyword, GitHub topic, manual PR), and release verification.
+description: Use when the user wants to publish a new akm stash so it appears in the official registry and remains useful to agents using akm-cli v0.7.0.
 ---
 
 # Publish an akm Stash
 
 This skill walks an agent through turning a directory of assets into a
-discoverable stash listed by the official akm registry.
-
-## When to use
-
-- "Make this folder of skills into an akm stash"
-- "Publish my stash to the akm registry"
-- "Add our repo to the akm index"
+searchable, installable stash.
 
 ## 1. Lay out the stash
 
-akm classifies assets by file extension and content, not by directory name,
-but conventional directories sharply improve indexing confidence. Use them:
+Use conventional directories when possible:
 
-```
+```text
 my-stash/
   README.md
-  package.json            # optional, required only if publishing to npm
-  scripts/                # *.sh *.ts *.py etc.
-  skills/<name>/SKILL.md  # each skill in its own directory
-  commands/*.md           # prompt templates
-  agents/*.md             # system prompts with frontmatter
-  knowledge/*.md          # reference docs
-  workflows/*.md          # multi-step procedures (v0.5.0+)
-  wikis/<name>/*.md       # multi-wiki knowledge bases (v0.5.0+)
-  vaults/*.env            # secret env files (v0.5.0+, never commit real secrets)
+  LICENSE
+  akm.json
+  scripts/
+  skills/<name>/SKILL.md
+  commands/
+  agents/
+  knowledge/
+  workflows/
+  lessons/
+  memories/
+  vaults/
+  wikis/
 ```
 
-Only include the directories you actually use — empty directories are fine
-but add noise.
+## 2. Write search-friendly metadata
 
-## 2. Write asset metadata
-
-Every skill, agent, and command should begin with YAML frontmatter:
-
-```markdown
----
-name: deploy-to-fly
-description: Use when deploying a Node service to Fly.io — runs flyctl, tails logs, and verifies health.
----
-
-# Deploy to Fly.io
-...
-```
-
-The `description` is what agents read to decide whether to invoke the asset,
-so write it as a *trigger sentence*, not a title.
+- Give every skill, command, agent, workflow, and lesson a trigger-sentence
+  `description`.
+- Add a root `akm.json` when you want stash-level metadata.
+- Add `.stash.json` inside asset directories when filenames/frontmatter alone do
+  not give enough search signal.
+- For benchmark or fixture content, teach **how** to do the work, not the exact
+  answer to a single verifier.
 
 ## 3. Pick a publish path
 
-### Path A — npm package (keyword discovery)
+### npm package
 
-In `package.json`:
+Add `"akm-stash"` to `keywords` in `package.json` and publish.
 
-```json
-{
-  "name": "@your-org/your-stash",
-  "version": "0.1.0",
-  "description": "Deployment skills and workflows",
-  "keywords": ["akm-stash"],
-  "files": ["skills", "commands", "agents", "knowledge", "workflows", "README.md"]
-}
-```
+### GitHub topic
 
-Publish: `npm publish --access public`. The official registry will pick it up
-on its next `akm registry build-index` run.
+Add the `akm-stash` topic and keep the repo public, documented, and licensed.
 
-### Path B — GitHub topic (repo discovery)
-
-On the repo's **About** panel, add the `akm-stash` topic.
-Make sure the repo has a clear README and a license. No other metadata is
-required.
-
-### Path C — Manual entry (curated addition or override)
+### Manual registry entry or override
 
 Open a PR against [itlackey/akm-registry](https://github.com/itlackey/akm-registry)
-adding an object to `manual-entries.json`:
+when you need a curated manual entry or metadata override.
 
-```json
-{
-  "id": "github:your-org/your-stash",
-  "name": "Your Stash",
-  "ref": "your-org/your-stash",
-  "source": "github",
-  "description": "One-line, agent-facing description",
-  "homepage": "https://github.com/your-org/your-stash",
-  "tags": ["deploy", "fly"],
-  "assetTypes": ["skill", "workflow"],
-  "author": "your-org",
-  "license": "MIT",
-  "curated": true
-}
-```
-
-Required fields: `id`, `name`, `ref`, `source`. Use Path C when you need to
-override auto-discovered metadata or list assets that aren't on npm/GitHub.
-
-## 4. Verify listing
-
-After the registry rebuilds:
+## 4. Verify listing and installability
 
 ```bash
-akm registry search <your-stash-name>
+akm registry search <your-stash>
 akm add <your-ref>
-akm show <a-ref-from-your-stash>
+akm index
+akm show <ref-from-your-stash>
 ```
 
 ## 5. Release hygiene
 
-- Pin versions via git tags (`v0.1.0`) or npm semver so consumers can pin.
-- Keep `README.md` oriented to agents: describe asset triggers, not marketing.
-- For breaking changes, bump the major version and note migration in the
-  release notes — the registry does not enforce semver, consumers do.
-- Do **not** commit real secrets into `vaults/` — ship `.env.example` files
-  and document the keys consumers must provide.
+- Tag releases so users can pin a known-good version.
+- Keep README copy oriented to agents, not marketing.
+- Ship `.env.example` files instead of real secrets.
+- Review proposal-generated changes before release; do not publish draft
+  `quality: "proposed"` content as if it were final.
