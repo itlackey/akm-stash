@@ -41,20 +41,12 @@
       "searchHints": ["distill lesson", "feedback to lesson", "akm distill"]
     },
     {
-      "name": "scan-session-logs",
+      "name": "analyze-session-logs",
       "type": "skill",
-      "filename": "scan-session-logs/SKILL.md",
-      "description": "Use when an agent needs to scan user directories for opencode, Claude, or akm logs and normalize the extracted signals.",
+      "filename": "analyze-session-logs/SKILL.md",
+      "description": "Use when an agent needs one skill to scan supported session logs, normalize the evidence, and prepare queue-ready akm proposals.",
       "quality": "curated",
-      "searchHints": ["scan session logs", "parse opencode logs", "parse claude logs", "akm feedback logs"]
-    },
-    {
-      "name": "harvest-session-knowledge",
-      "type": "skill",
-      "filename": "harvest-session-knowledge/SKILL.md",
-      "description": "Use when normalized session-log evidence should be deduplicated, prioritized, and submitted to the akm proposal queue.",
-      "quality": "curated",
-      "searchHints": ["harvest session knowledge", "submit proposal from logs", "session lessons", "agent behavior mining"]
+      "searchHints": ["analyze session logs", "parse opencode logs", "session lessons", "proposal queue harvest"]
     }
   ]
 }

@@ -18,7 +18,7 @@ minor filename variation does not break harvesting.
 ## Normalization contract
 
 Every parser should emit the canonical harvest record described in
-`skill:scan-session-logs`.
+`skill:analyze-session-logs`.
 
 To support a new tool cleanly, add:
 
@@ -105,7 +105,7 @@ after duplicates are under control.
 
 ## Example harvest-to-proposal flow
 
-1. Scan and normalize records with `skill:scan-session-logs`.
+1. Scan and normalize records with `skill:analyze-session-logs`.
 2. Cluster repeated misses such as "agents skip proposal-queue review before
    drafting changes."
 3. Package the best finding:

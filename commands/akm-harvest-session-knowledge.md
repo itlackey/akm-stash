@@ -13,8 +13,9 @@ Mode: $4
    - expand the requested roots and note missing directories,
    - inspect `akm proposal list` for overlapping pending work,
    - identify which supported log families are actually present.
-2. Use `skill:scan-session-logs` to normalize opencode, Claude, and akm
-   evidence from the requested scope.
+2. Use `skill:analyze-session-logs` to normalize opencode, Claude, and akm
+   evidence from the requested scope and identify the strongest proposal
+   candidates.
 3. Use `workflow:harvest-session-knowledge` with the supplied parameters to
    cluster patterns, remove duplicates, and either:
    - stop at queue-ready briefs when mode is `dry-run`, or

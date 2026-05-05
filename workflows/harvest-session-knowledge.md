@@ -28,9 +28,9 @@ out early.
 Step ID: scan-logs
 
 ### Instructions
-Use `skill:scan-session-logs` to scan for opencode, Claude, and akm logs under
-the supplied roots. Normalize each useful hit into the canonical harvest record
-and preserve source-specific leftovers under `extras`.
+Use `skill:analyze-session-logs` to scan for opencode, Claude, and akm logs
+under the supplied roots. Normalize each useful hit into the canonical harvest
+record and preserve source-specific leftovers under `extras`.
 
 ### Completion Criteria
 - Supported log candidates were scanned.
@@ -40,9 +40,10 @@ and preserve source-specific leftovers under `extras`.
 Step ID: distill-patterns
 
 ### Instructions
-Use `skill:harvest-session-knowledge` to cluster repeated mistakes, successful
-strategies, explicit feedback, and missing references. Prefer evidence that
-appears in more than one session or is backed by strong user/akm feedback.
+Continue with `skill:analyze-session-logs` to cluster repeated mistakes,
+successful strategies, explicit feedback, and missing references. Prefer
+evidence that appears in more than one session or is backed by strong user/akm
+feedback.
 
 ### Completion Criteria
 - Candidate lessons, skills, workflows, agents, or knowledge assets were identified.
