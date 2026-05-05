@@ -1,0 +1,53 @@
+{
+  "skill_name": "akm-dream",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My akm memory files are a mess. Can you dream over them and clean things up?",
+      "expected_output": "Skill triggers; agent runs phase 1 (inventory) via bun run scripts/phase1-orient.ts, then phase 2, then guides through consolidation, then phase 4 to rebuild MEMORY.md and the index.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Run an akm dream cycle on my stash.",
+      "expected_output": "Skill triggers; agent invokes the bundled dream.ts orchestrator and walks through the four phases. Detects whether akm has a native dream command and delegates if so.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "/dream",
+      "expected_output": "Skill triggers on the slash-style invocation. Agent runs the four-phase pipeline.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I just refactored half my project — switched from Express to Fastify and renamed a bunch of files. My akm memories are referencing old stuff. Help me consolidate them.",
+      "expected_output": "Skill triggers. Agent runs phase 1 to inventory, phase 2 to find references to the old framework in transcripts, then in phase 3 deletes contradicted memories (Express references), updates ones that need rewrites, and creates new ones for the migration. Phase 4 regenerates MEMORY.md.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Show me what akm memories I have, find any that are stale or contradicted, and merge any duplicates.",
+      "expected_output": "Skill triggers (matches 'consolidate' / 'merge duplicates' patterns in description). Agent runs the dream pipeline rather than just listing.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "MEMORY.md is way too long. Can you shrink it back under the 200-line limit?",
+      "expected_output": "Skill triggers (matches 'MEMORY.md' / line limit). Agent runs phase 4 (or full pipeline) to regenerate the index. Demotes verbose entries — keeps gist in index, leaves detail in topic files.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "What memories does akm have stored?",
+      "expected_output": "DOES NOT trigger akm-dream (this is just a listing query). Agent should run `akm search --type memory --source stash` directly. Dream is for consolidation, not browsing.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Forget the memory about old-deploy.sh — we don't use that script anymore.",
+      "expected_output": "Skill triggers (delete-stale-memory falls under dream's scope). Agent uses bun run scripts/forget.ts memory:old-deploy. May also offer to do a fuller dream cycle.",
+      "files": []
+    }
+  ]
+}

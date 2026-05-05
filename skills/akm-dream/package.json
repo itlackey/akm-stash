@@ -1,0 +1,43 @@
+{
+  "name": "akm-dream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Auto Dream memory consolidation for the akm CLI — implements the four-phase Orient/Gather/Consolidate/Prune pipeline as a Claude Code skill.",
+  "type": "module",
+  "scripts": {
+    "dream": "bun run scripts/dream.ts",
+    "dream:auto": "bun run scripts/dream.ts --auto",
+    "dream:continue": "bun run scripts/dream.ts --continue",
+    "phase1": "bun run scripts/phase1-orient.ts",
+    "phase2": "bun run scripts/phase2-gather.ts",
+    "phase4": "bun run scripts/phase4-prune.ts",
+    "phase4:dry": "bun run scripts/phase4-prune.ts --dry-run",
+    "forget": "bun run scripts/forget.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test",
+    "audit:akm": "bun run scripts/audit-current-akm.ts",
+    "verify": "bun run typecheck && bun run test && bun run audit:akm"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "bun-types": "^1.3.13",
+    "typescript": "5.5"
+  },
+  "keywords": [
+    "akm",
+    "claude-code",
+    "skill",
+    "memory",
+    "auto-dream",
+    "agentikit"
+  ],
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itlackey/akm-dream"
+  },
+  "homepage": "https://github.com/itlackey/akm-dream"
+}
