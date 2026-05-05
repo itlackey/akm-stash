@@ -47,14 +47,6 @@
       "description": "Use when an agent is authoring benchmark fixtures or reusable test stashes and needs the MANIFEST.json and task.yaml format plus anti-leak rules.",
       "quality": "curated",
       "searchHints": ["benchmark fixtures", "task yaml", "manifest json", "teach how not what"]
-    },
-    {
-      "name": "session-log-harvest",
-      "type": "knowledge",
-      "filename": "session-log-harvest.md",
-      "description": "Use when an agent needs the supported session-log formats, normalization contract, scheduling examples, and queue-submission examples for harvest workflows.",
-      "quality": "curated",
-      "searchHints": ["session log schema", "harvest config", "schedule knowledge harvest", "proposal submission example"]
     }
   ]
 }

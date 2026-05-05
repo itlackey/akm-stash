@@ -174,5 +174,5 @@ akm proposal diff <id>
 Then use `skill:manage-akm-proposals` or `command:akm-review-proposal` to
 accept or reject the strongest submissions.
 
-Use `knowledge:session-log-harvest` for sample config, scheduling examples, and
+Use `references/session-log-harvest.md` for sample config, scheduling examples, and
 example normalized output.

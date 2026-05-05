@@ -16,7 +16,7 @@ Mode: $4
 2. Use `skill:analyze-session-logs` to normalize opencode, Claude, and akm
    evidence from the requested scope and identify the strongest proposal
    candidates.
-3. Use `workflow:harvest-session-knowledge` with the supplied parameters to
+3. Use `akm workflow` with `workflow:harvest-session-knowledge` with the supplied parameters to
    cluster patterns, remove duplicates, and either:
    - stop at queue-ready briefs when mode is `dry-run`, or
    - submit proposals when mode is `live`.
