@@ -108,3 +108,35 @@ akm workflow complete <run-id> --step phase1 --state completed
 The skill doesn't ship a dream workflow file — that's a project-level
 choice. But if one exists at `workflow:dream`, every dream run can be
 audited later.
+
+## Dream phase helpers
+
+The standalone phase 3 helpers default to the latest stash-scoped run under
+`<stash>/.akm-dream/runs/<run-id>/`:
+
+```bash
+# Uses latest run's orient.json and signal.json when flags are omitted.
+bun run phase3:plan
+
+# Explicit inputs/outputs.
+bun run phase3:plan -- \
+  --orient <run-dir>/orient.json \
+  --signal <run-dir>/signal.json \
+  --out <run-dir>/plan.json \
+  --run-id <run-id>
+
+# Uses latest run's plan.json when --plan is omitted.
+bun run phase3:apply -- --dry-run
+
+# Explicit apply artifacts.
+bun run phase3:apply -- \
+  --plan <run-dir>/plan.json \
+  --actions <run-dir>/actions.jsonl \
+  --result <run-dir>/result.json \
+  --apply-approved
+```
+
+Supported phase 3 flags:
+
+- `phase3:plan`: `--orient`, `--signal`, `--out`, `--run-id`
+- `phase3:apply`: `--plan`, `--actions`, `--result`, `--dry-run`, `--apply-approved`, `--include-unapproved`, `--no-delete`, `--max-deletes`, `--allow-protected`

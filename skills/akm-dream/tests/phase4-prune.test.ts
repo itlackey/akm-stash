@@ -18,6 +18,38 @@ describe("phase4 renderIndex", () => {
     expect(result.droppedRefs[0]).toMatch(/^memory:item-/);
   });
 
+  test("reports all remaining refs when budget runs out after a tag section", () => {
+    const entries: Entry[] = [
+      ...Array.from({ length: 192 }, (_, index) => ({
+        ref: `memory:alpha-${index + 1}`,
+        name: `alpha-${index + 1}`,
+        description: `Alpha ${index + 1}`,
+        tags: ["alpha"],
+        ageDays: index,
+      })),
+      {
+        ref: "memory:beta-1",
+        name: "beta-1",
+        description: "Beta 1",
+        tags: ["beta"],
+        ageDays: 0,
+      },
+      {
+        ref: "memory:beta-2",
+        name: "beta-2",
+        description: "Beta 2",
+        tags: ["beta"],
+        ageDays: 1,
+      },
+    ];
+
+    const result = renderIndex(entries);
+
+    expect(result.includedRefs).not.toContain("memory:beta-1");
+    expect(result.includedRefs).not.toContain("memory:beta-2");
+    expect(result.droppedRefs).toEqual(["memory:beta-1", "memory:beta-2"]);
+  });
+
   test("keeps all refs when content stays within the line budget", () => {
     const entries: Entry[] = [
       {

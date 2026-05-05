@@ -3,8 +3,10 @@
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { forget, type ForgetResult } from "./forget.ts";
-import { rememberMemory, showMemory, type MemoryShow } from "./lib/akm.ts";
+import { getStashDir, rememberMemory, showMemory, type MemoryShow } from "./lib/akm.ts";
 import { parseMemory, today } from "./lib/memory.ts";
+import { dreamRunsDir } from "./lib/paths.ts";
+import { loadDreamState } from "./lib/state.ts";
 import type { PlanCandidate, PlanEvidence, PlanReport } from "./phase3-plan.ts";
 
 interface ApplyJournalEntry {
@@ -351,6 +353,21 @@ function readPlan(filePath: string): PlanReport {
   return JSON.parse(readFileSync(filePath, "utf8")) as PlanReport;
 }
 
+function latestRunDir(stashDir: string): string {
+  const state = loadDreamState(stashDir);
+  const runId = state?.activeRunId ?? state?.lastRunId;
+  if (!runId) {
+    throw new Error(`no dream run recorded under ${dreamRunsDir(stashDir)}`);
+  }
+  return join(dreamRunsDir(stashDir), runId);
+}
+
+async function resolvePlanPath(planPath?: string): Promise<string> {
+  if (planPath) return planPath;
+  const stashDir = await getStashDir();
+  return join(latestRunDir(stashDir), "plan.json");
+}
+
 function renderApplySummary(result: ApplyResult): string {
   const lines = [
     "# Dream Apply Summary",
@@ -374,15 +391,17 @@ function renderApplySummary(result: ApplyResult): string {
 
 if (import.meta.main) {
   const args = parseArgs();
-  if (!args.planPath) {
-    console.error("phase3-apply requires --plan <path>");
-    process.exit(2);
-  }
-  const planDir = join(args.planPath, "..");
-  const actionsPath = args.actionsPath ?? join(planDir, "actions.jsonl");
-  const resultPath = args.resultPath ?? join(planDir, "result.json");
-  applyPlan(readPlan(args.planPath), { ...args, actionsPath, resultPath })
-    .then((result) => {
+  resolvePlanPath(args.planPath)
+    .then((planPath) => {
+      const planDir = join(planPath, "..");
+      const actionsPath = args.actionsPath ?? join(planDir, "actions.jsonl");
+      const resultPath = args.resultPath ?? join(planDir, "result.json");
+      return applyPlan(readPlan(planPath), { ...args, actionsPath, resultPath }).then((result) => ({
+        result,
+        resultPath,
+      }));
+    })
+    .then(({ result, resultPath }) => {
       const summaryPath = join(join(resultPath, ".."), "summary.md");
       writeFileSync(summaryPath, `${renderApplySummary(result)}\n`);
       console.log(JSON.stringify(result, null, 2));

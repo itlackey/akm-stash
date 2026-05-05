@@ -112,10 +112,24 @@ approved; it then executes the approved phase 3 plan and proceeds to phase 4. Se
 ```bash
 bun run phase1               # inventory
 bun run phase2               # gather signal
+bun run phase3:plan          # default: latest run's orient.json + signal.json
+bun run phase3:apply         # default: latest run's plan.json in .akm-dream/runs/
 bun run phase4               # rebuild MEMORY.md + akm index
 bun run phase4:dry           # preview the new MEMORY.md without writing
 bun run forget memory:foo    # delete a single memory
 ```
+
+Phase 3 standalone commands accept explicit artifact paths when you do not want
+the latest stash-scoped run directory defaults:
+
+```bash
+bun run phase3:plan -- --orient <run-dir>/orient.json --signal <run-dir>/signal.json --out <run-dir>/plan.json --run-id <run-id>
+bun run phase3:apply -- --plan <run-dir>/plan.json --actions <run-dir>/actions.jsonl --result <run-dir>/result.json --apply-approved
+```
+
+If `--orient`, `--signal`, or `--plan` are omitted, the scripts resolve the
+latest run directory under `<stash>/.akm-dream/runs/` and use the canonical
+artifact names there.
 
 ## Architecture
 

@@ -46,3 +46,8 @@ directory (`<stash>/.akm-dream/runs/<run-id>/`):
 The explicit approval boundary remains between planning and apply. Review the
 deterministic `plan.json` first, then resume with `--continue` only when the
 checklist is satisfied.
+
+For direct phase-3 debugging outside the orchestrator, `phase3-plan.ts` and
+`phase3-apply.ts` default to the latest run directory under
+`<stash>/.akm-dream/runs/`, but you can override inputs and outputs with the
+explicit path flags documented in `references/akm-commands.md`.

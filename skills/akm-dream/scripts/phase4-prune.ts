@@ -126,25 +126,32 @@ function renderIndex(entries: Entry[]): RenderIndexResult {
   ];
   const includedRefs: string[] = [];
   const droppedRefs: string[] = [];
+  const noteDroppedFrom = (startTagIndex: number, startEntryIndex = 0): void => {
+    for (let tagIndex = startTagIndex; tagIndex < tags.length; tagIndex += 1) {
+      const tagEntries = byTag.get(tags[tagIndex] as string) ?? [];
+      for (const entry of tagEntries.slice(tagIndex === startTagIndex ? startEntryIndex : 0)) {
+        droppedRefs.push(entry.ref);
+      }
+    }
+  };
 
   let allowed = LINE_LIMIT - HEADER_LINES;
-  for (const tag of tags) {
+  for (let tagIndex = 0; tagIndex < tags.length; tagIndex += 1) {
+    const tag = tags[tagIndex] as string;
     if (allowed <= 2) {
-      for (const remainingTag of tags.slice(tags.indexOf(tag))) {
-        for (const entry of byTag.get(remainingTag) ?? []) {
-          droppedRefs.push(entry.ref);
-        }
-      }
+      noteDroppedFrom(tagIndex);
       break;
     }
     lines.push(`## ${tag}`);
     lines.push("");
     allowed -= 2;
     const tagEntries = byTag.get(tag) ?? [];
-    for (const e of tagEntries) {
+    for (let entryIndex = 0; entryIndex < tagEntries.length; entryIndex += 1) {
+      const e = tagEntries[entryIndex] as Entry;
       if (allowed <= 1) {
-        droppedRefs.push(e.ref);
-        continue;
+        noteDroppedFrom(tagIndex, entryIndex);
+        allowed = 0;
+        break;
       }
       const desc = e.description ? ` — ${e.description}` : "";
       lines.push(`- \`${e.ref}\`${desc}`);

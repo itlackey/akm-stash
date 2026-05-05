@@ -1,9 +1,13 @@
 #!/usr/bin/env bun
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { OrientReport, MemoryReport } from "./phase1-orient.ts";
 import type { Signal, SignalReport } from "./phase2-gather.ts";
+import { getStashDir } from "./lib/akm.ts";
 import { slugify } from "./lib/memory.ts";
+import { dreamRunsDir } from "./lib/paths.ts";
+import { loadDreamState } from "./lib/state.ts";
 
 type PlanOperation = "create" | "update" | "merge-into" | "delete" | "skip";
 
@@ -546,23 +550,54 @@ function readJsonFile<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, "utf8")) as T;
 }
 
+function latestRunDir(stashDir: string): string {
+  const state = loadDreamState(stashDir);
+  const runId = state?.activeRunId ?? state?.lastRunId;
+  if (!runId) {
+    throw new Error(`no dream run recorded under ${dreamRunsDir(stashDir)}`);
+  }
+  return join(dreamRunsDir(stashDir), runId);
+}
+
+async function resolveDefaultPaths(args: ReturnType<typeof parseArgs>): Promise<{
+  orientPath: string;
+  signalPath: string;
+}> {
+  if (args.orientPath && args.signalPath) {
+    return {
+      orientPath: args.orientPath,
+      signalPath: args.signalPath,
+    };
+  }
+  const stashDir = await getStashDir();
+  const runDir = latestRunDir(stashDir);
+  return {
+    orientPath: args.orientPath ?? join(runDir, "orient.json"),
+    signalPath: args.signalPath ?? join(runDir, "signal.json"),
+  };
+}
+
 if (import.meta.main) {
   const args = parseArgs();
-  if (!args.orientPath || !args.signalPath) {
-    console.error("phase3-plan requires --orient <path> and --signal <path>");
-    process.exit(2);
-  }
-  const plan = buildPlan(
-    readJsonFile<OrientReport>(args.orientPath),
-    readJsonFile<SignalReport>(args.signalPath),
-    { runId: args.runId },
-  );
-  const output = `${JSON.stringify(plan, null, 2)}\n`;
-  if (args.outPath) {
-    writeFileSync(args.outPath, output);
-  } else {
-    process.stdout.write(output);
-  }
+  resolveDefaultPaths(args)
+    .then(({ orientPath, signalPath }) => {
+      const plan = buildPlan(
+        readJsonFile<OrientReport>(orientPath),
+        readJsonFile<SignalReport>(signalPath),
+        { runId: args.runId },
+      );
+      const output = `${JSON.stringify(plan, null, 2)}\n`;
+      if (args.outPath) {
+        writeFileSync(args.outPath, output);
+      } else {
+        process.stdout.write(output);
+      }
+    })
+    .catch((error: unknown) => {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error(`phase3-plan failed: ${msg}`);
+      process.exit(1);
+    });
 }
 
 export { buildPlan };
