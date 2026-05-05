@@ -39,6 +39,22 @@
       "description": "Use when repeated feedback should become a reusable lesson through akm distill and the proposal queue.",
       "quality": "curated",
       "searchHints": ["distill lesson", "feedback to lesson", "akm distill"]
+    },
+    {
+      "name": "scan-session-logs",
+      "type": "skill",
+      "filename": "scan-session-logs/SKILL.md",
+      "description": "Use when an agent needs to scan user directories for opencode, Claude, or akm logs and normalize the extracted signals.",
+      "quality": "curated",
+      "searchHints": ["scan session logs", "parse opencode logs", "parse claude logs", "akm feedback logs"]
+    },
+    {
+      "name": "harvest-session-knowledge",
+      "type": "skill",
+      "filename": "harvest-session-knowledge/SKILL.md",
+      "description": "Use when normalized session-log evidence should be deduplicated, prioritized, and submitted to the akm proposal queue.",
+      "quality": "curated",
+      "searchHints": ["harvest session knowledge", "submit proposal from logs", "session lessons", "agent behavior mining"]
     }
   ]
 }
