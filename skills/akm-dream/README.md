@@ -4,12 +4,14 @@
 > Dream** memory consolidation process for the [akm
 > CLI](https://github.com/itlackey/akm).
 
-This skill is a polyfill for the not-yet-shipped `akm dream` command
-tracked in [itlackey/akm#302](https://github.com/itlackey/akm/issues/302).
-It does for `akm remember` what REM sleep does for short-term memory:
+This skill is the canonical dream implementation for AKM. It does for
+`akm remember` what REM sleep does for short-term memory:
 prunes stale notes, merges duplicates, converts relative dates to
 absolute, and rebuilds a clean `MEMORY.md` index — without an LLM
 having to scan the entire stash from scratch each session.
+
+The implementation target and design rationale live in
+`references/implementation-spec.md`.
 
 ## What it does
 
@@ -165,12 +167,13 @@ but you transparently get the in-tree implementation.
 - [Auto Dream — Claude Fast](https://claudefa.st/blog/guide/mechanics/auto-dream)
   — the original auto-dream design from which the four-phase
   structure is borrowed.
+- `references/implementation-spec.md`
+  — canonical design/architecture spec for this skill, with internal and
+  external citations for future implementation validation.
 - [akm 0.7.0 — Proposal Queue, Reflection Commands, Lessons](https://dev.to/itlackey/akm-070-proposal-queue-reflection-commands-lessons-and-akm-bench-4lbl)
   — context for `akm reflect`/`propose`/`distill`. Dream is
   complementary: those commands generate proposals; dream consolidates
   what's already in the live stash.
-- [Issue #302 — Add dream module for akm](https://github.com/itlackey/akm/issues/302)
-  — the upstream tracking issue this skill polyfills.
 
 ## License
 

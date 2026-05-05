@@ -6,11 +6,10 @@ description: Consolidate, prune, and reorganize akm memories using the four-phas
 # akm Dream — Memory Consolidation for the akm CLI
 
 This skill implements the **Auto Dream** consolidation process for memories
-stored by the [akm CLI](https://github.com/itlackey/akm). It is a polyfill
-for the not-yet-shipped `akm dream` command tracked in
-[itlackey/akm#302](https://github.com/itlackey/akm/issues/302), built on top
-of the existing `akm` surface (`search`, `show`, `remember`, `index`,
-`feedback`, `config`).
+stored by the [akm CLI](https://github.com/itlackey/akm). It is the canonical
+dream implementation for AKM, built on top of the existing `akm` surface
+(`show`, `remember`, `index`, `feedback`, `history`, `events`, `config`) plus
+helper Bun/TypeScript scripts where AKM does not expose a dedicated command.
 
 The dream process is the REM-sleep equivalent for an agent's memory: while
 `akm remember` is the daytime note-taker, dream is the nightly consolidator
@@ -225,17 +224,12 @@ just run each phase script in order yourself.
   (frontmatter + body conventions).
 - `references/akm-commands.md` — quick reference for the akm verbs
   this skill leans on.
+- `references/implementation-spec.md` — canonical design/architecture spec,
+  including internal and external citations for future implementation work.
 - `evals/evals.json` — test prompts you can run to verify the skill
   triggers and behaves correctly.
 
 ---
-
-## When to defer to akm itself
-
-Once `akm dream` ships natively (issue
-[#302](https://github.com/itlackey/akm/issues/302)), prefer it over
-this skill — `dream.ts` will detect the native command and shell out
-to it. Until then, this skill is the canonical implementation.
 
 This skill uses `akm` for authoritative actions and stash discovery:
 `akm show`, `akm remember`, `akm index`, `akm events list`, and

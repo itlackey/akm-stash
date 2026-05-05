@@ -51,8 +51,6 @@ bun run scripts/forget.ts memory:release-process --dry-run
 ```
 
 The shim refuses to delete anything outside `<stash>/memories/`.
-When `akm dream` lands natively (issue #302), the bundled
-`scripts/dream.ts` will detect it and delegate.
 
 ## Indexing
 
