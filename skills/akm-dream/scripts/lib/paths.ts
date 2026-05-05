@@ -10,6 +10,8 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative, resolve } from "node:path";
 
+const DREAM_STATE_DIRNAME = ".akm-dream";
+
 export interface SignalLocations {
   claudeProjects: string | null;
   opencodeSessions: string | null;
@@ -59,9 +61,43 @@ export function memoryIndexPath(stashDir: string): string {
   return join(memoriesDir(stashDir), "MEMORY.md");
 }
 
-/** Path to the working directory we use for dream artifacts. */
-export function dreamWorkDir(): string {
-  return process.env.AKM_DREAM_TMP ?? "/tmp/akm-dream";
+/** Path to the stash-local directory we use for dream artifacts. */
+export function dreamStateDir(stashDir: string): string {
+  return join(stashDir, DREAM_STATE_DIRNAME);
+}
+
+/** Path to the top-level dream state file inside a stash. */
+export function dreamStatePath(stashDir: string): string {
+  return join(dreamStateDir(stashDir), "state.json");
+}
+
+/** Path to the directory containing all dream runs for a stash. */
+export function dreamRunsDir(stashDir: string): string {
+  return join(dreamStateDir(stashDir), "runs");
+}
+
+/** Path to a specific dream run directory. */
+export function dreamRunDir(stashDir: string, runId: string): string {
+  return join(dreamRunsDir(stashDir), runId);
+}
+
+/** Path to a specific dream run artifact file. */
+export function dreamRunArtifactPath(
+  stashDir: string,
+  runId: string,
+  fileName: string,
+): string {
+  return join(dreamRunDir(stashDir, runId), fileName);
+}
+
+/** Path to the per-run dream metadata file. */
+export function dreamRunMetadataPath(stashDir: string, runId: string): string {
+  return dreamRunArtifactPath(stashDir, runId, "run.json");
+}
+
+/** Path to the per-run backup directory. */
+export function dreamRunBackupDir(stashDir: string, runId: string): string {
+  return join(dreamRunDir(stashDir, runId), "backup");
 }
 
 /**

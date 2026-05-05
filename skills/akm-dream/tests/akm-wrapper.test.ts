@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import fs from "node:fs";
 import path from "node:path";
-import { akm, hasNativeDream } from "../scripts/lib/akm.ts";
+import { akm } from "../scripts/lib/akm.ts";
 import { cleanupTempDirs, makeTempDir, writeFile } from "./helpers.ts";
 
 const originalAkmBin = process.env.AKM_BIN;
@@ -28,18 +28,5 @@ describe("akm wrapper", () => {
     process.env.AKM_BIN = fakeAkm;
 
     await expect(akm(["info"])).rejects.toThrow("boom");
-  });
-
-  test("native dream detection probes help output", async () => {
-    const dir = makeTempDir("akm-dream-wrapper-");
-    const fakeAkm = path.join(dir, "fake-akm");
-    writeFile(
-      fakeAkm,
-      "#!/usr/bin/env bash\nif [ \"$1\" = \"--help\" ]; then\n  printf '%s\n' '  dream    Run dream pipeline'\nelse\n  printf '%s' '{}'\nfi\n",
-    );
-    fs.chmodSync(fakeAkm, 0o755);
-    process.env.AKM_BIN = fakeAkm;
-
-    await expect(hasNativeDream()).resolves.toBe(true);
   });
 });

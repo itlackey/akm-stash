@@ -19,7 +19,7 @@
  * Pass `--dry-run` to preview the new index without writing it.
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, statSync, writeFileSync } from "node:fs";
 import { getStashDir, indexStash } from "./lib/akm.ts";
 import { loadMemoryInventory } from "./lib/inventory.ts";
 import { parseMemory } from "./lib/memory.ts";
@@ -34,6 +34,12 @@ interface Entry {
   description: string;
   tags: string[];
   ageDays: number; // smaller = newer; used for tie-breaking
+}
+
+interface RenderIndexResult {
+  content: string;
+  includedRefs: string[];
+  droppedRefs: string[];
 }
 
 function firstSentence(body: string): string {
@@ -58,7 +64,6 @@ function descriptionFor(content: string): string {
 function ageDaysFor(path: string | undefined): number {
   if (!path || !existsSync(path)) return Number.MAX_SAFE_INTEGER;
   try {
-    const { statSync } = require("node:fs") as typeof import("node:fs");
     const s = statSync(path);
     return Math.floor((Date.now() - s.mtimeMs) / (1000 * 60 * 60 * 24));
   } catch {
@@ -87,7 +92,7 @@ async function buildEntries(): Promise<Entry[]> {
   return entries;
 }
 
-function renderIndex(entries: Entry[]): string {
+function renderIndex(entries: Entry[]): RenderIndexResult {
   // Group by primary tag (first one in frontmatter; fallback to "uncategorized").
   const byTag = new Map<string, Entry[]>();
   for (const e of entries) {
@@ -119,18 +124,31 @@ function renderIndex(entries: Entry[]): string {
     `_Index of akm memories — regenerated ${today} by akm-dream._`,
     "",
   ];
+  const includedRefs: string[] = [];
+  const droppedRefs: string[] = [];
 
   let allowed = LINE_LIMIT - HEADER_LINES;
   for (const tag of tags) {
-    if (allowed <= 2) break;
+    if (allowed <= 2) {
+      for (const remainingTag of tags.slice(tags.indexOf(tag))) {
+        for (const entry of byTag.get(remainingTag) ?? []) {
+          droppedRefs.push(entry.ref);
+        }
+      }
+      break;
+    }
     lines.push(`## ${tag}`);
     lines.push("");
     allowed -= 2;
     const tagEntries = byTag.get(tag) ?? [];
     for (const e of tagEntries) {
-      if (allowed <= 1) break;
+      if (allowed <= 1) {
+        droppedRefs.push(e.ref);
+        continue;
+      }
       const desc = e.description ? ` — ${e.description}` : "";
       lines.push(`- \`${e.ref}\`${desc}`);
+      includedRefs.push(e.ref);
       allowed--;
     }
     if (allowed <= 1) break;
@@ -141,14 +159,19 @@ function renderIndex(entries: Entry[]): string {
   // Trim trailing blanks.
   while (lines.length && lines[lines.length - 1] === "") lines.pop();
   lines.push("");
-  return lines.join("\n");
+  return {
+    content: lines.join("\n"),
+    includedRefs,
+    droppedRefs,
+  };
 }
 
 async function run(opts: { dryRun: boolean; skipIndex: boolean }): Promise<void> {
   const stashDir = await getStashDir();
   const indexPath = memoryIndexPath(stashDir);
   const entries = await buildEntries();
-  const newIndex = renderIndex(entries);
+  const rendered = renderIndex(entries);
+  const newIndex = rendered.content;
 
   if (opts.dryRun) {
     console.error(
@@ -176,8 +199,12 @@ async function run(opts: { dryRun: boolean; skipIndex: boolean }): Promise<void>
         ok: true,
         indexPath,
         entryCount: entries.length,
+        includedEntryCount: rendered.includedRefs.length,
+        droppedEntryCount: rendered.droppedRefs.length,
+        droppedRefs: rendered.droppedRefs,
         lineCount,
         overLimit: lineCount > LINE_LIMIT,
+        indexRefreshed: !opts.skipIndex,
       },
       null,
       2,
@@ -197,3 +224,4 @@ if (import.meta.main) {
 }
 
 export { buildEntries, renderIndex };
+export type { Entry, RenderIndexResult };

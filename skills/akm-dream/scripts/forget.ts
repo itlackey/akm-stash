@@ -28,7 +28,7 @@ import { resolve } from "node:path";
 import { getStashDir, indexStash, showMemory } from "./lib/akm.ts";
 import { isInside, memoriesDir } from "./lib/paths.ts";
 
-interface ForgetResult {
+export interface ForgetResult {
   ok: boolean;
   ref: string;
   path?: string;

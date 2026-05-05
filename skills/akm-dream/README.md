@@ -71,10 +71,10 @@ bun run dream
 bun run dream
 ```
 
-This runs phases 1 and 2, drops their JSON output in
-`/tmp/akm-dream/`, and prints the consolidation prompt. Then you (or
-your agent) read the JSON, do phase 3 by hand using `akm remember`
-and `bun run scripts/forget.ts`, and finish with:
+This runs phases 1 and 2, generates a deterministic `plan.json`, writes
+stash-scoped run artifacts under `<stash>/.akm-dream/runs/<run-id>/`, and
+prints the review/apply prompt. Then you (or your agent) review the plan,
+preview or adjust if needed, and finish with:
 
 ```bash
 bun run dream:continue
@@ -86,9 +86,26 @@ bun run dream:continue
 bun run dream:auto
 ```
 
-Skips phase 3 — runs only inventory, signal-gather, and index rebuild.
-Useful as a cron job or post-commit hook to keep MEMORY.md current
-without doing any merging.
+Skips phase 3 review/approval and runs only inventory, signal-gather,
+and index rebuild. Useful as a cron job or post-commit hook to keep
+`MEMORY.md` current without doing any merging. The run report marks the
+review checkpoint as skipped so audits can distinguish auto mode from a
+reviewed full run.
+
+## Review Flow
+
+Every non-trivial dream run now emits staged review artifacts:
+
+- `orient.json` for phase 1 validation
+- `signal.json` for phase 2 validation
+- `review-checklist.md` for the phase 3 approval gate
+- `run-report.json` for machine-readable checkpoint status
+- `phase4-result.json` after phase 4 with final audit metrics
+
+The explicit approval boundary is between phase 3 planning and phase 3 apply.
+Running `bun run dream:continue` means the consolidation plan was reviewed and
+approved; it then executes the approved phase 3 plan and proceeds to phase 4. See
+`references/review-flow.md` for the exact staged review contract.
 
 ### Just one phase
 
@@ -109,7 +126,7 @@ akm-dream/
 ├── package.json
 ├── tsconfig.json
 ├── scripts/
-│   ├── dream.ts                      # orchestrator (lock + phases + delegation)
+│   ├── dream.ts                      # orchestrator (lock + phases + run state)
 │   ├── phase1-orient.ts              # inventory memories + MEMORY.md state
 │   ├── phase2-gather.ts              # grep transcripts/logs for save signals
 │   ├── phase4-prune.ts               # regenerate MEMORY.md, run akm index
@@ -118,10 +135,13 @@ akm-dream/
 │       ├── akm.ts                    # akm CLI wrapper (JSON envelope parsing)
 │       ├── memory.ts                 # frontmatter + relative-date scanning
 │       ├── lock.ts                   # <stash>/.akm-dream.lock management
-│       └── paths.ts                  # XDG / transcript path resolution
+│       ├── paths.ts                  # stash + transcript path resolution
+│       ├── run-report.ts             # review checkpoints + audit artifacts
+│       └── state.ts                  # stash-scoped durable dream state
 ├── references/                       # loaded into context only when needed
 │   ├── dream-system-prompt.md        # the four-phase prompt for phase 3
 │   ├── memory-format.md              # frontmatter + body conventions
+│   ├── review-flow.md                # staged validation + approval contract
 │   └── akm-commands.md               # quick-ref of the akm verbs we use
 └── evals/
     └── evals.json                    # test prompts for skill validation
@@ -143,18 +163,21 @@ enumeration with paths.
   outside `<stash>/memories/`. The phase scripts never write outside
   the stash.
 - **Pre-dream snapshot.** Before phase 3, the orchestrator copies the
-  current `memories/` tree into `/tmp/akm-dream/backup/` so manual
+  current `memories/` tree into `<stash>/.akm-dream/runs/<run-id>/backup/` so manual
   consolidation has a local rollback point without invoking `akm save`.
 - **Dry-run available.** `phase4-prune --dry-run` and `forget --dry-run`
   show what would change without writing.
+- **Review checkpoints are explicit.** `run-report.json` and
+  `review-checklist.md` make the phase 3 approval boundary visible and
+  auditable.
 
-## Defer to akm when possible
+## Dream Implementation Boundary
 
-`dream.ts` probes `akm --help` first; if the installed akm exposes a
-native `dream` subcommand (issue #302), the orchestrator delegates to
-it and exits. This skill is therefore future-compatible — when akm
-0.8.0 ships, your prompt-and-trigger setup keeps working unchanged
-but you transparently get the in-tree implementation.
+`akm-dream` is the dream implementation. It uses current `akm` commands
+for authoritative reads, writes, indexing, feedback, and stash
+discovery, while keeping dream orchestration and run-state management in
+this skill. Future phase B/C/D work should attach `plan.json`,
+`actions.jsonl`, and `result.json` to the same per-run directory.
 
 ## Compatibility
 
@@ -170,6 +193,8 @@ but you transparently get the in-tree implementation.
 - `references/implementation-spec.md`
   — canonical design/architecture spec for this skill, with internal and
   external citations for future implementation validation.
+- `references/review-flow.md`
+  — staged validation, review, approval, and post-run audit expectations.
 - [akm 0.7.0 — Proposal Queue, Reflection Commands, Lessons](https://dev.to/itlackey/akm-070-proposal-queue-reflection-commands-lessons-and-akm-bench-4lbl)
   — context for `akm reflect`/`propose`/`distill`. Dream is
   complementary: those commands generate proposals; dream consolidates

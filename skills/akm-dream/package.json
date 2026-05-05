@@ -10,13 +10,16 @@
     "dream:continue": "bun run scripts/dream.ts --continue",
     "phase1": "bun run scripts/phase1-orient.ts",
     "phase2": "bun run scripts/phase2-gather.ts",
+    "phase3:plan": "bun run scripts/phase3-plan.ts",
+    "phase3:apply": "bun run scripts/phase3-apply.ts",
     "phase4": "bun run scripts/phase4-prune.ts",
     "phase4:dry": "bun run scripts/phase4-prune.ts --dry-run",
     "forget": "bun run scripts/forget.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
     "audit:akm": "bun run scripts/audit-current-akm.ts",
-    "verify": "bun run typecheck && bun run test && bun run audit:akm"
+    "audit:review": "bun run scripts/audit-review-artifacts.ts",
+    "verify": "bun run typecheck && bun run test && bun run audit:akm && bun run audit:review"
   },
   "engines": {
     "bun": ">=1.1.0"

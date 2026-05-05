@@ -17,9 +17,8 @@ that prunes stale notes, merges duplicates, converts relative dates to
 absolute, and rebuilds a clean `MEMORY.md` index.
 
 **Division of labour:** the bundled Bun/TypeScript scripts handle deterministic
-operations (inventory, parsing, deletion, indexing). The agent — that's you —
-does the synthesis, contradiction resolution, and merging. This mirrors akm's
-"akm surfaces, the agent writes" philosophy.
+operations (inventory, planning, apply execution, deletion, indexing). Review
+and approval still happen explicitly before phase 3 apply and phase 4.
 
 ---
 
@@ -38,15 +37,16 @@ Skip the dream if `<stash>/.akm-dream.lock` exists — another instance is runni
 
 ## The four phases
 
-Run them in order. Phase 1, 2, and 4 are mostly script work. Phase 3 is where
-you do the real LLM thinking.
+Run them in order. Phases 1, 2, and 4 are deterministic script work. Phase 3
+now has a deterministic planner plus an explicit review-and-approval gate
+before apply.
 
 ### Phase 1 — Orient
 
 Inventory what already exists so you avoid creating near-duplicates.
 
 ```bash
-bun run scripts/phase1-orient.ts > /tmp/akm-dream/orient.json
+bun run scripts/phase1-orient.ts > <stash>/.akm-dream/runs/<run-id>/orient.json
 ```
 
 This emits a JSON manifest of every `memory:` asset: ref, file path, byte
@@ -65,7 +65,7 @@ stash, rather than depending on `akm search` ranking output.
 Find new information worth persisting. Run:
 
 ```bash
-bun run scripts/phase2-gather.ts > /tmp/akm-dream/signal.json
+bun run scripts/phase2-gather.ts > <stash>/.akm-dream/runs/<run-id>/signal.json
 ```
 
 This searches for high-value signals in roughly priority order:
@@ -95,7 +95,7 @@ suspect matter.
 
 ### Phase 3 — Consolidate
 
-This is the LLM-heavy phase. For each candidate, decide:
+This phase starts from the deterministic `plan.json` candidate list. Review:
 
 - **Merge** into an existing memory (preferred — reduces duplication).
 - **Update** an existing memory (e.g. correct a contradicted fact).
@@ -103,7 +103,7 @@ This is the LLM-heavy phase. For each candidate, decide:
 - **Delete** an existing memory that is now wrong, stale, or superseded.
 - **Skip** if the signal is too thin to be worth a memory.
 
-For each operation:
+For each operation you approve:
 
 **Read a memory first** (so you preserve nuance):
 
@@ -174,8 +174,8 @@ plain markdown.
 
 ## Putting it all together
 
-The bundled orchestrator runs phases 1, 2, and 4 deterministically and
-prompts the agent (you) to handle phase 3 in between:
+The bundled orchestrator runs the full workflow and stops at the explicit
+phase 3 approval boundary:
 
 ```bash
 bun run scripts/dream.ts
@@ -184,17 +184,21 @@ bun run scripts/dream.ts
 It:
 
 1. Acquires `<stash>/.akm-dream.lock` with a dream session id (refuses to run if another dream holds it).
-2. Runs phase 1 → emits `/tmp/akm-dream/orient.json`.
-3. Runs phase 2 → emits `/tmp/akm-dream/signal.json`.
-4. **Pauses** and prints the consolidation prompt (see
-   `references/dream-system-prompt.md`) — this is where you, the agent,
-   read the JSON outputs, decide what to merge/update/delete/create, and
-   issue the `akm remember`, `forget.ts`, etc. calls.
-5. Once you indicate phase 3 is done (re-invoke with `--continue`), the
-   same session resumes phase 4 and then releases the lock.
+2. Runs phase 1 → emits `<stash>/.akm-dream/runs/<run-id>/orient.json`.
+3. Runs phase 2 → emits `<stash>/.akm-dream/runs/<run-id>/signal.json`.
+4. Writes `plan.json`, `run-report.json`, and `review-checklist.md` so the
+   review boundary is explicit and auditable.
+5. **Pauses** and prints the review/apply prompt (see
+   `references/dream-system-prompt.md`) so you can inspect the deterministic
+   plan and preview apply if needed.
+6. Once phase 3 is approved (re-invoke with `--continue`), the same session
+   runs the approved phase 3 apply step, then phase 4, then releases the lock.
 
-For a fully manual dream — useful for small stashes or debugging —
-just run each phase script in order yourself.
+Treat `--continue` as an approval action: do not run it until the review
+checklist is satisfied and the phase 3 edits are acceptable.
+
+For debugging, you can still run the phase scripts directly, but the canonical
+workflow is the stash-scoped orchestrator plus the review gate.
 
 ---
 
@@ -211,8 +215,11 @@ just run each phase script in order yourself.
   and `phase4-prune.ts --dry-run` show what would change without
   writing when you explicitly ask for preview mode.
 - **Backup before consolidation.** `dream.ts` copies the current
-  `memories/` tree into `/tmp/akm-dream/backup/` before phase 3 so bad
+  `memories/` tree into `<stash>/.akm-dream/runs/<run-id>/backup/` before phase 3 so bad
   merges have a local rollback point without invoking `akm save`.
+- **Review and audit artifacts.** `dream.ts` emits `run-report.json`,
+  `review-checklist.md`, and `phase4-result.json` so the staged validation
+  flow is inspectable after the run.
 
 ---
 
@@ -224,6 +231,8 @@ just run each phase script in order yourself.
   (frontmatter + body conventions).
 - `references/akm-commands.md` — quick reference for the akm verbs
   this skill leans on.
+- `references/review-flow.md` — explicit staged validation and review/
+  approval flow for end-to-end dream runs.
 - `references/implementation-spec.md` — canonical design/architecture spec,
   including internal and external citations for future implementation work.
 - `evals/evals.json` — test prompts you can run to verify the skill

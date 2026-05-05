@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "Run an akm dream cycle on my stash.",
-      "expected_output": "Skill triggers; agent invokes the bundled dream.ts orchestrator and walks through the four phases. Detects whether akm has a native dream command and delegates if so.",
+      "expected_output": "Skill triggers; agent invokes the bundled dream.ts orchestrator, writes orient/signal review artifacts plus run-report.json and review-checklist.md under <stash>/.akm-dream/runs/<run-id>/, pauses for phase 3 approval, then completes phase 4 after explicit continue.",
       "files": []
     },
     {
@@ -48,6 +48,23 @@
       "prompt": "Forget the memory about old-deploy.sh — we don't use that script anymore.",
       "expected_output": "Skill triggers (delete-stale-memory falls under dream's scope). Agent uses bun run scripts/forget.ts memory:old-deploy. May also offer to do a fuller dream cycle.",
       "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Run a full dream, but stop for my approval before anything rebuilds MEMORY.md.",
+      "expected_output": "Skill triggers. Agent runs phases 1 and 2, writes run-report.json and review-checklist.md, explicitly treats --continue as the approval boundary, and does not run phase 4 until review is complete.",
+      "files": [
+        "references/review-flow.md"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "I need an audit trail for a dream run so I can show what was reviewed between phases.",
+      "expected_output": "Skill triggers or the asset is consulted. Agent points to run-report.json, review-checklist.md, orient.json, signal.json, and phase4-result.json as the staged validation artifacts and explains the phase 3 approval gate.",
+      "files": [
+        "references/review-flow.md",
+        "references/implementation-spec.md"
+      ]
     }
   ]
 }

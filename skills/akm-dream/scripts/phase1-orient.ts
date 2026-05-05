@@ -33,6 +33,7 @@ import { memoryIndexPath } from "./lib/paths.ts";
 interface MemoryReport {
   ref: string;
   name: string;
+  description?: string;
   path: string | null;
   sizeBytes: number | null;
   ageDays: number | null;
@@ -116,6 +117,7 @@ async function buildReport(): Promise<OrientReport> {
     memoryReports.push({
       ref: m.ref,
       name: m.name,
+      description: m.description,
       path,
       sizeBytes,
       ageDays,

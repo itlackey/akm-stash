@@ -51,11 +51,12 @@ The skill must therefore do more than print a prompt. A dream run should:
 
 1. Gather the current memory state.
 2. Gather recent high-value signals.
-3. Build a deterministic consolidation plan.
-4. Apply approved changes safely.
-5. Rebuild `MEMORY.md`.
-6. Reindex the stash.
-7. Emit a machine-readable result.
+3. Emit staged validation artifacts and pause at explicit review gates.
+4. Build a deterministic consolidation plan.
+5. Apply approved changes safely.
+6. Rebuild `MEMORY.md`.
+7. Reindex the stash.
+8. Emit a machine-readable result.
 
 ## Design Principles
 
@@ -67,6 +68,7 @@ The skill must therefore do more than print a prompt. A dream run should:
 6. Prefer canonical memory updates over creating duplicates.
 7. Resolve contradictions at the source.
 8. Keep startup memory compact and index-like.
+9. Make review and approval checkpoints visible in artifacts, not only prompts.
 
 ## Recommended Architecture
 
@@ -106,8 +108,8 @@ Recommended location:
       backup/
 ```
 
-`/tmp` may still be used for scratch data, but it should not be the only source
-of run state.
+`/tmp` may still be used for scratch data, but stash-scoped state under
+`<stash>/.akm-dream/` is the canonical source of run truth and review artifacts.
 
 ### 3. Deterministic Evidence Gathering
 
@@ -172,6 +174,20 @@ Each candidate should include:
 
 The LLM should refine decisions from this plan, not reason from scratch over raw
 logs.
+
+### 4A. Review And Approval Layer
+
+Even before deterministic `plan.json` and `phase3-apply.ts` exist, the skill
+must make review points explicit.
+
+Minimum expectations:
+
+- `orient.json` and `signal.json` are preserved as named run artifacts
+- a machine-readable run report records checkpoint state transitions
+- a human-readable review checklist states what must be validated before moving
+  from phase 3 to phase 4
+- `--continue` is documented as the approval boundary for the current workflow
+- phase 4 emits final audit metrics including dropped refs and index status
 
 ### 5. Controlled Apply Layer
 
@@ -322,6 +338,16 @@ Should include:
 - `MEMORY.md` before/after metrics
 - index refresh status
 
+### `run-report.json`
+
+Should include:
+
+- run id and mode
+- named artifacts produced so far
+- checkpoint states for phases 1 through 4
+- explicit phase 3 approval requirement/state
+- summary counts useful for later audits
+
 ## Implementation Roadmap
 
 ### Phase A: Reposition
@@ -358,6 +384,7 @@ Should include:
 
 1. Add e2e tests around plan/apply.
 2. Add false-positive and operator-safety evals.
+3. Add staged validation and approval-gate tests for the current pre-plan/apply workflow.
 
 ## Validation Checklist For Future Agents
 
@@ -368,8 +395,9 @@ Before implementing or changing behavior, validate against:
 2. Is the deterministic part implemented in Bun/TS, not in the LLM prompt?
 3. Are writes going through `akm remember` where possible?
 4. Are deletes guarded and audited?
-5. Is the change aligned with current `../akm` behavior, not assumptions?
-6. Are sources/claims cited in code comments or docs where the behavior is non-obvious?
+5. Are review/approval gates explicit in artifacts and docs?
+6. Is the change aligned with current `../akm` behavior, not assumptions?
+7. Are sources/claims cited in code comments or docs where the behavior is non-obvious?
 
 ## Internal Source Index
 

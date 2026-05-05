@@ -285,15 +285,3 @@ export async function listFeedbackEvents(limit = 50): Promise<FeedbackEvent[]> {
   const events = result.events ?? [];
   return events.slice(-limit).reverse();
 }
-
-/** Check whether a `dream` subcommand exists in the installed akm. */
-export async function hasNativeDream(): Promise<boolean> {
-  try {
-    const { stdout } = await runAkmRaw(["--help"]);
-    return stripAnsi(stdout)
-      .split("\n")
-      .some((line) => /^\s*dream\s+/i.test(line));
-  } catch {
-    return false;
-  }
-}
