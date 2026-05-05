@@ -53,8 +53,12 @@ normalized output looks clean.
 
 - **cron** for a simple daily or weekly harvest:
 
-  ```cron
-  15 3 * * * akm run command:akm-harvest-session-knowledge -- "/home/alice/.claude,/home/alice/.local/state/akm" "7d" "claude,akm" "dry-run"
+  Store the roots, filters, and mode in a small config file, then have the
+  scheduler ask your host agent to load `command:akm-harvest-session-knowledge`
+  with those values or start `workflow:harvest-session-knowledge` directly.
+
+  ```text
+  15 3 * * * host-agent run command:akm-harvest-session-knowledge "/home/alice/.claude,/home/alice/.local/state/akm" "7d" "claude,akm" "dry-run"
   ```
 
 - **systemd timer** when the host already uses user services.
