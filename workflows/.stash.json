@@ -23,6 +23,14 @@
       "description": "Use when a stash should improve through feedback, proposal review, and lesson promotion.",
       "quality": "curated",
       "searchHints": ["evolve stash", "feedback workflow", "proposal queue workflow"]
+    },
+    {
+      "name": "harvest-session-knowledge",
+      "type": "workflow",
+      "filename": "harvest-session-knowledge.md",
+      "description": "Use when user-directory session logs should be scanned, distilled, and turned into reviewed akm proposals on a schedule.",
+      "quality": "curated",
+      "searchHints": ["session log workflow", "knowledge harvest workflow", "proposal queue automation", "review agent logs"]
     }
   ]
 }

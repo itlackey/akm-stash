@@ -23,6 +23,14 @@
       "description": "Use when an agent needs a structured accept-or-reject review of a proposal-queue entry.",
       "quality": "curated",
       "searchHints": ["review proposal", "proposal diff", "accept proposal"]
+    },
+    {
+      "name": "akm-harvest-session-knowledge",
+      "type": "command",
+      "filename": "akm-harvest-session-knowledge.md",
+      "description": "Use when an agent should gather context and kick off the session-log knowledge-harvest workflow with explicit parameters.",
+      "quality": "curated",
+      "searchHints": ["harvest session command", "kick off log review", "proposal queue harvest", "session log context"]
     }
   ]
 }

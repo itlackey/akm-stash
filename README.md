@@ -53,6 +53,9 @@ No akm yet? Install the CLI first — see
   `publish-akm-stash` skill.
 - **Improving assets with v0.7.0 proposal tooling** → use the
   `manage-akm-proposals` and `distill-feedback-into-lessons` skills.
+- **Harvesting reusable lessons from session logs** → use the
+  `analyze-session-logs` skill, the `akm-harvest-session-knowledge` command,
+  and the `harvest-session-knowledge` workflow.
 - **Authoring benchmark fixtures or test stashes** → read
   `knowledge:akm-benchmark-fixtures` before writing assets.
 
