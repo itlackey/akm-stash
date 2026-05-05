@@ -1,6 +1,6 @@
 ---
 name: akm-dream
-description: Consolidate, prune, and reorganize akm memories using the four-phase Auto Dream process (Orient → Gather Signal → Consolidate → Prune & Index). Use this skill whenever the user says "dream", "/dream", "auto dream", "consolidate my memory files", "consolidate akm memories", "akm dream", "clean up my memories", "prune stale memories", "my memory files are a mess", "merge duplicate memories", or any time akm memories need REM-sleep-style maintenance — even if the user only mentions cleaning up notes, deduplicating, or "fixing the memory pile". Also use after major refactors when old memory entries reference renamed/deleted code, or when MEMORY.md exceeds ~200 lines.
+description: Consolidate, prune, and reorganize akm memories using the four-phase Auto Dream process (Orient → Gather Signal → Consolidate → Prune & Index). Use this skill whenever the user says "dream", "/dream", "auto dream", "consolidate my memory files", "consolidate akm memories", "akm dream", "clean up my memories", "prune stale memories", "my memory files are a mess", "merge duplicate memories", or any time akm memories need periodic consolidation and cleanup — even if the user only mentions cleaning up notes, deduplicating, or "fixing the memory pile". Also use after major refactors when old memory entries reference renamed/deleted code, or when the stash memory index grows beyond ~200 lines.
 ---
 
 # akm Dream — Memory Consolidation for the akm CLI
@@ -11,10 +11,10 @@ dream implementation for AKM, built on top of the existing `akm` surface
 (`show`, `remember`, `index`, `feedback`, `history`, `events`, `config`) plus
 helper Bun/TypeScript scripts where AKM does not expose a dedicated command.
 
-The dream process is the REM-sleep equivalent for an agent's memory: while
-`akm remember` is the daytime note-taker, dream is the nightly consolidator
-that prunes stale notes, merges duplicates, converts relative dates to
-absolute, and rebuilds a clean `MEMORY.md` index.
+The dream process is AKM's periodic memory-maintenance pass: while
+`akm remember` captures new notes, dream consolidates them later by pruning
+stale entries, merging duplicates, converting relative dates to absolute ones,
+and rebuilding the stash memory index at `<stash>/memories/MEMORY.md`.
 
 **Division of labour:** the bundled Bun/TypeScript scripts handle deterministic
 operations (inventory, planning, apply execution, deletion, indexing). Review
@@ -28,7 +28,7 @@ Trigger a dream when **any** of the following is true:
 
 - The user explicitly asks for one (any phrase from the description above).
 - A major refactor just happened (renamed modules, switched frameworks, dropped a service).
-- `MEMORY.md` is over the 200-line startup-load threshold.
+- The stash memory index at `<stash>/memories/MEMORY.md` is over the 200-line threshold.
 - The user has not run a dream in ≥ 24 hours **and** has had ≥ 5 sessions since the last run (matches Anthropic's auto-dream gating).
 
 Skip the dream if `<stash>/.akm-dream.lock` exists — another instance is running.
@@ -52,9 +52,9 @@ bun run scripts/phase1-orient.ts > <stash>/.akm-dream/runs/<run-id>/orient.json
 This emits a JSON manifest of every `memory:` asset: ref, file path, byte
 size, age in days, last-modified time, presence of frontmatter, detection
 of relative-date phrases ("yesterday", "last week", "X days ago"), and
-whether each one is currently linked from `MEMORY.md`. It also reports
-whether `MEMORY.md` exists, its line count, and any links it contains
-that point nowhere.
+whether each one is currently linked from the stash memory index
+`<stash>/memories/MEMORY.md`. It also reports whether that index file exists,
+its line count, and any links it contains that point nowhere.
 
 Read the JSON first. The phase walks `<stash>/memories/` directly so the
 inventory is deterministic and includes stable file paths from the live
@@ -74,7 +74,7 @@ This searches for high-value signals in roughly priority order:
 2. **Recent akm feedback events** (the `feedback` command writes utility
    events; negative feedback often points at memories that contradict
    reality).
-3. **Claude Code transcripts** at `~/.claude/projects/<project>/*.jsonl`.
+3. **Supported transcript logs** such as `~/.claude/projects/<project>/*.jsonl`.
    The script only scans the most recent files and searches for
    "remember this", "save to memory", "save that", "actually that's wrong",
    "let's not", and similar correction/save markers.
@@ -161,14 +161,14 @@ safety check), removes it, and prints what was removed.
 bun run scripts/phase4-prune.ts
 ```
 
-This regenerates `<stash>/memories/MEMORY.md` as an **index** (one-line
-descriptions plus refs), enforces the 200-line cap, removes pointers to
-memories that no longer exist, sorts entries by recency × relevance, and
-then runs `akm index` to refresh the FTS5 search index.
+This regenerates the stash memory index at `<stash>/memories/MEMORY.md` as an
+**index** (one-line descriptions plus refs), enforces the 200-line cap,
+removes pointers to memories that no longer exist, sorts entries by recency ×
+relevance, and then runs `akm index` to refresh the FTS5 search index.
 
-Read the resulting `MEMORY.md` and sanity-check it. If anything looks
-wrong (e.g. an important memory got demoted), edit it directly — it's
-plain markdown.
+Read the resulting memory index file and sanity-check it. If anything looks
+wrong (e.g. an important memory got demoted), edit it directly — it's plain
+markdown.
 
 ---
 
