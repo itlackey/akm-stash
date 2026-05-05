@@ -46,7 +46,7 @@
       "filename": "analyze-session-logs/SKILL.md",
       "description": "Use when an agent needs one skill to scan supported session logs, normalize the evidence, and prepare queue-ready akm proposals.",
       "quality": "curated",
-      "searchHints": ["analyze session logs", "parse opencode logs", "session lessons", "proposal queue harvest"]
+      "searchHints": ["analyze session logs", "parse opencode logs", "session lessons", "proposal queue harvest", "harvest session knowledge", "submit proposal from logs"]
     }
   ]
 }
