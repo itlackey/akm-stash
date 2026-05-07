@@ -265,7 +265,7 @@ export async function getStashDir(): Promise<string> {
 
 /** Rebuild the search index. */
 export async function indexStash(verbose = false): Promise<unknown> {
-  const args = ["index"];
+  const args = ["index", "--format", "json"];
   if (verbose) args.push("--verbose");
   return await akm(args);
 }
