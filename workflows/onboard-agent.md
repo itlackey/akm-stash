@@ -25,7 +25,7 @@ Step ID: init-stash
 ### Instructions
 Run `akm setup` for the guided flow, or `akm init && akm index` for a direct
 setup. Confirm the stash contains the standard asset directories, including
-`lessons/`.
+`lessons/` and room for `tasks/` if you plan scheduled automation.
 
 ### Completion Criteria
 - The working stash exists.
@@ -58,17 +58,17 @@ akm show knowledge:akm-cli-reference
 - `skill:akm-quickstart` is retrievable.
 - `knowledge:akm-cli-reference` is retrievable.
 
-## Step: Learn the v0.7.0 asset lifecycle
+## Step: Learn the v0.8.0 improvement lifecycle
 Step ID: learn-lifecycle
 
 ### Instructions
-Review how v0.7.0 handles feedback, lessons, and proposals. Inspect
-`knowledge:akm-proposals-and-lessons`, then verify the proposal queue commands
-exist with `akm proposal list`.
+Review how v0.8.0 handles feedback, improvement, lessons, and proposals.
+Inspect `knowledge:akm-proposals-and-lessons`, then verify the proposal queue
+commands exist with `akm proposals`.
 
 ### Completion Criteria
-- The operator understands `feedback`, `distill`, and `proposal` basics.
-- `akm proposal list` runs successfully.
+- The operator understands `feedback`, `improve`, `propose`, and proposal-review basics.
+- `akm proposals` runs successfully.
 
 ## Step: Smoke test discovery
 Step ID: smoke-test

@@ -209,10 +209,10 @@ this skill. Future phase B/C/D work should attach `plan.json`,
   external citations for future implementation validation.
 - `references/review-flow.md`
   — staged validation, review, approval, and post-run audit expectations.
-- [akm 0.7.0 — Proposal Queue, Reflection Commands, Lessons](https://dev.to/itlackey/akm-070-proposal-queue-reflection-commands-lessons-and-akm-bench-4lbl)
-  — context for `akm reflect`/`propose`/`distill`. Dream is
-  complementary: those commands generate proposals; dream consolidates
-  what's already in the live stash.
+- [akm 0.8.0 — CLI Redesign, Task Assets, and Belief-Aware Memory](https://dev.to/itlackey/akm-080-cli-redesign-task-assets-and-belief-aware-memory-3h42)
+  — context for `akm improve`/`propose` and the renamed proposal-review
+  commands. Dream is complementary: those commands generate proposals; dream
+  consolidates what's already in the live stash.
 
 ## License
 

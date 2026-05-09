@@ -1,6 +1,12 @@
+---
+description: Use when an agent needs the current registry index schema and install metadata fields for published stashes.
+tags: [akm, registry, schema]
+quality: curated
+---
+
 # akm Registry Index Schema
 
-> **Version target:** akm registry schema v3, used by akm-cli v0.7.0
+> **Version target:** akm registry schema v3, used by akm-cli v0.8.0
 
 The official registry publishes a static `index.json`. akm fetches and caches
 that file, then searches it for matching stashes.
@@ -51,14 +57,14 @@ that file, then searches it for matching stashes.
 | `author` | string | optional | User or org. |
 | `license` | SPDX string | recommended | Surfaced before install. |
 
-## Notes for v0.7.0 users
+## Notes for v0.8.0 users
 
 - The old `kits[]` top-level array is long gone; use `stashes[]` only.
 - The legacy registry boolean `curated` is no longer part of the current
   surface. Prefer richer descriptions, tags, and per-asset metadata instead of
   relying on a single curation flag.
 - Search-hit `quality` such as `curated` or `proposed` is an **asset-level**
-  concept in akm v0.7.0, not a stash-level registry boolean.
+  concept in akm v0.8.0, not a stash-level registry boolean.
 
 ## Minimum viable entry
 

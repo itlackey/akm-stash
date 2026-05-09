@@ -10,7 +10,7 @@ akm proposal queue.
 |---|---|---|
 | opencode | paths containing `opencode`, `session`, `.json`, `.jsonl` | tool-call success/failure, retries, timings, command sequences |
 | Claude | paths containing `claude`, `.claude`, transcript markdown/json/jsonl | task statement, plan quality, tool usage, final outcome, user corrections |
-| akm feedback and metrics | paths containing `akm`, `feedback`, `proposal`, `metrics` | positive/negative asset feedback, distill candidates, proposal outcomes |
+| akm feedback and metrics | paths containing `akm`, `feedback`, `proposal`, `metrics` | positive/negative asset feedback, improve candidates, proposal outcomes |
 
 The parser should rely on both path hints and light content inspection so a
 minor filename variation does not break harvesting.
@@ -55,10 +55,17 @@ normalized output looks clean.
 
   Store the roots, filters, and mode in a small config file, then have the
   scheduler ask your host agent to load `command:akm-harvest-session-knowledge`
-  with those values or start `workflow:harvest-session-knowledge` directly.
+  with those values, start `workflow:harvest-session-knowledge` directly, or
+  register an `akm tasks` entry that runs the workflow.
 
   ```text
   15 3 * * * host-agent run command:akm-harvest-session-knowledge "/home/alice/.claude,/home/alice/.local/state/akm" "7d" "claude,akm" "dry-run"
+  ```
+
+  Equivalent AKM-native scheduling:
+
+  ```bash
+  akm tasks add harvest-session-knowledge --schedule "15 3 * * *" --workflow workflow:harvest-session-knowledge --params '{"roots":"/home/alice/.claude,/home/alice/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
   ```
 
 - **systemd timer** when the host already uses user services.
@@ -117,9 +124,9 @@ after duplicates are under control.
 4. Review it:
 
    ```bash
-   akm proposal list
-   akm proposal show <id>
-   akm proposal diff <id>
+   akm proposals
+   akm show proposal <id>
+   akm diff proposal <id>
    ```
 
 5. Accept only if the proposal is reusable, evidence-backed, and not already

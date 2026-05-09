@@ -1,6 +1,6 @@
 ---
 name: distill-feedback-into-lessons
-description: Use when repeated feedback should be turned into a reusable lesson via akm distill and the proposal queue in akm-cli v0.7.0.
+description: Use when repeated feedback should become a reusable lesson through akm improve and the proposal queue in akm-cli v0.8.0.
 ---
 
 # Distill Feedback into Lessons
@@ -24,20 +24,21 @@ akm feedback <ref> --negative --reason "too generic for docker-compose healthche
 akm feedback <ref> --positive
 ```
 
-### 2. Distill the asset
+### 2. Improve the asset with lesson distillation
 
 ```bash
-akm distill <ref>
+akm improve <ref>
 ```
 
-This creates a proposal instead of changing the live stash immediately.
+In 0.8.0, lesson distillation is part of `akm improve`. This still creates a
+proposal instead of changing the live stash immediately.
 
 ### 3. Review the lesson proposal
 
 ```bash
-akm proposal list
-akm proposal show <id>
-akm proposal diff <id>
+akm proposals
+akm show proposal <id>
+akm diff proposal <id>
 ```
 
 Check that the lesson states when to use it, captures a repeated pattern, and
@@ -46,9 +47,9 @@ teaches how to solve the class of problem.
 ### 4. Promote or reject
 
 ```bash
-akm proposal accept <id>
+akm accept <id>
 # or
-akm proposal reject <id> --reason "why"
+akm reject <id> --reason "why"
 ```
 
 ### 5. Confirm discoverability

@@ -11,7 +11,7 @@ Mode: $4
 
 1. Gather context before doing any extraction:
    - expand the requested roots and note missing directories,
-   - inspect `akm proposal list` for overlapping pending work,
+   - inspect `akm proposals` for overlapping pending work,
    - identify which supported log families are actually present.
 2. Use `skill:analyze-session-logs` to normalize opencode, Claude, and akm
    evidence from the requested scope and identify the strongest proposal

@@ -1,19 +1,21 @@
 {
   "name": "akm-stash",
-  "description": "Official akm onboarding stash for discovery, publishing, proposal review, lessons, and benchmark-fixture authoring on akm-cli v0.7.0.",
+  "description": "Official akm onboarding stash for discovery, publishing, proposal review, task assets, and improvement workflows on akm-cli v0.8.0.",
   "tags": [
     "akm",
     "official",
     "onboarding",
     "proposals",
     "lessons",
-    "benchmark-fixtures"
+    "tasks",
+    "improve"
   ],
   "assetTypes": [
     "agent",
     "command",
     "knowledge",
     "skill",
+    "task",
     "workflow"
   ],
   "author": "itlackey",

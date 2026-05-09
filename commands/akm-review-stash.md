@@ -15,7 +15,7 @@ akm show "$1"
 ```
 
 If the ref points at a GitHub repo, also inspect `README.md`, `LICENSE`, and
-any root `akm.json`, `stash.json`, or `package.json`.
+any root `akm.json` or `package.json`.
 
 ## Evaluate
 

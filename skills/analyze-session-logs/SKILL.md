@@ -122,9 +122,9 @@ Use this mapping:
 - **Agent** — recurring delegation boundary or specialist reviewer role.
 - **Knowledge** — durable reference material or format/schema explanation.
 
-If the insight updates an existing asset, prefer `akm reflect <ref> --task "..."`
-instead of drafting a brand-new asset. If repeated feedback is about one live
-asset, use `akm distill <ref>`.
+If the insight updates an existing asset, prefer `akm improve <ref> --task "..."`
+instead of drafting a brand-new asset. The same `akm improve <ref>` flow is
+also the right path when repeated feedback should be distilled into a lesson.
 
 ### 8. Build queue-ready proposal briefs
 
@@ -149,13 +149,13 @@ akm propose <type> <name> --task "<brief from harvested evidence>"
 For updates:
 
 ```bash
-akm reflect <ref> --task "<brief from harvested evidence>"
+akm improve <ref> --task "<brief from harvested evidence>"
 ```
 
 For repeated feedback on one asset:
 
 ```bash
-akm distill <ref>
+akm improve <ref>
 ```
 
 If the run is exploratory, stop after generating the briefs and mark them as a
@@ -166,9 +166,9 @@ dry run instead of writing to the queue.
 Finish with:
 
 ```bash
-akm proposal list
-akm proposal show <id>
-akm proposal diff <id>
+akm proposals
+akm show proposal <id>
+akm diff proposal <id>
 ```
 
 Then use `skill:manage-akm-proposals` or `command:akm-review-proposal` to

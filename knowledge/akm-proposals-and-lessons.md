@@ -1,23 +1,30 @@
+---
+description: Use when an agent needs the v0.8.0 proposal queue, quality values, and lesson lifecycle explained clearly.
+tags: [akm, proposals, lessons]
+quality: curated
+---
+
 # akm Proposals, Quality, and Lessons
 
-> **Version target:** akm-cli v0.7.0
+> **Version target:** akm-cli v0.8.0
 
-akm v0.7.0 adds a safe self-improvement loop: agents can suggest changes, but
+akm v0.8.0 keeps a safe self-improvement loop: agents can suggest changes, but
 nothing touches the live stash until a proposal is reviewed and accepted.
 
 ## The proposal loop
 
 1. **Create a draft**
-   - `akm reflect <ref> --task "..."` for improving an existing asset.
+   - `akm improve <ref> --task "..."` for improving an existing asset.
+   - `akm improve <type>` for broad improvement passes over one asset type.
    - `akm propose <type> <name> --task "..."` for drafting a new asset.
-   - `akm distill <ref>` for turning feedback into a lesson proposal.
+   - `akm improve <ref>` again when repeated feedback should be distilled into a lesson proposal.
 2. **Inspect the draft**
-   - `akm proposal list`
-   - `akm proposal show <id>`
-   - `akm proposal diff <id>`
+   - `akm proposals`
+   - `akm show proposal <id>`
+   - `akm diff proposal <id>`
 3. **Decide**
-   - `akm proposal accept <id>` validates and promotes the change.
-   - `akm proposal reject <id> --reason "..."` archives it.
+   - `akm accept <id>` validates and promotes the change.
+   - `akm reject <id> --reason "..."` archives it.
 
 ## Quality values
 
@@ -35,7 +42,7 @@ draft material.
 
 ## Lessons
 
-A **lesson** is a first-class v0.7.0 asset stored under `lessons/`. Lessons are
+A lesson is a first-class asset stored under `lessons/`. Lessons are
 meant to capture reusable guidance learned from repeated wins or misses.
 
 Typical lesson frontmatter:
@@ -53,7 +60,7 @@ single benchmark answer, it should not live in the stash.
 
 ## Good operator habits
 
-- Record feedback with reasons so distillation has useful input.
+- Record feedback with reasons so `akm improve` has useful input.
 - Read the proposal diff before accepting.
 - Promote only changes that improve a real workflow, not just wording churn.
 - Keep lessons focused on a repeated pattern or failure mode.

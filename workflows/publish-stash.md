@@ -1,5 +1,5 @@
 ---
-description: Publish a local directory of agent assets as a searchable akm stash and verify it with current v0.7.0 conventions.
+description: Publish a local directory of agent assets as a searchable akm stash and verify it with current v0.8.0 conventions.
 tags: [publish, release]
 params:
   ref: Install ref to verify after publishing
@@ -22,9 +22,9 @@ create `akm.json` if you want stash-level metadata.
 Step ID: add-metadata
 
 ### Instructions
-Add trigger-sentence descriptions, directory-level `.stash.json` files where
-helpful, and benchmark-safe content that teaches how to solve a class of
-problems instead of leaking one exact answer.
+Add trigger-sentence descriptions, inline metadata in frontmatter or file-local
+headers, and reusable content that teaches how to solve a class of problems
+instead of leaking one exact answer.
 
 ### Completion Criteria
 - Skills, commands, agents, workflows, and lessons have clear descriptions.

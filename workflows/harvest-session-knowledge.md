@@ -17,7 +17,7 @@ Step ID: capture-context
 ### Instructions
 Expand `params.roots`, note any missing directories, and record the harvest
 window from `params.since`. Before extracting anything, inspect the current
-proposal queue with `akm proposal list` so repeated discoveries can be filtered
+proposal queue with `akm proposals` so repeated discoveries can be filtered
 out early.
 
 ### Completion Criteria
@@ -66,9 +66,8 @@ Step ID: submit
 
 ### Instructions
 If `params.dryRun` is `true`, emit queue-ready briefs only. Otherwise, submit
-the strongest items with `akm propose`, `akm reflect`, or `akm distill`
-depending on whether the target is a new asset, an update, or a lesson from
-existing feedback.
+the strongest items with `akm propose` for net-new assets or `akm improve`
+for updates and feedback-backed lesson distillation.
 
 ### Completion Criteria
 - Dry runs produced queue-ready briefs, or
@@ -78,11 +77,11 @@ existing feedback.
 Step ID: review-and-schedule
 
 ### Instructions
-Review submitted proposals with `akm proposal show <id>` and
-`akm proposal diff <id>`, then decide whether to accept or reject them. For
+Review submitted proposals with `akm show proposal <id>` and
+`akm diff proposal <id>`, then decide whether to accept or reject them. For
 recurring runs, store the chosen roots and filters in a small config file and
-schedule the kickoff command with cron, a systemd timer, or the host agent's
-own recurring task runner.
+schedule the kickoff command with `akm tasks add`, cron, a systemd timer, or
+the host agent's own recurring task runner.
 
 ### Completion Criteria
 - Submitted proposals were reviewed or queued for review.
