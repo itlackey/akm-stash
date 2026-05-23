@@ -29,7 +29,7 @@ my-stash/
 ├── lessons/*.md
 ├── vaults/*.env.example
 ├── wikis/<name>/*.md
-└── tasks/*.md
+└── tasks/*.yml
 ```
 
 Use only the directories you need, but prefer this layout when you can.
@@ -120,25 +120,28 @@ quality: curated
 
 ### Tasks
 
-Task assets are first-class 0.8.0 assets stored under `tasks/` as markdown:
+Task assets are first-class 0.8.0 assets stored under `tasks/` as YAML
+(`tasks/<id>.yml`). The file is pure YAML — no markdown frontmatter
+delimiters, no body section. Legacy `.md` task files are warned and
+silently skipped by the loader.
 
-```markdown
----
+```yaml
+# tasks/<id>.yml
 schedule: "0 9 * * *"
-workflow: workflow:harvest-session-knowledge
-params:
-  roots: /home/alice/.claude,/home/alice/.local/state/akm
-  since: 7d
 enabled: true
-description: Use when a daily AKM harvest should run without hand-built cron notes.
+description: "Use when a daily AKM harvest should run without hand-built cron notes."
 tags: [scheduled, harvest]
----
-
-# Task: Daily AKM harvest
+# Pick exactly one of `workflow:`, `prompt:`, or `command:`:
+workflow: workflow:harvest-session-knowledge
+# OR an inline agent prompt:
+# prompt: |
+#   multi-line prompt body
+# OR a deterministic shell command:
+# command: ["akm", "improve", "--task", "..."]
 ```
 
-Use `prompt:` instead of `workflow:` when the task should run an agent prompt
-target. Manage these with `akm tasks add|list|show|run|remove|sync`.
+Pick exactly one of `workflow:`, `prompt:`, or `command:`. Manage tasks with
+`akm tasks add|list|show|run|remove|sync`.
 
 ### Metadata guidance
 

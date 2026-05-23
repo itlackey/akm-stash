@@ -49,7 +49,7 @@ file extension and content, but conventional directories (`skills/`,
 | `vault` | Environment key-value pairs; secrets masked. | `vaults/prod.env` |
 | `memory` | Context fragments recalled from external systems. | `memories/team-notes.md` |
 | `lesson` | Distilled guidance learned from feedback or reflection. | `lessons/search-ranking.md` |
-| `task` | Scheduled prompt or workflow execution. | `tasks/daily-review.md` |
+| `task` | Scheduled prompt or workflow execution. | `tasks/daily-review.yml` |
 
 ## Ref format
 
@@ -76,8 +76,9 @@ asset types such as commands, agents, workflows, and scripts.
 - **Proposal review renames.** `akm proposals`, `akm show proposal`,
   `akm diff proposal`, `akm accept`, and `akm reject` replace the older
   `akm proposal *` subcommands.
-- **Task assets.** `tasks/<id>.md` is now a first-class asset type for
-  scheduled workflow or prompt execution through `akm tasks`.
+- **Task assets.** `tasks/<id>.yml` is now a first-class asset type for
+  scheduled workflow or prompt execution through `akm tasks`. Each task
+  picks exactly one target: `workflow:`, `prompt:`, or `command:`.
 - **Belief-aware memory cleanup.** Improvement runs can prune or consolidate
   memory more safely before proposing durable updates.
 - **Quality states.** Search hits can carry `quality` such as `generated`,

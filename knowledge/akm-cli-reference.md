@@ -63,7 +63,7 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm run <ref>` | Execute a runnable asset. |
 | `akm workflow start <ref>` / `next` / `complete` / `status` | Run stateful workflows. |
 | `akm workflow create <name>` / `validate <ref\|path>` | Author or validate workflow files. |
-| `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.md` and install it in the OS scheduler. |
+| `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. Task files must be YAML; legacy `.md` files are warned and silently skipped. |
 | `akm tasks list` / `show <id>` / `run <id>` / `history` | Inspect or execute scheduled task assets. |
 | `akm tasks enable <id>` / `disable <id>` / `remove <id>` / `sync` | Manage task lifecycle and scheduler reconciliation. |
 | `akm remember "<text>"` | Append a memory fragment to the working stash. |
