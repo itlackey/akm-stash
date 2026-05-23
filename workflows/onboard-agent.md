@@ -3,6 +3,7 @@ description: Bootstrap a coding agent so it can discover, install, search, and i
 tags: [onboarding, akm]
 params:
   host: Host agent or tool being onboarded
+updated: 2026-05-09
 ---
 
 # Workflow: Onboard an agent onto akm

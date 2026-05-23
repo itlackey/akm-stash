@@ -1,3 +1,10 @@
+---
+description: Conventions for the akm memory file format used by the akm-dream pipeline (filenames, headings, frontmatter, and reference syntax).
+tags: [akm-dream, reference, memories]
+updated: 2026-05-23
+refs: []
+---
+
 # akm Memory File Format
 
 akm stores memories as plain markdown files under `<stash>/memories/`,

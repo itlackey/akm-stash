@@ -3,6 +3,7 @@ description: Publish a local directory of agent assets as a searchable akm stash
 tags: [publish, release]
 params:
   ref: Install ref to verify after publishing
+updated: 2026-05-09
 ---
 
 # Workflow: Publish an akm Stash

@@ -1,3 +1,10 @@
+---
+description: Repository README for the akm-dream skill. The active asset entrypoint is SKILL.md; this file documents the package layout, phase scripts, and CLI usage.
+tags: [akm-dream, readme]
+updated: 2026-05-23
+refs: []
+---
+
 # akm-dream
 
 > A Claude Code / OpenCode skill that implements the four-phase **Auto

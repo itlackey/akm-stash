@@ -2,6 +2,7 @@
 description: Use when an agent needs the current registry index schema and install metadata fields for published stashes.
 tags: [akm, registry, schema]
 quality: curated
+updated: 2026-05-09
 ---
 
 # akm Registry Index Schema

@@ -1,6 +1,7 @@
 ---
 name: analyze-session-logs
 description: Use when an agent needs one skill to scan supported session logs, normalize the evidence, and prepare queue-ready akm proposals.
+updated: 2026-05-23
 ---
 
 # Analyze Session Logs

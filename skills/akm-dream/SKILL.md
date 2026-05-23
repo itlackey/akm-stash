@@ -1,6 +1,8 @@
 ---
 name: akm-dream
 description: Consolidate, prune, and reorganize akm memories using the four-phase Auto Dream process (Orient → Gather Signal → Consolidate → Prune & Index). Use this skill whenever the user says "dream", "/dream", "auto dream", "consolidate my memory files", "consolidate akm memories", "akm dream", "clean up my memories", "prune stale memories", "my memory files are a mess", "merge duplicate memories", or any time akm memories need periodic consolidation and cleanup — even if the user only mentions cleaning up notes, deduplicating, or "fixing the memory pile". Also use after major refactors when old memory entries reference renamed/deleted code, or when the stash memory index grows beyond ~200 lines.
+updated: 2026-05-23
+refs: []
 ---
 
 # akm Dream — Memory Consolidation for the akm CLI

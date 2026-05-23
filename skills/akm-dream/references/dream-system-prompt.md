@@ -1,3 +1,10 @@
+---
+description: The system prompt used by the akm-dream pipeline to consolidate akm memory files into durable, well-organized memories.
+tags: [akm-dream, reference, prompt]
+updated: 2026-05-23
+refs: []
+---
+
 # Dream — Memory Consolidation System Prompt
 
 You are performing a dream — a reflective pass over an akm stash's memory

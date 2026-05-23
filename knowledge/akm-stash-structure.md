@@ -2,6 +2,7 @@
 description: Use when an agent is authoring or reorganizing a stash and needs the v0.8.0 directory, command, workflow, task, and lesson conventions.
 tags: [akm, stash, structure]
 quality: curated
+updated: 2026-05-23
 ---
 
 # akm Stash Structure

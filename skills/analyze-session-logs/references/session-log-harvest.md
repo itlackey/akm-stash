@@ -33,9 +33,9 @@ stay easy and low risk.
 
 ```yaml
 roots:
-  - /home/alice/.local/share/opencode
-  - /home/alice/.claude
-  - /home/alice/.local/state/akm
+  - $HOME/.local/share/opencode
+  - $HOME/.claude
+  - $HOME/.local/state/akm
 since: 7d
 tools:
   - opencode
@@ -59,13 +59,13 @@ normalized output looks clean.
   register an `akm tasks` entry that runs the workflow.
 
   ```text
-  15 3 * * * host-agent run command:akm-harvest-session-knowledge "/home/alice/.claude,/home/alice/.local/state/akm" "7d" "claude,akm" "dry-run"
+  15 3 * * * host-agent run command:akm-harvest-session-knowledge "$HOME/.claude,$HOME/.local/state/akm" "7d" "claude,akm" "dry-run"
   ```
 
   Equivalent AKM-native scheduling:
 
   ```bash
-  akm tasks add harvest-session-knowledge --schedule "15 3 * * *" --workflow workflow:harvest-session-knowledge --params '{"roots":"/home/alice/.claude,/home/alice/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
+  akm tasks add harvest-session-knowledge --schedule "15 3 * * *" --workflow workflow:harvest-session-knowledge --params '{"roots":"$HOME/.claude,$HOME/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
   ```
 
 - **systemd timer** when the host already uses user services.
@@ -103,7 +103,7 @@ after duplicates are under control.
     "workflow:publish-stash",
     "skill:manage-akm-proposals"
   ],
-  "source_path": "/home/alice/.claude/projects/issue-412/transcript.jsonl",
+  "source_path": "$HOME/.claude/projects/issue-412/transcript.jsonl",
   "extras": {
     "branch": "fix/release-workflow"
   }

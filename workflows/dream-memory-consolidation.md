@@ -5,6 +5,8 @@ params:
   trigger: Why this dream run is happening (for example `post-refactor`, `weekly-maintenance`, or `manual-cleanup`)
   dream_dir: Directory containing the akm-dream package. Defaults to `skills/akm-dream`.
   review_focus: Optional area to scrutinize during review (for example `deletes`, `contradictions`, or `release memories`)
+updated: 2026-05-23
+refs: []
 ---
 
 # Workflow: Dream memory consolidation

@@ -7,6 +7,7 @@ params:
   tools: Optional comma-separated tool filter such as opencode,claude,akm
   maxFiles: Optional cap on scanned files
   dryRun: true to stop before queue submission
+updated: 2026-05-23
 ---
 
 # Workflow: Harvest knowledge from session logs

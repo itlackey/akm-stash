@@ -3,6 +3,7 @@ description: Improve an existing stash by collecting feedback, generating review
 tags: [improvement, proposals, lessons]
 params:
   ref: Asset ref to improve
+updated: 2026-05-23
 ---
 
 # Workflow: Evolve stash assets with proposals

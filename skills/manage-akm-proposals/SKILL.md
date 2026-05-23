@@ -1,6 +1,7 @@
 ---
 name: manage-akm-proposals
 description: Use when an agent needs to review, accept, reject, or follow up on akm proposal-queue entries created by improve or propose in akm-cli v0.8.0.
+updated: 2026-05-23
 ---
 
 # Manage akm Proposals

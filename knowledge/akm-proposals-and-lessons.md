@@ -2,6 +2,7 @@
 description: Use when an agent needs the v0.8.0 proposal queue, quality values, and lesson lifecycle explained clearly.
 tags: [akm, proposals, lessons]
 quality: curated
+updated: 2026-05-23
 ---
 
 # akm Proposals, Quality, and Lessons

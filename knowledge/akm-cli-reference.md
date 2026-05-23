@@ -2,6 +2,7 @@
 description: Use when an agent needs the main akm-cli v0.8.0 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
 tags: [akm, cli, reference]
 quality: curated
+updated: 2026-05-23
 ---
 
 # akm CLI Reference
@@ -68,15 +69,15 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. |
 | `akm tasks list` / `show <id>` / `run <id>` / `history` | Inspect or execute scheduled task assets. |
 | `akm tasks enable <id>` / `disable <id>` / `remove <id>` / `sync` | Manage task lifecycle and scheduler reconciliation. |
-
-> ⚠️ **Task files must be `.yml`.** Legacy `tasks/*.md` files are warned at
-> load time and silently skipped — they will never be scheduled. Each task
-> file picks exactly one target: `workflow:`, `prompt:`, or `command:`.
 | `akm remember "<text>"` | Append a memory fragment to the working stash. |
 | `akm import <file>` | Ingest a knowledge or lesson-style document into the stash. |
 | `akm feedback <ref> --positive` | Record positive feedback. |
 | `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
 | `akm save -m "msg" [--push]` | Commit and optionally push the git-backed working stash. |
+
+> ⚠️ **Task files must be `.yml`.** Legacy `tasks/*.md` files are warned at
+> load time and silently skipped — they will never be scheduled. Each task
+> file picks exactly one target: `workflow:`, `prompt:`, or `command:`.
 
 ## Proposal queue and self-improvement (v0.8.0+)
 

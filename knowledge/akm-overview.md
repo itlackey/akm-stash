@@ -2,6 +2,8 @@
 description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major v0.8.0 surfaces.
 tags: [akm, overview, concepts]
 quality: curated
+updated: 2026-05-23
+refs: []
 ---
 
 # akm Overview for Agents

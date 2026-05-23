@@ -1,6 +1,8 @@
 ---
 name: distill-feedback-into-lessons
 description: Use when repeated feedback should become a reusable lesson through akm improve and the proposal queue in akm-cli v0.8.0.
+updated: 2026-05-23
+refs: []
 ---
 
 # Distill Feedback into Lessons

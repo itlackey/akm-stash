@@ -1,6 +1,7 @@
 ---
 name: publish-akm-stash
 description: Use when the user wants to publish a new akm stash so it appears in the official registry and remains useful to agents using akm-cli v0.8.0.
+updated: 2026-05-23
 ---
 
 # Publish an akm Stash
