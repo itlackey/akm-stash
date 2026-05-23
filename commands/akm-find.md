@@ -1,5 +1,8 @@
 ---
+name: akm-find
+type: command
 description: Use when you need a compact ranked shortlist of akm assets for a task. The first argument is the need; the optional second argument is an asset type filter.
+updated: 2026-05-23
 ---
 
 You are helping choose the best akm asset for this need.

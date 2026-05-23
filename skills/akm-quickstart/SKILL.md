@@ -1,6 +1,6 @@
 ---
 name: akm-quickstart
-description: Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations.
+description: "Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations."
 ---
 
 # akm Quickstart

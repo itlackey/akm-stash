@@ -1,5 +1,8 @@
 ---
+name: akm-review-proposal
+type: command
 description: Use when you need to evaluate an akm proposal before accepting or rejecting it. The first argument is the proposal id.
+updated: 2026-05-23
 ---
 
 Review akm proposal `$1` and decide whether it should become live.

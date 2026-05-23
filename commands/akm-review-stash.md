@@ -1,5 +1,8 @@
 ---
+name: akm-review-stash
+type: command
 description: Use when you need to review a candidate akm stash before installing it. The first argument is the stash or asset ref to inspect.
+updated: 2026-05-23
 ---
 
 Review the akm stash at `$1` before the user installs it. Do not run `akm add`

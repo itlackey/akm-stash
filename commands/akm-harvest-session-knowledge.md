@@ -1,5 +1,8 @@
 ---
-description: Use when you need to gather context and kick off session-log harvesting. Arguments: roots, since-window, tool-filter, and mode.
+name: akm-harvest-session-knowledge
+type: command
+description: "Use when you need to gather context and kick off session-log harvesting. Arguments: roots, since-window, tool-filter, and mode."
+updated: 2026-05-23
 ---
 
 You are starting a session-log knowledge harvest.
