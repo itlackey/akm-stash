@@ -233,3 +233,24 @@ Supported phase 3 flags:
 
 - `phase3:plan`: `--orient`, `--signal`, `--out`, `--run-id`
 - `phase3:apply`: `--plan`, `--actions`, `--result`, `--dry-run`, `--apply-approved`, `--include-unapproved`, `--no-delete`, `--max-deletes`, `--allow-protected`
+
+## Health and diagnostics
+
+```bash
+# Probe runtime, telemetry, scheduler reachability, and recent improve
+# metrics. Useful as a smoke test before kicking off a dream run.
+akm health
+```
+
+Two environment escape hatches that the dream pipeline can benefit from
+when project-scoped context is causing noise or when scoped utility
+discovery should be bypassed for a deterministic baseline:
+
+- `AKM_DISABLE_PROJECT_CONTEXT=1` — ignore the project-local context
+  layer for the duration of the process. Useful when phase 1 / phase 2
+  diagnostics need a pure-stash view.
+- `AKM_DISABLE_SCOPED_UTILITY=1` — disable the scoped-utility resolver
+  so that asset lookups don't fall back into per-scope overlays.
+
+Both flip back to their default (enabled) state by unsetting the
+variable; they're per-process, not persisted to config.

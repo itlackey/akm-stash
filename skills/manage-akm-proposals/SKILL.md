@@ -60,3 +60,23 @@ akm search "<query that should find it>"
 If the proposal is weak but the underlying asset is still the right target,
 rerun `akm improve <ref> --task "..."` with more precise guidance instead of
 editing the live stash directly.
+
+## When to revert
+
+Use `akm revert <id>` to undo a previously accepted proposal — it restores
+the prior asset content from the backup captured at acceptance time. Errors
+if the proposal was never accepted or has no backup. Accepts full UUID or
+`proposal:<id>` ref; UUID prefixes are not supported for archived proposals.
+
+## Bulk decisions
+
+For mass review of low-risk batches, `akm accept` and `akm reject` accept
+filter flags instead of a single id:
+
+- `akm accept --source <name>` / `akm reject --source <name>` scopes a bulk
+  action to one stash's proposals.
+- `--max-diff-lines <N>` caps to small, low-risk changes.
+- `--older-than <duration>` caps by age (e.g. `7d`).
+- `--dry-run` lists the matching ids without acting.
+
+Pair flags freely (e.g. `akm accept --source mine --max-diff-lines 5 --dry-run`).

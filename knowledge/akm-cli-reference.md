@@ -27,6 +27,7 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm init [--dir <path>]` | Create the working stash skeleton (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`, `lessons/`, `tasks/`). |
 | `akm index [--full]` | Build or refresh the local search index. |
 | `akm info` | Print version, configured sources, registries, and index/search capabilities. |
+| `akm health` | Runtime / telemetry probe: surfaces backend status, artifact dirs, recent improve metrics, and scheduler reachability. |
 | `akm config get <key>` / `set <key> <value>` | Read or write configuration. |
 | `akm upgrade` | Self-update the CLI. |
 | `akm help migrate <version>` | Preview release notes and migration guidance. |
@@ -38,6 +39,7 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm search <query>` | Search local stash content by default. |
 | `akm search <query> --source registry` | Search only registries. |
 | `akm search <query> --source both` | Merge local and registry discovery. |
+| `akm search <query> --source <name>` | Scope the search to one named stash (use the name from `akm list`). |
 | `akm search <query> --type <type>` | Filter by asset type (`script`, `skill`, `command`, `agent`, `knowledge`, `workflow`, `wiki`, `vault`, `memory`, `lesson`). |
 | `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
 | `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
@@ -63,9 +65,13 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm run <ref>` | Execute a runnable asset. |
 | `akm workflow start <ref>` / `next` / `complete` / `status` | Run stateful workflows. |
 | `akm workflow create <name>` / `validate <ref\|path>` | Author or validate workflow files. |
-| `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. Task files must be YAML; legacy `.md` files are warned and silently skipped. |
+| `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. |
 | `akm tasks list` / `show <id>` / `run <id>` / `history` | Inspect or execute scheduled task assets. |
 | `akm tasks enable <id>` / `disable <id>` / `remove <id>` / `sync` | Manage task lifecycle and scheduler reconciliation. |
+
+> ⚠️ **Task files must be `.yml`.** Legacy `tasks/*.md` files are warned at
+> load time and silently skipped — they will never be scheduled. Each task
+> file picks exactly one target: `workflow:`, `prompt:`, or `command:`.
 | `akm remember "<text>"` | Append a memory fragment to the working stash. |
 | `akm import <file>` | Ingest a knowledge or lesson-style document into the stash. |
 | `akm feedback <ref> --positive` | Record positive feedback. |
@@ -76,7 +82,7 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 
 | Command | Purpose |
 |---|---|
-| `akm improve [ref\|type] [--task "..."]` | Ask the configured agent to propose improvements to an existing asset, asset type, or the current stash scope. |
+| `akm improve [ref\|type] [--task "..."]` | Ask the configured agent to propose improvements to an existing asset, asset type, or the current stash scope. Auto-accepts at confidence ≥ 90 by default; pass `--auto-accept=false` to disable. Each run writes JSON to `.akm/runs/<run-id>/improve-result.json` (filter `.dryRun != true` before any productivity audit). Pass `--json-to-stdout` for legacy stdout JSON. |
 | `akm propose <type> <name> --task "..."` | Ask the configured agent to propose a brand-new asset. |
 | `akm proposals` | List pending, accepted, or rejected proposals. |
 | `akm show proposal:<id>` | Render a proposal. |
