@@ -79,10 +79,11 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm improve [ref\|type] [--task "..."]` | Ask the configured agent to propose improvements to an existing asset, asset type, or the current stash scope. |
 | `akm propose <type> <name> --task "..."` | Ask the configured agent to propose a brand-new asset. |
 | `akm proposals` | List pending, accepted, or rejected proposals. |
-| `akm show proposal <id>` | Render a proposal. |
-| `akm diff proposal <id>` | Diff a proposal against the live asset. |
+| `akm show proposal:<id>` | Render a proposal. |
+| `akm diff <id>` | Diff a proposal against the live asset. Accepts a UUID, UUID prefix, or `proposal:<id>` ref positionally. |
 | `akm accept <id>` | Validate and promote a proposal into the stash. |
 | `akm reject <id> --reason "..."` | Reject and archive a proposal. |
+| `akm revert <id>` | Roll back a previously accepted proposal. |
 
 In 0.8.0, lesson distillation is part of `akm improve <ref>` rather than a
 separate public `distill` command.
@@ -92,7 +93,9 @@ separate public `distill` command.
 | Command | Purpose |
 |---|---|
 | `akm wiki list` / `ingest` / `register` / `lint` | Manage multi-page wiki assets. |
-| `akm vault set <KEY> <value>` / `get` / `list` / `export` | Manage secret or configuration key-value pairs. |
+| `akm vault set <ref> <KEY>` (value via stdin: `printf '%s' "$VALUE" \| akm vault set <ref> <KEY>`) | Set a vault key. Value via stdin keeps secrets out of shell history. |
+| `akm vault set <ref> <KEY> --from-env <VAR>` | Set a vault key from an environment variable. |
+| `akm vault get <ref> <KEY>` / `list <ref>` / `export <ref>` | Read or list vault contents. |
 
 ## Workflow authoring contract (v0.8.0)
 

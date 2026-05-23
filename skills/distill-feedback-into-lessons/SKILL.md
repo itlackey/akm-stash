@@ -37,8 +37,8 @@ proposal instead of changing the live stash immediately.
 
 ```bash
 akm proposals
-akm show proposal <id>
-akm diff proposal <id>
+akm show proposal:<id>
+akm diff <id>
 ```
 
 Check that the lesson states when to use it, captures a repeated pattern, and

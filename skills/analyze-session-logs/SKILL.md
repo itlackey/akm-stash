@@ -167,8 +167,8 @@ Finish with:
 
 ```bash
 akm proposals
-akm show proposal <id>
-akm diff proposal <id>
+akm show proposal:<id>
+akm diff <id>
 ```
 
 Then use `skill:manage-akm-proposals` or `command:akm-review-proposal` to

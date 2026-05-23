@@ -7,8 +7,8 @@ Review akm proposal `$1` and decide whether it should become live.
 1. Run:
 
 ```bash
-akm show proposal "$1"
-akm diff proposal "$1"
+akm show "proposal:$1"
+akm diff "$1"
 ```
 
 2. Evaluate the proposal on five axes:

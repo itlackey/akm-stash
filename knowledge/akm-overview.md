@@ -73,9 +73,10 @@ asset types such as commands, agents, workflows, and scripts.
 
 - **Improvement surface redesign.** `akm improve` replaces the public
   `reflect` and `distill` split for updates and lesson distillation.
-- **Proposal review renames.** `akm proposals`, `akm show proposal`,
-  `akm diff proposal`, `akm accept`, and `akm reject` replace the older
-  `akm proposal *` subcommands.
+- **Proposal review renames.** `akm proposals`, `akm show proposal:<id>`,
+  `akm diff <id>`, `akm accept`, and `akm reject` replace the older
+  `akm proposal *` subcommands. `akm diff` accepts a UUID, a UUID prefix,
+  or a `proposal:<id>` ref positionally.
 - **Task assets.** `tasks/<id>.yml` is now a first-class asset type for
   scheduled workflow or prompt execution through `akm tasks`. Each task
   picks exactly one target: `workflow:`, `prompt:`, or `command:`.

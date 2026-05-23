@@ -125,8 +125,8 @@ after duplicates are under control.
 
    ```bash
    akm proposals
-   akm show proposal <id>
-   akm diff proposal <id>
+   akm show proposal:<id>
+   akm diff <id>
    ```
 
 5. Accept only if the proposal is reusable, evidence-backed, and not already

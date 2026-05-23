@@ -104,7 +104,8 @@ set `AKM_STASH_DIR` or run `akm init --dir <custom>`.
 > commands accept it) or `AKM_STASH_DIR=<path>` in the environment.
 > Running `init --dir` against a temp directory has previously caused
 > agents to silently re-route all subsequent reads and writes to the
-> wrong location. See [[memory:akm-init-persists-stashdir-warning]].
+> wrong location. Always prefer `--stash-dir` or `AKM_STASH_DIR` for
+> sandboxed test runs.
 
 ## Feedback
 
@@ -142,8 +143,8 @@ akm lessons coverage --format text
 
 Reports tags that exist on indexed assets but are NOT yet covered by
 any lesson — a signal that tacit knowledge in skills/scripts/etc. has
-not been crystallized into a lesson yet. Pair with `akm distill` to
-fill the gaps. Added in 0.8.0.
+not been crystallized into a lesson yet. Pair with `akm improve` (which
+subsumes the old `distill` flow in 0.8.0) to fill the gaps. Added in 0.8.0.
 
 ## Proposals
 
@@ -159,9 +160,8 @@ akm proposals --status pending|accepted|rejected|reverted
 akm proposals --ref memory:release-process
 
 # Inspect / diff a proposal.
-akm show proposal <id>
-akm diff proposal <id>
-akm diff <id>                      # asset-ref form also works
+akm show proposal:<id>
+akm diff <id>                      # UUID, UUID prefix, or proposal:<id> ref
 akm diff <8-char-uuid-prefix>
 
 # Accept / reject.
@@ -177,7 +177,7 @@ akm revert <id>                    # full UUID or asset ref only;
 ```
 
 Each proposal record carries an optional `confidence` field (0..1, set
-by reflect/propose runs). `akm improve --auto-accept=<N>` promotes
+by improve/propose runs). `akm improve --auto-accept=<N>` promotes
 proposals with `confidence × 100 >= N` (default threshold 90 when the
 flag is bare; `--auto-accept=false` disables auto-promotion). Accepted
 proposals that overwrote an existing asset also carry a `backup` field

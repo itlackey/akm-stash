@@ -20,11 +20,13 @@ nothing touches the live stash until a proposal is reviewed and accepted.
    - `akm improve <ref>` again when repeated feedback should be distilled into a lesson proposal.
 2. **Inspect the draft**
    - `akm proposals`
-   - `akm show proposal <id>`
-   - `akm diff proposal <id>`
+   - `akm show proposal:<id>`
+   - `akm diff <id>` (accepts a UUID, UUID prefix, or `proposal:<id>` ref positionally)
 3. **Decide**
    - `akm accept <id>` validates and promotes the change.
    - `akm reject <id> --reason "..."` archives it.
+4. **Roll back if needed**
+   - `akm revert <id>` undoes a previously accepted proposal.
 
 ## Quality values
 

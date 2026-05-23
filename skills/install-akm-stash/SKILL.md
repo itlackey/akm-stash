@@ -72,10 +72,17 @@ akm show <ref> --detail=agent
 
 ## Private stashes
 
-For private GitHub repos, set `GITHUB_TOKEN` in the environment or vault:
+For private GitHub repos, set `GITHUB_TOKEN` in the environment or vault.
+Vault values are never accepted on argv (that would leak via `/proc/cmdline`);
+read them from stdin or an environment variable:
 
 ```bash
-akm vault set GITHUB_TOKEN ghp_xxx
+# Value via stdin (recommended; keeps secrets out of shell history):
+printf '%s' "$GITHUB_TOKEN" | akm vault set vault:user GITHUB_TOKEN
+
+# Or read from an existing environment variable:
+akm vault set vault:user GITHUB_TOKEN --from-env GITHUB_TOKEN
+
 akm add github:your-org/private-stash
 ```
 

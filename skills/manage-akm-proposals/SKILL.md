@@ -25,12 +25,13 @@ akm proposals
 ### 2. Inspect the strongest candidate
 
 ```bash
-akm show proposal <id>
-akm diff proposal <id>
+akm show proposal:<id>
+akm diff <id>
 ```
 
-Check whether the proposal improves a real workflow, keeps trigger-sentence
-metadata, and avoids answer leakage.
+`akm diff` accepts the proposal UUID, a UUID prefix, or a `proposal:<id>` ref
+positionally. Check whether the proposal improves a real workflow, keeps
+trigger-sentence metadata, and avoids answer leakage.
 
 ### 3. Decide
 

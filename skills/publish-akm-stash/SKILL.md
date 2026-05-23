@@ -73,5 +73,8 @@ akm show <ref-from-your-stash>
 - Ship `.env.example` files instead of real secrets.
 - Review proposal-generated changes before release; do not publish draft
   `quality: "proposed"` content as if it were final.
-- If you ship `tasks/`, verify they use the current markdown task format and
-  `akm tasks` CLI, not older experimental examples.
+- If you ship `tasks/`, verify they use the current YAML task format
+  (`tasks/<id>.yml`) with `schedule:` and exactly one of `workflow:`,
+  `prompt:`, or `command:` — and the `akm tasks` CLI, not older
+  experimental examples. Legacy `.md` task files are warned and silently
+  skipped by the loader.
