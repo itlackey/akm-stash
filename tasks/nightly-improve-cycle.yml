@@ -1,0 +1,29 @@
+schedule: "0 2 * * *"
+enabled: true
+timeoutMs: 1800000
+name: nightly-improve-cycle
+description: "Nightly non-destructive AKM improve pass: queues proposals without modifying live assets."
+when_to_use: "Use when the stash should run a nightly improvement pass that proposes reusable updates without directly modifying live assets."
+tags:
+  - scheduled
+  - improve
+  - proposals
+updated: 2026-05-23
+prompt: |
+  Run a non-destructive nightly improvement pass for the current AKM stash.
+
+  1. Verify the installed `akm` supports `improve` and `proposals`.
+  2. Inspect the current queue with `akm proposals --status pending --format json`.
+  3. Run one whole-stash improve pass:
+
+     akm improve --task "Review the current stash for stale guidance, outdated CLI references, missing task-asset coverage, and reusable improvements. Generate only proposal-queue entries; do not edit live assets directly."
+
+  4. Check the queue again with `akm proposals --status pending --format json`.
+  5. Do not accept or reject proposals automatically.
+  6. Finish with a concise summary that includes:
+     - pending proposal count before and after,
+     - whether the improve run succeeded,
+     - the next review command (`akm proposals` or `akm show proposal:<id>`).
+
+  If `akm improve` is unavailable in the installed CLI, stop and report that the
+  environment is on an older AKM version.
