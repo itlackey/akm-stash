@@ -1,15 +1,16 @@
 ---
 description: Quick reference for the akm CLI verbs the akm-dream pipeline relies on, with examples and 0.8.0-specific guidance.
 tags: [akm-dream, reference, cli]
-updated: 2026-05-23
+updated: 2026-05-24
 refs: []
 ---
 
 # akm Commands Used by akm-dream
 
 A focused quick-reference for the akm verbs the dream pipeline leans on.
-For the full reference see [`docs/cli.md`](https://github.com/itlackey/akm/blob/main/docs/cli.md)
-in the akm repo.
+For the authoritative reference, run `akm --help` or `akm <verb> --help`
+locally; the akm repo's `docs/cli.md` is a useful secondary source but may
+lag the installed CLI.
 
 All commands default to JSON output. Prefer `--detail agent` for the
 agent-optimized shape; `--for-agent` remains a deprecated alias.

@@ -82,4 +82,9 @@ akm feedback <ref> --negative --reason "why it missed"
 
 ## License
 
-See [LICENSE](./LICENSE).
+MPL-2.0 — see [LICENSE](./LICENSE).
+
+MPL-2.0 is file-scoped copyleft: you can include individual assets in
+proprietary stashes or workflows, but modifications to a covered file must
+stay under MPL-2.0. This keeps the stash open while letting downstream users
+layer private assets alongside it.
