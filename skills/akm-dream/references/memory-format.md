@@ -124,9 +124,9 @@ The change was driven by:
 - bun's built-in workspaces resolution matching our monorepo layout
 
 If a release fails with `EACCES: permission denied`, the CI runner
-likely doesn't have a global bun install yet. Fix with:
-
-    curl -fsSL https://bun.sh/install | bash
+likely doesn't have a global bun install yet. Install bun by following
+the official instructions at https://bun.sh (download + run the
+installer script as two separate steps so you can inspect it first).
 
 See also: `memory:ci-pipeline`, `skill:release`.
 ```

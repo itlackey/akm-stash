@@ -57,8 +57,10 @@ export class AkmError extends Error {
 export class AkmMissingError extends Error {
   constructor() {
     super(
-      "akm CLI not found on PATH. Install with `bun i -g akm-cli` or " +
-        "`curl -fsSL https://raw.githubusercontent.com/itlackey/akm/main/install.sh | bash`.",
+      "akm CLI not found on PATH. " +
+        "Install with `bun i -g akm-cli`, or download the installer from " +
+        "https://github.com/itlackey/akm/releases/latest and run it. " +
+        "See https://github.com/itlackey/akm#install for full instructions.",
     );
     this.name = "AkmMissingError";
   }
