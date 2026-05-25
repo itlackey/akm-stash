@@ -49,28 +49,18 @@ dedupeWindow: 30d
 Keep the first run narrow. Expand roots or time windows only after the
 normalized output looks clean.
 
-## Scheduling approaches
+## Scheduling
 
-- **cron** for a simple daily or weekly harvest:
+Use `akm tasks` (akm-cli 0.8+) for recurring harvest runs — it's the
+purpose-built scheduling surface and handles dry-run modes, queue overlap, and
+follow-up feedback uniformly:
 
-  Store the roots, filters, and mode in a small config file, then have the
-  scheduler ask your host agent to load `command:akm-harvest-session-knowledge`
-  with those values, start `workflow:harvest-session-knowledge` directly, or
-  register an `akm tasks` entry that runs the workflow.
-
-  ```text
-  15 3 * * * host-agent run command:akm-harvest-session-knowledge "$HOME/.claude,$HOME/.local/state/akm" "7d" "claude,akm" "dry-run"
-  ```
-
-  Equivalent AKM-native scheduling:
-
-  ```bash
-  akm tasks add harvest-session-knowledge --schedule "15 3 * * *" --workflow workflow:harvest-session-knowledge --params '{"roots":"$HOME/.claude,$HOME/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
-  ```
-
-- **systemd timer** when the host already uses user services.
-- **host-agent scheduler** when a coding agent platform can invoke recurring
-  commands or workflows directly.
+```bash
+akm tasks add harvest-session-knowledge \
+  --schedule "15 3 * * *" \
+  --workflow workflow:harvest-session-knowledge \
+  --params '{"roots":"$HOME/.claude,$HOME/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
+```
 
 Use dry runs by default for scheduled jobs; promote to live submission only
 after duplicates are under control.

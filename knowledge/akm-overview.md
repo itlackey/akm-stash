@@ -107,5 +107,7 @@ akm tasks list
 - Install or clone a stash → `skill:install-akm-stash`
 - Publish a stash → `skill:publish-akm-stash`
 - Review proposals → `skill:manage-akm-proposals`
-- Turn repeated feedback into reusable lessons → `skill:distill-feedback-into-lessons`
+- Turn repeated feedback into reusable lessons → `akm improve <ref>` (the
+  improvement loop natively distills feedback into lesson proposals as of
+  akm-cli 0.8)
 - Full command list → `knowledge:akm-cli-reference`

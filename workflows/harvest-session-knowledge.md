@@ -29,13 +29,16 @@ out early.
 Step ID: scan-logs
 
 ### Instructions
-Use `skill:analyze-session-logs` to scan for opencode, Claude, and akm logs
-under the supplied roots. Normalize each useful hit into the canonical harvest
-record and preserve source-specific leftovers under `extras`.
+Prefer the native scan: `akm improve --dry-run` runs the session-log providers
+(opencode, claude-code) and emits normalized candidate records into
+`<stash>/.akm/runs/<run-id>/improve-result.json`. Inspect that artifact first.
+
+Fall back to `skill:analyze-session-logs` for any source the native providers
+don't yet cover, or when you want to scan a custom root directory tree that
+isn't `~/.claude`, `~/.local/share/opencode`, or akm state.
 
 ### Completion Criteria
-- Supported log candidates were scanned.
-- Useful records were normalized with source paths attached.
+- Native improve candidates (or custom-scanned records) are normalized with source paths attached.
 
 ## Step: Distill repeated patterns
 Step ID: distill-patterns

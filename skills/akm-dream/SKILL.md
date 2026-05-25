@@ -1,26 +1,33 @@
 ---
 name: akm-dream
-description: Consolidate, prune, and reorganize akm memories using the four-phase Auto Dream process (Orient → Gather Signal → Consolidate → Prune & Index). Use this skill whenever the user says "dream", "/dream", "auto dream", "consolidate my memory files", "consolidate akm memories", "akm dream", "clean up my memories", "prune stale memories", "my memory files are a mess", "merge duplicate memories", or any time akm memories need periodic consolidation and cleanup — even if the user only mentions cleaning up notes, deduplicating, or "fixing the memory pile". Also use after major refactors when old memory entries reference renamed/deleted code, or when the stash memory index grows beyond ~200 lines.
-updated: 2026-05-23
-refs: []
+description: Consolidate, prune, and reorganize akm memories using the four-phase Auto Dream process (Orient → Gather Signal → Consolidate → Prune & Index) with explicit staged review gates. Use this skill whenever the user says "dream", "/dream", "auto dream", "consolidate my memory files", "consolidate akm memories", "akm dream", "clean up my memories", "prune stale memories", "my memory files are a mess", "merge duplicate memories", or any time akm memories need periodic consolidation with reviewed approval — even if the user only mentions cleaning up notes, deduplicating, or "fixing the memory pile". For the common unreviewed path, prefer `akm improve memory --dry-run` (covers merge/delete/promote/contradict/relative-date natively as of akm-cli 0.8); use this skill when the staged review gate is the point.
+updated: 2026-05-24
 ---
 
 # akm Dream — Memory Consolidation for the akm CLI
 
 This skill implements the **Auto Dream** consolidation process for memories
-stored by the [akm CLI](https://github.com/itlackey/akm). It is the canonical
-dream implementation for AKM, built on top of the existing `akm` surface
-(`show`, `remember`, `index`, `feedback`, `history`, `events`, `config`) plus
-helper Bun/TypeScript scripts where AKM does not expose a dedicated command.
+stored by the [akm CLI](https://github.com/itlackey/akm). It wraps the
+native `akm improve memory` surface (which handles merge/delete/promote/
+contradict ops, relative-date resolution, and contradiction-edge writing as of
+akm-cli 0.8) with a four-phase staged orchestration that adds:
 
-The dream process is AKM's periodic memory-maintenance pass: while
-`akm remember` captures new notes, dream consolidates them later by pruning
-stale entries, merging duplicates, converting relative dates to absolute ones,
-and rebuilding the stash memory index at `<stash>/memories/MEMORY.md`.
+- explicit phase-3 plan review before any apply,
+- per-run audit artifacts under `<stash>/.akm-dream/runs/<run-id>/`,
+- a `forget` shim for deleting a single memory until akm has a native verb.
+
+**When to reach for `akm improve memory` instead:** for routine consolidation
+where you don't need staged review or run-scoped artifacts. The CLI is
+deterministic, faster, and covers the common case.
+
+**When to reach for this skill:** when the consolidation is high-stakes
+(major refactor, contested facts, large deletes) and you want the explicit
+plan-and-approve gate before anything is applied.
 
 **Division of labour:** the bundled Bun/TypeScript scripts handle deterministic
-operations (inventory, planning, apply execution, deletion, indexing). Review
-and approval still happen explicitly before phase 3 apply and phase 4.
+operations (inventory, planning, apply execution, deletion, indexing) that
+extend or wrap `akm improve memory`. Review and approval still happen explicitly
+before phase 3 apply and phase 4.
 
 ---
 
@@ -144,18 +151,21 @@ safety check), removes it, and prints what was removed.
 
 **Critical consolidation rules** (from the auto-dream system prompt):
 
-- **Convert relative dates to absolute.** "Yesterday we decided to use
-  Redis" becomes "On 2026-05-04 we decided to use Redis." `today` is
-  `2026-05-05` — use `date -I` if you need to compute another.
 - **Delete contradicted facts at the source.** If today's signal disproves
   an old memory, fix or delete it; don't just note the contradiction
-  somewhere else.
+  somewhere else. (`akm improve memory` will surface contradiction edges
+  natively if you run it as a precursor.)
 - **Merge near-duplicates.** Three sessions all noted the same build quirk
   → one clean entry, not three.
 - **Don't rewrite untouched memories.** Dream is surgical. If a memory
   is fine, leave it.
 - **Preserve memory ref names you already use elsewhere** (e.g. anything
   referenced by a workflow or skill).
+
+> Relative-date resolution ("yesterday" → ISO date) is handled natively
+> by `akm improve memory` (`memory-improve.ts`). The dream skill no longer
+> performs this transform manually; if you see unresolved relative dates,
+> run `akm improve memory --dry-run` first to surface them.
 
 ### Phase 4 — Prune and rebuild the index
 
@@ -231,10 +241,12 @@ workflow is the stash-scoped orchestrator plus the review gate.
   prompt to load into context during phase 3.
 - `references/memory-format.md` — the memory file format akm uses
   (frontmatter + body conventions).
-- `references/akm-commands.md` — quick reference for the akm verbs
-  this skill leans on.
 - `references/review-flow.md` — explicit staged validation and review/
   approval flow for end-to-end dream runs.
+- For akm CLI command reference, see `akm --help` or the akm repo's
+  `docs/features/improvement-loop.md` — dream relies on `akm show`,
+  `akm remember`, `akm index`, `akm events list`, and
+  `akm config path --all`.
 - `references/implementation-spec.md` — canonical design/architecture spec,
   including internal and external citations for future implementation work.
 - `evals/evals.json` — test prompts you can run to verify the skill
