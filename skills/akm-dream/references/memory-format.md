@@ -1,3 +1,10 @@
+---
+description: Conventions for the akm memory file format used by the akm-dream pipeline (filenames, headings, frontmatter, and reference syntax).
+tags: [akm-dream, reference, memories]
+updated: 2026-05-23
+refs: []
+---
+
 # akm Memory File Format
 
 akm stores memories as plain markdown files under `<stash>/memories/`,
@@ -32,20 +39,50 @@ description: One-liner shown in MEMORY.md.
 tags: [release, ci]
 created: 2026-04-12
 updated: 2026-05-05
+captureMode: hot
+beliefState: asserted
 ---
 ```
 
-| Field         | Purpose                                                    |
-| ------------- | ---------------------------------------------------------- |
-| `description` | Used by `phase4-prune` to populate the MEMORY.md index. If absent, the first sentence of the body is used. |
-| `tags`        | Primary tag (first one) becomes the MEMORY.md section. Untagged memories land under "uncategorized". |
-| `created`     | ISO date of original creation. Useful when the file's mtime has been touched by other tools. |
-| `updated`     | ISO date of last meaningful update. Lets dream tell stale memories from fresh ones across mtime resets. |
+| Field            | Purpose                                                    |
+| ---------------- | ---------------------------------------------------------- |
+| `description`    | Used by `phase4-prune` to populate the MEMORY.md index. If absent, the first sentence of the body is used. |
+| `tags`           | Primary tag (first one) becomes the MEMORY.md section. Untagged memories land under "uncategorized". |
+| `created`        | ISO date of original creation. Useful when the file's mtime has been touched by other tools. |
+| `updated`        | ISO date of last meaningful update. Lets dream tell stale memories from fresh ones across mtime resets. |
+| `captureMode`    | `hot` (written via `akm remember`) or `background` (inferred by `akm improve`). Hot-captured memories receive a ranking boost. Auto-populated; don't set by hand. |
+| `beliefState`    | One of `asserted` \| `active` \| `deprecated` \| `superseded` \| `contradicted` \| `archived`. Hot-path writes get `asserted` automatically. `deprecated` and historical states are frozen (never auto-refreshed to active). |
+| `evidenceSources`| Array of refs/URLs that justify this memory. Surfaced by improve passes. |
+| `lastConfirmedAt`| ISO timestamp from staleness-detection / improve runs. Refreshed when the indexer revalidates the memory. |
+| `supersededBy`   | Array of refs that replace this memory. Used with `beliefState: superseded`. |
+| `source`         | For derived memories (filename suffix `.derived` OR `inferred: true`): the parent ref in the form `memory:<parent>`. Powers the `derived_from` indexer column and the `expandTo` search-hit enrichment. |
 
 The dream pipeline tolerates frontmatter-less memories — it falls back
 to file mtime for age and the first sentence for description. New
 memories created during phase 3 should include frontmatter so future
 dream cycles can do better work.
+
+Memories written via `akm remember` (hot path) automatically receive
+`captureMode: hot` and `beliefState: asserted` — you should not set
+those fields by hand. Memories inferred by `akm improve` receive
+`captureMode: background`.
+
+## Belief states
+
+Memories carry a `beliefState` that gates how the indexer weighs them:
+
+| State          | Ranking boost | When it's set |
+|----------------|---------------|----------------|
+| `asserted`     | strongest +   | Hot-path `akm remember` |
+| `active`       | + (medium)    | Default for unmarked memories |
+| `deprecated`   | -             | Soft-deprecated; frozen (never refreshed). |
+| `superseded`   | --            | Replaced by another memory via `supersededBy` |
+| `contradicted` | ---           | Contradicted by other evidence |
+| `archived`     | ----          | Soft-deleted; retained for audit |
+
+`akm search --belief current` returns only `asserted`+`active`;
+`--belief historical` returns the four "weaker" states; `--belief all`
+disables the filter.
 
 ## Body conventions
 
@@ -70,6 +107,8 @@ description: Release scripts now run via bun publish, not npm publish.
 tags: [release, ci]
 created: 2026-04-12
 updated: 2026-05-04
+captureMode: hot
+beliefState: asserted
 ---
 
 # Release process
@@ -85,9 +124,9 @@ The change was driven by:
 - bun's built-in workspaces resolution matching our monorepo layout
 
 If a release fails with `EACCES: permission denied`, the CI runner
-likely doesn't have a global bun install yet. Fix with:
-
-    curl -fsSL https://bun.sh/install | bash
+likely doesn't have a global bun install yet. Install bun by following
+the official instructions at https://bun.sh (download + run the
+installer script as two separate steps so you can inspect it first).
 
 See also: `memory:ci-pipeline`, `skill:release`.
 ```

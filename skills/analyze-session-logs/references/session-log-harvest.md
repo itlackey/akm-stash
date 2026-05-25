@@ -10,7 +10,7 @@ akm proposal queue.
 |---|---|---|
 | opencode | paths containing `opencode`, `session`, `.json`, `.jsonl` | tool-call success/failure, retries, timings, command sequences |
 | Claude | paths containing `claude`, `.claude`, transcript markdown/json/jsonl | task statement, plan quality, tool usage, final outcome, user corrections |
-| akm feedback and metrics | paths containing `akm`, `feedback`, `proposal`, `metrics` | positive/negative asset feedback, distill candidates, proposal outcomes |
+| akm feedback and metrics | paths containing `akm`, `feedback`, `proposal`, `metrics` | positive/negative asset feedback, improve candidates, proposal outcomes |
 
 The parser should rely on both path hints and light content inspection so a
 minor filename variation does not break harvesting.
@@ -33,9 +33,9 @@ stay easy and low risk.
 
 ```yaml
 roots:
-  - /home/alice/.local/share/opencode
-  - /home/alice/.claude
-  - /home/alice/.local/state/akm
+  - $HOME/.local/share/opencode
+  - $HOME/.claude
+  - $HOME/.local/state/akm
 since: 7d
 tools:
   - opencode
@@ -49,21 +49,18 @@ dedupeWindow: 30d
 Keep the first run narrow. Expand roots or time windows only after the
 normalized output looks clean.
 
-## Scheduling approaches
+## Scheduling
 
-- **cron** for a simple daily or weekly harvest:
+Use `akm tasks` (akm-cli 0.8+) for recurring harvest runs — it's the
+purpose-built scheduling surface and handles dry-run modes, queue overlap, and
+follow-up feedback uniformly:
 
-  Store the roots, filters, and mode in a small config file, then have the
-  scheduler ask your host agent to load `command:akm-harvest-session-knowledge`
-  with those values or start `workflow:harvest-session-knowledge` directly.
-
-  ```text
-  15 3 * * * host-agent run command:akm-harvest-session-knowledge "/home/alice/.claude,/home/alice/.local/state/akm" "7d" "claude,akm" "dry-run"
-  ```
-
-- **systemd timer** when the host already uses user services.
-- **host-agent scheduler** when a coding agent platform can invoke recurring
-  commands or workflows directly.
+```bash
+akm tasks add harvest-session-knowledge \
+  --schedule "15 3 * * *" \
+  --workflow workflow:harvest-session-knowledge \
+  --params '{"roots":"$HOME/.claude,$HOME/.local/state/akm","since":"7d","tools":"claude,akm","dryRun":true}'
+```
 
 Use dry runs by default for scheduled jobs; promote to live submission only
 after duplicates are under control.
@@ -96,7 +93,7 @@ after duplicates are under control.
     "workflow:publish-stash",
     "skill:manage-akm-proposals"
   ],
-  "source_path": "/home/alice/.claude/projects/issue-412/transcript.jsonl",
+  "source_path": "$HOME/.claude/projects/issue-412/transcript.jsonl",
   "extras": {
     "branch": "fix/release-workflow"
   }
@@ -117,9 +114,9 @@ after duplicates are under control.
 4. Review it:
 
    ```bash
-   akm proposal list
-   akm proposal show <id>
-   akm proposal diff <id>
+   akm proposals
+   akm show proposal:<id>
+   akm diff <id>
    ```
 
 5. Accept only if the proposal is reusable, evidence-backed, and not already

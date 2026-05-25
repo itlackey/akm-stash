@@ -1,10 +1,11 @@
 ---
-description: Walk through the full akm-dream process step by step, from kickoff through explicit review gates, phase 3 approval, phase 4 audit, and follow-up feedback.
+description: Walk through the full akm-dream process step by step, from kickoff through explicit review gates, phase 3 approval, phase 4 audit, and follow-up feedback. Use when staged review is the point — for routine consolidation prefer `akm improve memory --dry-run` instead.
 tags: [dream, memory, review, workflow, akm-dream]
 params:
   trigger: Why this dream run is happening (for example `post-refactor`, `weekly-maintenance`, or `manual-cleanup`)
   dream_dir: Directory containing the akm-dream package. Defaults to `skills/akm-dream`.
   review_focus: Optional area to scrutinize during review (for example `deletes`, `contradictions`, or `release memories`)
+updated: 2026-05-24
 ---
 
 # Workflow: Dream memory consolidation
@@ -43,6 +44,32 @@ contract.
 - The operator has loaded the current dream instructions and review contract.
 - The trigger and any special review focus are explicit.
 - The stash and dream package are available for use.
+
+## Step: Try the native path first
+Step ID: try-native-first
+
+### Instructions
+Before invoking the dream orchestrator, run the native CLI path. `akm improve
+memory` (in akm-cli 0.8) covers most consolidation cases (merge / delete /
+promote / contradict / relative-date resolution) without staged review overhead.
+
+1. Inspect what improve would do:
+
+   ```bash
+   akm improve memory --dry-run
+   ```
+
+2. If the dry-run plan is acceptable and you don't need the staged review gate,
+   apply it directly with `akm improve memory` and mark this workflow `skipped`
+   with a note explaining native path was sufficient.
+3. If the plan is high-risk (large deletes, contested facts, post-refactor
+   churn) or you need per-run audit artifacts under `<stash>/.akm-dream/runs/`,
+   continue to the next step.
+
+### Completion Criteria
+- The native dry-run was inspected.
+- A clear decision was recorded: either native path applied + workflow skipped,
+  or dream orchestrator needed (proceed to next step).
 
 ## Step: Start the orchestrated dream run
 Step ID: start-run

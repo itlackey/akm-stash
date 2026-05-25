@@ -1,5 +1,8 @@
 ---
-description: Use when you need to gather context and kick off session-log harvesting. Arguments: roots, since-window, tool-filter, and mode.
+name: akm-harvest-session-knowledge
+type: command
+description: "Use when you need to gather context and kick off session-log harvesting. Arguments: roots, since-window, tool-filter, and mode."
+updated: 2026-05-23
 ---
 
 You are starting a session-log knowledge harvest.
@@ -11,7 +14,7 @@ Mode: $4
 
 1. Gather context before doing any extraction:
    - expand the requested roots and note missing directories,
-   - inspect `akm proposal list` for overlapping pending work,
+   - inspect `akm proposals` for overlapping pending work,
    - identify which supported log families are actually present.
 2. Use `skill:analyze-session-logs` to normalize opencode, Claude, and akm
    evidence from the requested scope and identify the strongest proposal

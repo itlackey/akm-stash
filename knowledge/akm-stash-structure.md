@@ -1,6 +1,13 @@
+---
+description: Use when an agent is authoring or reorganizing a stash and needs the v0.8.0 directory, command, workflow, task, and lesson conventions.
+tags: [akm, stash, structure]
+quality: curated
+updated: 2026-05-23
+---
+
 # akm Stash Structure
 
-> **Version target:** akm-cli v0.7.0
+> **Version target:** akm-cli v0.8.0
 
 akm classifies assets by **file extension and content**, not by directory name.
 Conventional directories are still the best default because they improve search
@@ -22,7 +29,8 @@ my-stash/
 ├── memories/*.md
 ├── lessons/*.md
 ├── vaults/*.env.example
-└── wikis/<name>/*.md
+├── wikis/<name>/*.md
+└── tasks/*.yml
 ```
 
 Use only the directories you need, but prefer this layout when you can.
@@ -44,7 +52,7 @@ The `description` is a trigger sentence. Write “Use when …”, not a title.
 
 ### Commands
 
-akm v0.7.0 command assets follow the OpenCode-style prompt-template convention:
+akm v0.8.0 command assets follow the OpenCode-style prompt-template convention:
 
 ```markdown
 ---
@@ -72,7 +80,7 @@ tools: [Read, Grep, Glob, Bash]
 
 ### Workflows
 
-akm v0.7.0 workflows are structured markdown, not frontmatter step arrays:
+akm v0.8.0 workflows are structured markdown, not frontmatter step arrays:
 
 ```markdown
 ---
@@ -97,7 +105,7 @@ Check the version, changelog, and release target.
 
 ### Lessons
 
-Lessons are first-class v0.7.0 assets stored under `lessons/`:
+Lessons are first-class assets stored under `lessons/`:
 
 ```markdown
 ---
@@ -111,30 +119,40 @@ quality: curated
 
 `quality` is commonly `generated`, `curated`, or `proposed`.
 
-### Directory-level curated metadata
+### Tasks
 
-Place `.stash.json` inside an asset-type directory when you want stronger search
-signals than filename/frontmatter alone can provide:
+Task assets are first-class 0.8.0 assets stored under `tasks/` as YAML
+(`tasks/<id>.yml`). The file is pure YAML — no markdown frontmatter
+delimiters, no body section. Legacy `.md` task files are warned and
+silently skipped by the loader.
 
-```json
-{
-  "entries": [
-    {
-      "name": "publish-stash",
-      "type": "workflow",
-      "filename": "publish-stash.md",
-      "description": "Publish a stash with current akm conventions.",
-      "quality": "curated",
-      "searchHints": ["publish akm stash", "release stash", "registry listing"]
-    }
-  ]
-}
+```yaml
+# tasks/<id>.yml
+schedule: "0 9 * * *"
+enabled: true
+description: "Use when a daily AKM harvest should run without hand-built cron notes."
+tags: [scheduled, harvest]
+# Pick exactly one of `workflow:`, `prompt:`, or `command:`:
+workflow: workflow:harvest-session-knowledge
+# OR an inline agent prompt:
+# prompt: |
+#   multi-line prompt body
+# OR a deterministic shell command:
+# command: ["akm", "improve", "--task", "..."]
 ```
+
+Pick exactly one of `workflow:`, `prompt:`, or `command:`. Manage tasks with
+`akm tasks add|list|show|run|remove|sync`.
+
+### Metadata guidance
+
+Prefer inline metadata in frontmatter and file-local headers. Older curated
+stashes may still carry `.stash.json` during migration, but 0.8.0-facing assets
+should not rely on it as the primary authoring contract.
 
 ## Asset quality rules
 
-These are especially important for benchmark fixtures and reusable official
-stashes:
+These are especially important for reusable official stashes:
 
 - **Teach HOW, not WHAT.** Document syntax, schemas, patterns, and decision
   rules. Do not hard-code task answers or verifier outputs into assets.
@@ -144,8 +162,8 @@ stashes:
   only on description text.
 - **Keep examples realistic but general.** Show one pattern that transfers to
   many tasks.
-- **Add stash-level metadata.** `akm.json`, `README.md`, and `.stash.json`
-  improve discovery, especially for third-party or benchmark consumption.
+- **Add stash-level metadata.** `akm.json` and `README.md` improve discovery,
+  especially for third-party consumption.
 
 ## Publishing metadata
 

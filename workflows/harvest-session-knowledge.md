@@ -7,6 +7,7 @@ params:
   tools: Optional comma-separated tool filter such as opencode,claude,akm
   maxFiles: Optional cap on scanned files
   dryRun: true to stop before queue submission
+updated: 2026-05-23
 ---
 
 # Workflow: Harvest knowledge from session logs
@@ -17,7 +18,7 @@ Step ID: capture-context
 ### Instructions
 Expand `params.roots`, note any missing directories, and record the harvest
 window from `params.since`. Before extracting anything, inspect the current
-proposal queue with `akm proposal list` so repeated discoveries can be filtered
+proposal queue with `akm proposals` so repeated discoveries can be filtered
 out early.
 
 ### Completion Criteria
@@ -28,13 +29,16 @@ out early.
 Step ID: scan-logs
 
 ### Instructions
-Use `skill:analyze-session-logs` to scan for opencode, Claude, and akm logs
-under the supplied roots. Normalize each useful hit into the canonical harvest
-record and preserve source-specific leftovers under `extras`.
+Prefer the native scan: `akm improve --dry-run` runs the session-log providers
+(opencode, claude-code) and emits normalized candidate records into
+`<stash>/.akm/runs/<run-id>/improve-result.json`. Inspect that artifact first.
+
+Fall back to `skill:analyze-session-logs` for any source the native providers
+don't yet cover, or when you want to scan a custom root directory tree that
+isn't `~/.claude`, `~/.local/share/opencode`, or akm state.
 
 ### Completion Criteria
-- Supported log candidates were scanned.
-- Useful records were normalized with source paths attached.
+- Native improve candidates (or custom-scanned records) are normalized with source paths attached.
 
 ## Step: Distill repeated patterns
 Step ID: distill-patterns
@@ -66,9 +70,8 @@ Step ID: submit
 
 ### Instructions
 If `params.dryRun` is `true`, emit queue-ready briefs only. Otherwise, submit
-the strongest items with `akm propose`, `akm reflect`, or `akm distill`
-depending on whether the target is a new asset, an update, or a lesson from
-existing feedback.
+the strongest items with `akm propose` for net-new assets or `akm improve`
+for updates and feedback-backed lesson distillation.
 
 ### Completion Criteria
 - Dry runs produced queue-ready briefs, or
@@ -78,11 +81,11 @@ existing feedback.
 Step ID: review-and-schedule
 
 ### Instructions
-Review submitted proposals with `akm proposal show <id>` and
-`akm proposal diff <id>`, then decide whether to accept or reject them. For
+Review submitted proposals with `akm show proposal:<id>` and
+`akm diff <id>` (accepts UUID / prefix / ref positionally), then decide whether to accept or reject them. For
 recurring runs, store the chosen roots and filters in a small config file and
-schedule the kickoff command with cron, a systemd timer, or the host agent's
-own recurring task runner.
+schedule the kickoff command with `akm tasks add`, cron, a systemd timer, or
+the host agent's own recurring task runner.
 
 ### Completion Criteria
 - Submitted proposals were reviewed or queued for review.

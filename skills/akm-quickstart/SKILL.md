@@ -1,6 +1,7 @@
 ---
 name: akm-quickstart
-description: Use when an agent needs to bootstrap akm in a fresh environment — installs the CLI, initializes the stash, configures the registry, and verifies the toolchain before any install, search, or proposal operations.
+description: "Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations."
+updated: 2026-05-23
 ---
 
 # akm Quickstart
@@ -47,8 +48,8 @@ akm index
 ```
 
 Expected type directories include `scripts/`, `skills/`, `commands/`,
-`agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`, and
-`lessons/`.
+`agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`,
+`lessons/`, and `tasks/` when you start authoring scheduled jobs.
 
 ### 4. Verify the official registry is reachable
 
@@ -67,7 +68,10 @@ akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/in
 
 ```bash
 akm info
-akm help migrate 0.7.0
+akm help migrate 0.8.0
+akm proposals
 ```
 
-Only proceed once `akm info` succeeds.
+Only proceed once `akm info` succeeds. On 0.8.0, `akm proposals` should work
+and the old `reflect` / `distill` / `proposal *` commands should not be part
+of your automation anymore.

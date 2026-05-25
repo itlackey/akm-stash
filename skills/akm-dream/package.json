@@ -34,13 +34,13 @@
     "claude-code",
     "skill",
     "memory",
-    "auto-dream",
-    "agentikit"
+    "auto-dream"
   ],
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/itlackey/akm-dream"
+    "url": "https://github.com/itlackey/akm-stash",
+    "directory": "skills/akm-dream"
   },
-  "homepage": "https://github.com/itlackey/akm-dream"
+  "homepage": "https://github.com/itlackey/akm-stash/tree/main/skills/akm-dream"
 }

@@ -1,3 +1,9 @@
+---
+description: Repository README for the akm-dream skill. The active asset entrypoint is SKILL.md; this file documents the package layout, phase scripts, and CLI usage.
+tags: [akm-dream, readme]
+updated: 2026-05-24
+---
+
 # akm-dream
 
 > A Claude Code / OpenCode skill that implements the four-phase **Auto
@@ -31,37 +37,45 @@ contradiction resolution, merging, and synthesis.
 
 ## Install
 
-### As a Claude Code skill
+The skill ships as part of [akm-stash](https://github.com/itlackey/akm-stash).
+
+### Via akm (recommended)
 
 ```bash
-# Drop the directory into ~/.claude/skills/
-git clone https://github.com/itlackey/akm-dream.git ~/.claude/skills/akm-dream
-
-# Or clone the skill asset into your working stash
-akm clone "github:itlackey/akm-dream//skill:akm-dream"
-```
-
-### As an akm asset (recommended)
-
-Once you've added this repo as a source, the skill participates in
-`akm search` like any other skill:
-
-```bash
-akm add github:itlackey/akm-dream
+akm add github:itlackey/akm-stash
 akm index
 akm search "dream consolidate memories"
 ```
 
-### Standalone
-
-You don't strictly need a skill loader. The Bun scripts are runnable
-on their own:
+### Single-asset clone
 
 ```bash
-git clone https://github.com/itlackey/akm-dream.git
-cd akm-dream
+akm clone "github:itlackey/akm-stash//skill:akm-dream"
+```
+
+### Standalone
+
+The Bun scripts are runnable directly from the cloned stash:
+
+```bash
+git clone https://github.com/itlackey/akm-stash.git
+cd akm-stash/skills/akm-dream
+bun install
 bun run dream
 ```
+
+## Relationship to `akm improve memory`
+
+As of akm-cli 0.8, `akm improve memory` natively performs merge/delete/
+promote/contradict ops, relative-date resolution, and contradiction-edge
+writing. Reach for `akm improve memory --dry-run` first — it covers the
+common case without dream's staged review overhead.
+
+Use this skill when you specifically want:
+
+- the four-phase **staged review gate** (phase-3 plan reviewed before apply),
+- per-run audit artifacts under `<stash>/.akm-dream/runs/<run-id>/`, or
+- the `forget` shim for deleting a single memory (no native `akm forget` yet).
 
 ## Use
 
@@ -155,8 +169,7 @@ akm-dream/
 ├── references/                       # loaded into context only when needed
 │   ├── dream-system-prompt.md        # the four-phase prompt for phase 3
 │   ├── memory-format.md              # frontmatter + body conventions
-│   ├── review-flow.md                # staged validation + approval contract
-│   └── akm-commands.md               # quick-ref of the akm verbs we use
+│   └── review-flow.md                # staged validation + approval contract
 └── evals/
     └── evals.json                    # test prompts for skill validation
 ```
@@ -209,10 +222,10 @@ this skill. Future phase B/C/D work should attach `plan.json`,
   external citations for future implementation validation.
 - `references/review-flow.md`
   — staged validation, review, approval, and post-run audit expectations.
-- [akm 0.7.0 — Proposal Queue, Reflection Commands, Lessons](https://dev.to/itlackey/akm-070-proposal-queue-reflection-commands-lessons-and-akm-bench-4lbl)
-  — context for `akm reflect`/`propose`/`distill`. Dream is
-  complementary: those commands generate proposals; dream consolidates
-  what's already in the live stash.
+- [akm 0.8.0 — CLI Redesign, Task Assets, and Belief-Aware Memory](https://dev.to/itlackey/akm-080-cli-redesign-task-assets-and-belief-aware-memory-3h42)
+  — context for `akm improve`/`propose` and the renamed proposal-review
+  commands. Dream is complementary: those commands generate proposals; dream
+  consolidates what's already in the live stash.
 
 ## License
 

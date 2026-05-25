@@ -1,7 +1,14 @@
+---
+description: Use when an agent needs the main akm-cli v0.8.0 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
+tags: [akm, cli, reference]
+quality: curated
+updated: 2026-05-23
+---
+
 # akm CLI Reference
 
 Quick reference for the main `akm` surfaces an agent is likely to use.
-Current as of **v0.7.0** (2026-05-04). For authoritative syntax, run
+Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 `akm <cmd> --help`.
 
 ## Global output controls
@@ -18,9 +25,10 @@ Current as of **v0.7.0** (2026-05-04). For authoritative syntax, run
 | Command | Purpose |
 |---|---|
 | `akm setup` | Guided first-run wizard: config, stash dir, providers, registries, and initial index. |
-| `akm init [--dir <path>]` | Create the working stash skeleton (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`, `lessons/`). |
+| `akm init [--dir <path>]` | Create the working stash skeleton (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`, `lessons/`, `tasks/`). |
 | `akm index [--full]` | Build or refresh the local search index. |
 | `akm info` | Print version, configured sources, registries, and index/search capabilities. |
+| `akm health` | Runtime / telemetry probe: surfaces backend status, artifact dirs, recent improve metrics, and scheduler reachability. |
 | `akm config get <key>` / `set <key> <value>` | Read or write configuration. |
 | `akm upgrade` | Self-update the CLI. |
 | `akm help migrate <version>` | Preview release notes and migration guidance. |
@@ -32,6 +40,7 @@ Current as of **v0.7.0** (2026-05-04). For authoritative syntax, run
 | `akm search <query>` | Search local stash content by default. |
 | `akm search <query> --source registry` | Search only registries. |
 | `akm search <query> --source both` | Merge local and registry discovery. |
+| `akm search <query> --source <name>` | Scope the search to one named stash (use the name from `akm list`). |
 | `akm search <query> --type <type>` | Filter by asset type (`script`, `skill`, `command`, `agent`, `knowledge`, `workflow`, `wiki`, `vault`, `memory`, `lesson`). |
 | `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
 | `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
@@ -57,35 +66,47 @@ Current as of **v0.7.0** (2026-05-04). For authoritative syntax, run
 | `akm run <ref>` | Execute a runnable asset. |
 | `akm workflow start <ref>` / `next` / `complete` / `status` | Run stateful workflows. |
 | `akm workflow create <name>` / `validate <ref\|path>` | Author or validate workflow files. |
+| `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. |
+| `akm tasks list` / `show <id>` / `run <id>` / `history` | Inspect or execute scheduled task assets. |
+| `akm tasks enable <id>` / `disable <id>` / `remove <id>` / `sync` | Manage task lifecycle and scheduler reconciliation. |
 | `akm remember "<text>"` | Append a memory fragment to the working stash. |
 | `akm import <file>` | Ingest a knowledge or lesson-style document into the stash. |
 | `akm feedback <ref> --positive` | Record positive feedback. |
 | `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
 | `akm save -m "msg" [--push]` | Commit and optionally push the git-backed working stash. |
 
-## Proposal queue and self-improvement (v0.7.0+)
+> ⚠️ **Task files must be `.yml`.** Legacy `tasks/*.md` files are warned at
+> load time and silently skipped — they will never be scheduled. Each task
+> file picks exactly one target: `workflow:`, `prompt:`, or `command:`.
+
+## Proposal queue and self-improvement (v0.8.0+)
 
 | Command | Purpose |
 |---|---|
-| `akm reflect [ref] [--task "..."]` | Ask the configured agent to propose an improvement to an existing asset or stash context. |
+| `akm improve [ref\|type] [--task "..."]` | Ask the configured agent to propose improvements to an existing asset, asset type, or the current stash scope. Auto-accepts at confidence ≥ 90 by default; pass `--auto-accept=false` to disable. Each run writes JSON to `.akm/runs/<run-id>/improve-result.json` (filter `.dryRun != true` before any productivity audit). Pass `--json-to-stdout` for legacy stdout JSON. |
 | `akm propose <type> <name> --task "..."` | Ask the configured agent to propose a brand-new asset. |
-| `akm distill <ref>` | Turn feedback and usage history into a lesson proposal. |
-| `akm proposal list` | List pending proposals. |
-| `akm proposal show <id>` | Render a proposal. |
-| `akm proposal diff <id>` | Diff a proposal against the live asset. |
-| `akm proposal accept <id>` | Validate and promote a proposal into the stash. |
-| `akm proposal reject <id> --reason "..."` | Reject and archive a proposal. |
+| `akm proposals` | List pending, accepted, or rejected proposals. |
+| `akm show proposal:<id>` | Render a proposal. |
+| `akm diff <id>` | Diff a proposal against the live asset. Accepts a UUID, UUID prefix, or `proposal:<id>` ref positionally. |
+| `akm accept <id>` | Validate and promote a proposal into the stash. |
+| `akm reject <id> --reason "..."` | Reject and archive a proposal. |
+| `akm revert <id>` | Roll back a previously accepted proposal. |
+
+In 0.8.0, lesson distillation is part of `akm improve <ref>` rather than a
+separate public `distill` command.
 
 ## Wikis and vaults
 
 | Command | Purpose |
 |---|---|
 | `akm wiki list` / `ingest` / `register` / `lint` | Manage multi-page wiki assets. |
-| `akm vault set <KEY> <value>` / `get` / `list` / `export` | Manage secret or configuration key-value pairs. |
+| `akm vault set <ref> <KEY>` (value via stdin: `printf '%s' "$VALUE" \| akm vault set <ref> <KEY>`) | Set a vault key. Value via stdin keeps secrets out of shell history. |
+| `akm vault set <ref> <KEY> --from-env <VAR>` | Set a vault key from an environment variable. |
+| `akm vault get <ref> <KEY>` / `list <ref>` / `export <ref>` | Read or list vault contents. |
 
-## Workflow authoring contract (v0.7.0)
+## Workflow authoring contract (v0.8.0)
 
-akm v0.7.0 workflows are markdown documents with:
+akm v0.8.0 workflows are markdown documents with:
 
 - optional frontmatter keys: `description`, `tags`, `params`
 - exactly one `# Workflow: <title>` heading
@@ -101,7 +122,9 @@ Older frontmatter-only step arrays are not the current contract.
 - Prefer `akm show <ref> --detail=agent` when you need execution-ready output.
 - Prefer `akm curate <query>` before raw `search` when the task is “find the
   best asset for this job.”
-- Treat `proposal` content as draft material until it has been explicitly
+- Treat proposal content as draft material until it has been explicitly
   accepted.
 - Use `--source both` only when you intentionally want local + registry results
   in one pass.
+- For recurring work, prefer `akm tasks add` over ad hoc cron notes in docs or
+  shell history.

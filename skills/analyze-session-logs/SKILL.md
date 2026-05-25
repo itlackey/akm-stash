@@ -1,20 +1,38 @@
 ---
 name: analyze-session-logs
-description: Use when an agent needs one skill to scan supported session logs, normalize the evidence, and prepare queue-ready akm proposals.
+description: Use when an agent needs one skill to cluster repeated patterns and editorial-judge which session-log signals deserve to become akm proposals. For raw scanning and detection of opencode/claude/akm logs, `akm improve` now ingests them natively (`src/integrations/session-logs/providers/`) — this skill is for the editorial layer above that.
+updated: 2026-05-24
 ---
 
 # Analyze Session Logs
 
-This skill turns mixed agent logs into prioritized proposal candidates without
-splitting the work across multiple similarly named skills.
+This skill turns mixed agent logs into prioritized proposal candidates. The raw
+scan-and-detect work is now handled by `akm improve` natively (via the session-
+log providers it ships); this skill's value is the **editorial judgment**:
+clustering repeated patterns, picking the right proposal target, and writing
+the briefs the agent (or `akm propose` / `akm improve --task`) will submit.
 
 ## When to use
 
-- A user directory contains opencode, Claude, or akm traces that may contain
-  reusable wins, mistakes, or feedback.
-- You need one repeatable skill that both normalizes the evidence and ranks the
-  strongest findings.
+- You want one repeatable skill that turns harvested session signals into ranked,
+  ready-to-submit proposal briefs.
+- You need to choose between Lesson / Skill / Workflow / Agent / Knowledge as the
+  proposal target for a given pattern.
 - You want a parser contract that can grow to cover other agent tools later.
+
+## What's native vs. what this skill adds
+
+`akm improve` natively (as of akm-cli 0.8) walks supported session logs
+(opencode, Claude, akm feedback/proposal events) and feeds normalized records
+into the improvement loop. So you typically don't need to write your own
+scanner — call `akm improve --dry-run` against a ref and inspect the candidates.
+
+This skill is for what comes next:
+
+- Clustering repeated mistakes / wins across sessions.
+- Choosing the right proposal target (lesson vs. skill vs. workflow vs. agent).
+- Writing strong `--task` briefs that capture evidence.
+- Filtering against existing proposals to avoid duplicates.
 
 ## Canonical harvest record
 
@@ -46,20 +64,30 @@ Keep unknown source-specific fields inside `extras` instead of dropping them.
 
 ## Steps
 
-### 1. Bound the scan first
+### 1. Source the candidates from `akm improve` first
 
-Collect:
+In most cases, `akm improve` already harvests session logs natively:
+
+```bash
+akm improve --dry-run                 # all refs
+akm improve <ref> --dry-run           # focused on one asset
+```
+
+The session-log providers (`src/integrations/session-logs/providers/{claude-code,opencode}`)
+detect and normalize logs into the same candidate shape this skill expects.
+Inspect `<stash>/.akm/runs/<run-id>/improve-result.json` for the parsed records.
+
+Only fall back to a custom scan when you need a source the native providers
+don't yet cover (and consider filing an issue against akm-cli to add it).
+
+### 2. Bound any custom scan tightly
+
+If you do need to scan beyond `akm improve`'s native providers, collect:
 
 - one or more root directories,
 - a time window such as `since=7d` or an ISO timestamp,
 - optional tool filters (`opencode`, `claude`, `akm`),
 - a file cap so large home directories stay tractable.
-
-Prefer recent, writable user areas before broad filesystem scans.
-
-### 2. Detect the source format before parsing
-
-Use filename, parent directory, and light content checks together:
 
 | Source | Common clues | Extract first |
 |---|---|---|
@@ -122,9 +150,9 @@ Use this mapping:
 - **Agent** — recurring delegation boundary or specialist reviewer role.
 - **Knowledge** — durable reference material or format/schema explanation.
 
-If the insight updates an existing asset, prefer `akm reflect <ref> --task "..."`
-instead of drafting a brand-new asset. If repeated feedback is about one live
-asset, use `akm distill <ref>`.
+If the insight updates an existing asset, prefer `akm improve <ref> --task "..."`
+instead of drafting a brand-new asset. The same `akm improve <ref>` flow is
+also the right path when repeated feedback should be distilled into a lesson.
 
 ### 8. Build queue-ready proposal briefs
 
@@ -149,13 +177,13 @@ akm propose <type> <name> --task "<brief from harvested evidence>"
 For updates:
 
 ```bash
-akm reflect <ref> --task "<brief from harvested evidence>"
+akm improve <ref> --task "<brief from harvested evidence>"
 ```
 
 For repeated feedback on one asset:
 
 ```bash
-akm distill <ref>
+akm improve <ref>
 ```
 
 If the run is exploratory, stop after generating the briefs and mark them as a
@@ -166,9 +194,9 @@ dry run instead of writing to the queue.
 Finish with:
 
 ```bash
-akm proposal list
-akm proposal show <id>
-akm proposal diff <id>
+akm proposals
+akm show proposal:<id>
+akm diff <id>
 ```
 
 Then use `skill:manage-akm-proposals` or `command:akm-review-proposal` to
