@@ -8,8 +8,8 @@ updated: 2026-05-24
 
 This skill is for adding a stash to the user's working stash so its assets
 (skills, commands, agents, knowledge, workflows, wikis, vaults, memories,
-lessons) become searchable and usable via `akm show`, `akm run`, or host-agent
-plugins.
+lessons) become searchable and usable via `akm show`, `akm workflow`, `akm tasks`,
+or host-agent plugins.
 
 ## When to use
 

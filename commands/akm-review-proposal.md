@@ -10,7 +10,7 @@ Review akm proposal `$1` and decide whether it should become live.
 1. Run:
 
 ```bash
-akm show "proposal:$1"
+akm show proposal "$1"
 akm diff "$1"
 ```
 

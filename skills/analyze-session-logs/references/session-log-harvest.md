@@ -115,7 +115,7 @@ after duplicates are under control.
 
    ```bash
    akm proposals
-   akm show proposal:<id>
+   akm show proposal <id>
    akm diff <id>
    ```
 

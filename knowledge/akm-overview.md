@@ -68,17 +68,17 @@ Examples:
 - `github:itlackey/akm-stash//knowledge:akm-cli-reference`
 - `npm:@acme/stash//lesson:docker-healthchecks`
 
-Use `akm show <ref>` to inspect an asset. Use `akm run <ref>` for runnable
-asset types such as commands, agents, workflows, and scripts.
+Use `akm show <ref>` to inspect an asset. Use `akm workflow start <ref>` for
+workflow runs and `akm tasks run <id>` for scheduled task assets.
 
 ## What's new in v0.8.0
 
 - **Improvement surface redesign.** `akm improve` replaces the public
   `reflect` and `distill` split for updates and lesson distillation.
-- **Proposal review renames.** `akm proposals`, `akm show proposal:<id>`,
+- **Proposal review renames.** `akm proposals`, `akm show proposal <id>`,
   `akm diff <id>`, `akm accept`, and `akm reject` replace the older
   `akm proposal *` subcommands. `akm diff` accepts a UUID, a UUID prefix,
-  or a `proposal:<id>` ref positionally.
+  or a proposal id positionally.
 - **Task assets.** `tasks/<id>.yml` is now a first-class asset type for
   scheduled workflow or prompt execution through `akm tasks`. Each task
   picks exactly one target: `workflow:`, `prompt:`, or `command:`.

@@ -63,14 +63,15 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 
 | Command | Purpose |
 |---|---|
-| `akm run <ref>` | Execute a runnable asset. |
 | `akm workflow start <ref>` / `next` / `complete` / `status` | Run stateful workflows. |
 | `akm workflow create <name>` / `validate <ref\|path>` | Author or validate workflow files. |
 | `akm tasks add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. |
-| `akm tasks list` / `show <id>` / `run <id>` / `history` | Inspect or execute scheduled task assets. |
+| `akm tasks add <id> --schedule "..." --prompt "..."` | Register a scheduled prompt task. |
+| `akm tasks add <id> --schedule "..." --command "..."` | Register a scheduled shell command task. |
+| `akm tasks list` / `akm tasks show <id>` / `akm tasks run <id>` / `akm tasks history` / `akm tasks doctor` | Inspect or execute scheduled task assets. |
 | `akm tasks enable <id>` / `disable <id>` / `remove <id>` / `sync` | Manage task lifecycle and scheduler reconciliation. |
 | `akm remember "<text>"` | Append a memory fragment to the working stash. |
-| `akm import <file>` | Ingest a knowledge or lesson-style document into the stash. |
+| `akm import <file\|url\|->` | Ingest a knowledge document into the stash. |
 | `akm feedback <ref> --positive` | Record positive feedback. |
 | `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
 | `akm save -m "msg" [--push]` | Commit and optionally push the git-backed working stash. |
@@ -86,8 +87,8 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm improve [ref\|type] [--task "..."]` | Ask the configured agent to propose improvements to an existing asset, asset type, or the current stash scope. Auto-accepts at confidence ≥ 90 by default; pass `--auto-accept=false` to disable. Each run writes JSON to `.akm/runs/<run-id>/improve-result.json` (filter `.dryRun != true` before any productivity audit). Pass `--json-to-stdout` for legacy stdout JSON. |
 | `akm propose <type> <name> --task "..."` | Ask the configured agent to propose a brand-new asset. |
 | `akm proposals` | List pending, accepted, or rejected proposals. |
-| `akm show proposal:<id>` | Render a proposal. |
-| `akm diff <id>` | Diff a proposal against the live asset. Accepts a UUID, UUID prefix, or `proposal:<id>` ref positionally. |
+| `akm show proposal <id>` | Render a proposal. |
+| `akm diff <id>` | Diff a proposal against the live asset. Accepts a UUID or UUID prefix. |
 | `akm accept <id>` | Validate and promote a proposal into the stash. |
 | `akm reject <id> --reason "..."` | Reject and archive a proposal. |
 | `akm revert <id>` | Roll back a previously accepted proposal. |

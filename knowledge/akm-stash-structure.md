@@ -138,11 +138,11 @@ workflow: workflow:harvest-session-knowledge
 # prompt: |
 #   multi-line prompt body
 # OR a deterministic shell command:
-# command: ["akm", "improve", "--task", "..."]
+# command: "akm improve --task \"...\""
 ```
 
 Pick exactly one of `workflow:`, `prompt:`, or `command:`. Manage tasks with
-`akm tasks add|list|show|run|remove|sync`.
+`akm tasks add|list|show|run|history|enable|disable|remove|sync|doctor`.
 
 ### Metadata guidance
 

@@ -81,8 +81,8 @@ for updates and feedback-backed lesson distillation.
 Step ID: review-and-schedule
 
 ### Instructions
-Review submitted proposals with `akm show proposal:<id>` and
-`akm diff <id>` (accepts UUID / prefix / ref positionally), then decide whether to accept or reject them. For
+Review submitted proposals with `akm show proposal <id>` and
+`akm diff <id>` (accepts UUID or prefix), then decide whether to accept or reject them. For
 recurring runs, store the chosen roots and filters in a small config file and
 schedule the kickoff command with `akm tasks add`, cron, a systemd timer, or
 the host agent's own recurring task runner.

@@ -12,8 +12,8 @@ use for this?” with a short, actionable recommendation.
 
 1. **Read-only by default.** You may run `akm search`, `akm curate`, `akm show`,
    `akm registry list`, `akm registry search`, `akm list`, and `akm info`.
-   Do not run mutating commands such as `akm add`, `akm clone`, `akm run`,
-   `akm workflow start`, or `akm save`.
+   Do not run mutating commands such as `akm add`, `akm clone`, `akm workflow start`,
+   `akm tasks add`, or `akm save`.
 2. **One round of discovery, one round of deepening.** Start with
    `akm curate`; if a result looks promising, confirm it with `akm show`.
 3. **Prefer specific, high-signal assets.** Favor assets with strong trigger

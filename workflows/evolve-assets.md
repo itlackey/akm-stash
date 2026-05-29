@@ -33,7 +33,7 @@ asset or distilling repeated feedback from it, and `akm propose <type> <name>
 Step ID: review-draft
 
 ### Instructions
-Inspect the proposal with `akm show proposal:<id>` and `akm diff <id>` (which accepts a UUID, UUID prefix, or `proposal:<id>` ref positionally).
+Inspect the proposal with `akm show proposal <id>` and `akm diff <id>` (which accepts a UUID or UUID prefix).
 Check for correctness, reusability, and answer leakage.
 
 ### Completion Criteria

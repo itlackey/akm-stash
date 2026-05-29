@@ -195,7 +195,7 @@ Finish with:
 
 ```bash
 akm proposals
-akm show proposal:<id>
+akm show proposal <id>
 akm diff <id>
 ```
 
