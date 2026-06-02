@@ -60,14 +60,20 @@ The old self-improvement CLI was replaced by `akm improve` and the proposal queu
 |---|---|---|
 | `akm reflect` | `akm improve <ref>` | |
 | `akm distill` | `akm improve <ref>` | Distillation is now part of improve |
-| `akm proposal list` | `akm proposals` | |
-| `akm proposal show <id>` | `akm show proposal <id>` | |
-| `akm proposal diff <id>` | `akm diff <id>` | No `proposal` middle word |
-| `akm proposal accept <id>` | `akm accept <id>` | |
-| `akm proposal reject <id>` | `akm reject <id> --reason "..."` | Reason is required |
+| `akm proposals` | `akm proposal list` | bare `akm proposal` also lists |
+| `akm show proposal <id>` | `akm proposal show <id>` | |
+| `akm diff <id>` | `akm proposal diff <id>` | now under the `proposal` noun |
+| `akm accept <id>` | `akm proposal accept <id>` | bulk `--generator <g>` form needs `-y`/`--yes` |
+| `akm reject <id>` | `akm proposal reject <id> --reason "..."` | Reason is required |
+| `akm revert <id>` | `akm proposal revert <id>` | |
 | `akm index --enrich` | `akm improve` | Memory inference moved to improve |
 | `akm index --re-enrich` | `akm improve` | |
-| `--for-agent` flag | `--detail=agent` | Deprecated alias |
+| `--for-agent` flag | `--shape agent` | also `--detail summary\|agent` → `--shape summary\|agent`; `--detail` is now verbosity (`brief\|normal\|full`) |
+| `--source` (on `accept`/`reject`/`history`) | `--generator` | unchanged on `search`/`curate`/`graph`/`remember` |
+| `akm save` | `akm sync` | `sync` = commit + optional push; adds `--no-push` |
+| `akm enable <component>` | `akm config enable <component>` | also `akm disable` → `akm config disable` |
+| `akm events` | `akm log` | `log` is primary; `history` is asset-scoped |
+| `akm feedback --note <text>` | `akm feedback --reason <text>` | |
 | `akm enable context-hub` | (removed) | No replacement |
 | `akm disable context-hub` | (removed) | No replacement |
 | `akm improve --format` | (removed) | Use `--json-to-stdout` for legacy JSON |

@@ -69,8 +69,8 @@ See `jna-diagnosis.md` §4 for the full three-signal discriminator.
 **Hypothesis B (cohort shift — most common sudden spike):**
 ```bash
 # 1. Clear proposal backlog (dedup_pending_proposal is blocking consolidation)
-akm accept --max-diff-lines 15 --dry-run   # preview
-akm accept --max-diff-lines 15             # accept low-risk proposals
+akm proposal accept --max-diff-lines 15 --dry-run   # preview
+akm proposal accept --max-diff-lines 15 -y          # accept low-risk proposals
 
 # 2. Fix missing descriptions (reduces merge_missing_description guard hits)
 akm improve memory --task "add concise one-line descriptions to memories missing a description frontmatter field" --auto-accept safe --limit 60
@@ -99,7 +99,7 @@ The consolidation LLM wants to merge memories but the target lacks a `descriptio
 **Fix — automated:**
 ```bash
 akm improve memory --task "add concise one-line descriptions to memories that are missing a description frontmatter field" --auto-accept safe --limit 50
-akm proposals --status pending   # review any that weren't auto-accepted
+akm proposal list --status pending   # review any that weren't auto-accepted
 ```
 
 **Fix — manual:** For each memory missing a description, add:

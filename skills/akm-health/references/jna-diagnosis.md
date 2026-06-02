@@ -223,8 +223,8 @@ cycles back to fresher memories.
    is backing up and blocking consolidation on memories that have pending proposals.
    Clear reviewed proposals to unlock them:
    ```bash
-   akm accept --max-diff-lines 15 --dry-run   # preview
-   akm accept --max-diff-lines 15             # accept low-risk ones
+   akm proposal accept --max-diff-lines 15 --dry-run   # preview
+   akm proposal accept --max-diff-lines 15 -y          # accept low-risk ones
    ```
 2. Check `merge_missing_description`. If still > 20/run, run the description fix:
    ```bash

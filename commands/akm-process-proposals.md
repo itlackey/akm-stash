@@ -1,7 +1,7 @@
 ---
 name: akm-process-proposals
 type: command
-description: "Review and process all pending proposals in the user's personal akm stash using a built-in rubric: accept what has real content, reject only what is broken/empty/duplicate, and escalate only genuine conflicts that require human judgment. Arguments: $1 = limit (default: process all), $2 = optional source filter (extract | consolidate | reflect | distill)."
+description: "Review and process all pending proposals in the user's personal akm stash using a built-in rubric: accept what has real content, reject only what is broken/empty/duplicate, and escalate only genuine conflicts that require human judgment. Arguments: $1 = limit (default: process all), $2 = optional generator filter (extract | consolidate | reflect | distill)."
 updated: 2026-06-01
 ---
 
@@ -11,7 +11,7 @@ project-specific context, and personal workflow notes are exactly what belongs �
 they should be accepted, not rejected for being narrow.
 
 **Limit:** $1 (default: process entire queue — run until empty)
-**Source filter:** $2 (optional — one of: extract, consolidate, reflect, distill)
+**Generator filter:** $2 (optional — one of: extract, consolidate, reflect, distill)
 
 ---
 
@@ -31,7 +31,7 @@ Log at the start:
 Queue: <totalCount> pending | sources: extract=N consolidate=N reflect=N distill=N
 ```
 
-If `$2` is supplied, restrict all subsequent steps to that source only.
+If `$2` is supplied, restrict all subsequent steps to that generator only.
 
 ---
 
@@ -115,7 +115,7 @@ Do NOT run any CLI command for escalated proposals — leave them pending.
 
 **Queue at start:** <totalCount>
 **Remaining pending:** <N>
-**Source filter:** <$2 or 'all'>
+**Generator filter:** <$2 or 'all'>
 
 ### Results
 
