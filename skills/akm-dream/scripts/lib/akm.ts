@@ -275,7 +275,7 @@ export async function indexStash(verbose = false): Promise<unknown> {
 /** Read recent feedback events from akm's append-only event stream. */
 export async function listFeedbackEvents(limit = 50): Promise<FeedbackEvent[]> {
   const result = await akm<{ events?: FeedbackEvent[] }>([
-    "events",
+    "log",
     "list",
     "--type",
     "feedback",

@@ -93,11 +93,11 @@ disables the filter.
   ```
   See also: `memory:ci-pipeline`, `skill:deploy`.
   ```
-  These are picked up by `scanMemorySignals` and used to keep the
+  These are picked up automatically by the dream scan phase and used to keep the
   dependency graph consistent during consolidation.
 - **One topic per file.** If a memory drifts into covering two topics,
   split it during the next dream cycle.
-- **No secrets.** Use vaults (`akm vault`) for anything sensitive.
+- **No secrets.** Use `akm env` for config or `akm secret` for single sensitive values.
 
 ## Example memory
 
@@ -133,7 +133,7 @@ See also: `memory:ci-pipeline`, `skill:release`.
 
 ## What dream looks for
 
-Phase 1 (`scanMemorySignals`) flags:
+The dream scan phase flags:
 
 - **Relative-date phrases** — "yesterday", "last week", "X days ago",
   "recently", "the other day". These need rewriting to absolute dates

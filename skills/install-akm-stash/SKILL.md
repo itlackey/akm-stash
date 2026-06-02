@@ -7,7 +7,7 @@ updated: 2026-05-24
 # Install an akm Stash
 
 This skill is for adding a stash to the user's working stash so its assets
-(skills, commands, agents, knowledge, workflows, wikis, vaults, memories,
+(skills, commands, agents, knowledge, workflows, wikis, env configs, secrets, memories,
 lessons) become searchable and usable via `akm show`, `akm workflow`, `akm tasks`,
 or host-agent plugins.
 
@@ -68,21 +68,21 @@ akm clone npm:@acme/stash//lesson:docker-healthchecks
 ```bash
 akm list
 akm search <asset-name>
-akm show <ref> --detail=agent
+akm show <ref> --shape agent
 ```
 
 ## Private stashes
 
-For private GitHub repos, set `GITHUB_TOKEN` in the environment or vault.
-Vault values are never accepted on argv (that would leak via `/proc/cmdline`);
-read them from stdin or an environment variable:
+For private GitHub repos, set `GITHUB_TOKEN` in the environment or a secret.
+Secret values are never accepted on argv (that would leak via `/proc/cmdline`);
+store them as a secret and inject via env:
 
 ```bash
-# Value via stdin (recommended; keeps secrets out of shell history):
-printf '%s' "$GITHUB_TOKEN" | akm vault set vault:user GITHUB_TOKEN
+# Store as a whole-file secret:
+printf '%s' "$GITHUB_TOKEN" | akm secret set secret:github-token
 
-# Or read from an existing environment variable:
-akm vault set vault:user GITHUB_TOKEN --from-env GITHUB_TOKEN
+# Or store in an env asset and inject when needed:
+akm env run env:user -- akm add github:your-org/private-stash
 
 akm add github:your-org/private-stash
 ```

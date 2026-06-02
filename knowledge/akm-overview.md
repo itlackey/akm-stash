@@ -13,7 +13,7 @@ refs: []
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
 Qwen, etc.) a unified way to discover, install, run, and improve the skills,
-commands, agents, knowledge, workflows, wikis, vaults, memories, lessons, and
+commands, agents, knowledge, workflows, wikis, env configs, secrets, memories, lessons, and
 tasks they need.
 
 Canonical repo: <https://github.com/itlackey/akm>
@@ -48,7 +48,8 @@ file extension and content, but conventional directories (`skills/`,
 | `knowledge` | Reference docs with navigation. | `knowledge/api-reference.md` |
 | `workflow` | Structured stateful procedure. | `workflows/release.md` |
 | `wiki` | Multi-page knowledge base. | `wikis/engineering/index.md` |
-| `vault` | Environment key-value pairs; secrets masked. | `vaults/prod.env` |
+| `env` | Group of related config/credential values for an app or service. | `env/prod.env` |
+| `secret` | Single whole-file secret (token, key, cert). | `secrets/deploy-key` |
 | `memory` | Context fragments recalled from external systems. | `memories/team-notes.md` |
 | `lesson` | Distilled guidance learned from feedback or reflection. | `lessons/search-ranking.md` |
 | `task` | Scheduled prompt or workflow execution. | `tasks/daily-review.yml` |
@@ -75,10 +76,13 @@ workflow runs and `akm tasks run <id>` for scheduled task assets.
 
 - **Improvement surface redesign.** `akm improve` replaces the public
   `reflect` and `distill` split for updates and lesson distillation.
-- **Proposal review renames.** `akm proposals`, `akm show proposal <id>`,
-  `akm diff <id>`, `akm accept`, and `akm reject` replace the older
-  `akm proposal *` subcommands. `akm diff` accepts a UUID, a UUID prefix,
-  or a proposal id positionally.
+- **Session knowledge extraction.** `akm extract --type claude-code|opencode`
+  reads native session files and queues durable insights as proposals, replacing
+  the legacy session-checkpoint hooks.
+- **Proposal review is a noun group.** `akm proposal list`, `akm proposal show <id>`,
+  `akm proposal diff <id>`, `akm proposal accept`, and `akm proposal reject` are the
+  canonical proposal-queue commands (bare `akm proposal` lists). `akm proposal diff`
+  accepts a UUID, a UUID prefix, or a proposal id positionally.
 - **Task assets.** `tasks/<id>.yml` is now a first-class asset type for
   scheduled workflow or prompt execution through `akm tasks`. Each task
   picks exactly one target: `workflow:`, `prompt:`, or `command:`.
@@ -87,18 +91,23 @@ workflow runs and `akm tasks run <id>` for scheduled task assets.
 - **Quality states.** Search hits can carry `quality` such as `generated`,
   `curated`, or `proposed`. Proposed content is excluded from default search
   unless you pass `--include-proposed`.
+- **Env and secret asset types.** `env/<name>.env` (group of config/credential
+  values) and `secrets/<name>` (single whole-file value) replace the deprecated
+  `vault` type. Values never surface in structured output.
 
 ## Essential commands at a glance
 
 ```bash
 akm setup
 akm search "deploy"
-akm show skill:review-pr --detail=agent
+akm show skill:review-pr --shape agent
 akm add github:owner/repo
 akm workflow start workflow:release
 akm feedback skill:review-pr --negative --reason "too generic"
+akm extract --auto
 akm improve skill:review-pr
-akm proposals
+akm proposal list
+akm health
 akm tasks list
 ```
 
@@ -107,7 +116,8 @@ akm tasks list
 - Install or clone a stash → `skill:install-akm-stash`
 - Publish a stash → `skill:publish-akm-stash`
 - Review proposals → `skill:manage-akm-proposals`
-- Turn repeated feedback into reusable lessons → `akm improve <ref>` (the
-  improvement loop natively distills feedback into lesson proposals as of
-  akm-cli 0.8)
+- Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
+  feedback into lesson proposals natively in akm-cli 0.8)
+- Harvest session knowledge → `akm extract --auto` then `akm proposal list`
+- Tune the improve pipeline → `knowledge:akm-improve-and-extract`
 - Full command list → `knowledge:akm-cli-reference`

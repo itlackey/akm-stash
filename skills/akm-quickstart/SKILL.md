@@ -48,7 +48,7 @@ akm index
 ```
 
 Expected type directories include `scripts/`, `skills/`, `commands/`,
-`agents/`, `knowledge/`, `workflows/`, `memories/`, `vaults/`, `wikis/`,
+`agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`, `wikis/`,
 `lessons/`, and `tasks/` when you start authoring scheduled jobs.
 
 ### 4. Verify the official registry is reachable
@@ -69,9 +69,10 @@ akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/in
 ```bash
 akm info
 akm help migrate 0.8.0
-akm proposals
+akm proposal list
 ```
 
-Only proceed once `akm info` succeeds. On 0.8.0, `akm proposals` should work
-and the old `reflect` / `distill` / `proposal *` commands should not be part
-of your automation anymore.
+Only proceed once `akm info` succeeds. On 0.8.0:
+- `akm proposal list` and `akm extract --auto --dry-run` should both work.
+- The old `reflect` / `distill` / `proposal *` / `vault` commands are removed
+  or deprecated — do not use them in new automation.

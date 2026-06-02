@@ -54,7 +54,7 @@ that file, then searches it for matching stashes.
 | `description` | string | recommended | Primary search/rerank signal. |
 | `homepage` | URL | recommended | Human-readable docs. |
 | `tags` | string[] | recommended | Lowercase search keywords. |
-| `assetTypes` | string[] | recommended | Any of `script`, `skill`, `command`, `agent`, `knowledge`, `workflow`, `wiki`, `vault`, `memory`, `lesson`. |
+| `assetTypes` | string[] | recommended | Any of `script`, `skill`, `command`, `agent`, `knowledge`, `workflow`, `wiki`, `env`, `secret`, `memory`, `lesson`. |
 | `author` | string | optional | User or org. |
 | `license` | SPDX string | recommended | Surfaced before install. |
 

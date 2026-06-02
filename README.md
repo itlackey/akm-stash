@@ -15,8 +15,8 @@ self-improvement, proposal review, and scheduled task authoring.
 |---|---|
 | [`agents/`](./agents) | Subagents that specialize in akm tasks (`akm-librarian`). |
 | [`commands/`](./commands) | Prompt templates for discovery, stash review, and proposal review. |
-| [`knowledge/`](./knowledge) | Reference docs for the CLI, stash structure, the 0.8 improvement flow, task assets, and registry schema. |
-| [`skills/`](./skills) | Progressive-disclosure skills for bootstrapping, installing, publishing, reviewing proposals, harvesting logs, and improving assets. |
+| [`knowledge/`](./knowledge) | Reference docs for the CLI, stash structure, the improve+extract pipeline, proposal/lesson lifecycle, and registry schema. |
+| [`skills/`](./skills) | Progressive-disclosure skills for bootstrapping, installing, publishing, reviewing proposals, and memory consolidation. |
 | [`tasks/`](./tasks) | Scheduled prompt assets for recurring improve and proposal-review checks. |
 | [`workflows/`](./workflows) | Runnable playbooks for onboarding, publishing, and evolving assets. |
 
@@ -54,11 +54,12 @@ No akm yet? Install the CLI first — see
   `publish-akm-stash` skill.
 - **Improving existing assets or distilling repeated feedback** → use
   `akm improve <ref>` plus the `manage-akm-proposals` skill.
-- **Harvesting reusable lessons from session logs** → use the
-  `analyze-session-logs` skill, the `akm-harvest-session-knowledge` command,
-  and the `harvest-session-knowledge` workflow.
+- **Harvesting knowledge from session logs** → run `akm extract --auto` then
+  review proposals with `akm proposal list`. See `knowledge:akm-improve-and-extract`.
 - **Scheduling recurring stash maintenance or harvest runs** → use `akm tasks`
-  and model the task file after `knowledge:akm-stash-structure`.
+  and model the task file after the examples in `tasks/`.
+- **After upgrading akm to a new version** → run the `akm-migrate` skill to read migration notes, apply config and storage migrations, update stash assets for deprecated commands, and verify system health.
+- **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
 
 ## Conventions
 

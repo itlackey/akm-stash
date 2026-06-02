@@ -27,7 +27,8 @@ my-stash/
   lessons/
   tasks/
   memories/
-  vaults/
+  env/
+  secrets/
   wikis/
 ```
 

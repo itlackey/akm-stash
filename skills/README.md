@@ -11,6 +11,8 @@ Start here:
 - [`install-akm-stash/`](./install-akm-stash) — pull a stash into the working
   directory.
 - [`manage-akm-proposals/`](./manage-akm-proposals) — drive the proposal queue.
+- [`akm-migrate/`](./akm-migrate) — verify and complete an akm version upgrade.
+- [`akm-curate-stash/`](./akm-curate-stash) — build a goal-specific mini-stash by discovering and cloning the best assets from all sources.
 
 Browse the full set with:
 

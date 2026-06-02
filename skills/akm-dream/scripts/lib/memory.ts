@@ -134,7 +134,7 @@ export function scanMemorySignals(parsed: ParsedMemory): MemorySignals {
     if (m) relativeDates.push(m[0]);
   }
 
-  const refRe = /\b(skill|command|agent|knowledge|workflow|memory|script|vault|wiki|lesson):[a-zA-Z0-9._\/-]+/g;
+  const refRe = /\b(skill|command|agent|knowledge|workflow|memory|script|env|secret|wiki|lesson):[a-zA-Z0-9._\/-]+/g;
   const internalRefs = Array.from(new Set(text.match(refRe) ?? []));
 
   const urlRe = /https?:\/\/[^\s)>\]]+/g;

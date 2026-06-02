@@ -28,7 +28,8 @@ my-stash/
 ├── workflows/*.md
 ├── memories/*.md
 ├── lessons/*.md
-├── vaults/*.env.example
+├── env/*.env
+├── secrets/
 ├── wikis/<name>/*.md
 └── tasks/*.yml
 ```
@@ -130,10 +131,10 @@ silently skipped by the loader.
 # tasks/<id>.yml
 schedule: "0 9 * * *"
 enabled: true
-description: "Use when a daily AKM harvest should run without hand-built cron notes."
-tags: [scheduled, harvest]
+description: "Use when a nightly AKM extract + improve pass should run without hand-built cron notes."
+tags: [scheduled, improve, extract]
 # Pick exactly one of `workflow:`, `prompt:`, or `command:`:
-workflow: workflow:harvest-session-knowledge
+workflow: workflow:evolve-assets
 # OR an inline agent prompt:
 # prompt: |
 #   multi-line prompt body

@@ -33,7 +33,7 @@ asset or distilling repeated feedback from it, and `akm propose <type> <name>
 Step ID: review-draft
 
 ### Instructions
-Inspect the proposal with `akm show proposal <id>` and `akm diff <id>` (which accepts a UUID or UUID prefix).
+Inspect the proposal with `akm proposal show <id>` and `akm proposal diff <id>` (which accepts a UUID or UUID prefix).
 Check for correctness, reusability, and answer leakage.
 
 ### Completion Criteria
@@ -43,7 +43,7 @@ Check for correctness, reusability, and answer leakage.
 Step ID: decide
 
 ### Instructions
-Promote a good proposal with `akm accept <id>` or reject it with a reason.
+Promote a good proposal with `akm proposal accept <id>` or reject it with a reason.
 
 ### Completion Criteria
 - The proposal has been accepted or rejected explicitly.

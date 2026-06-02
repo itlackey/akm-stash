@@ -12,7 +12,8 @@ an agent needs background, not when it needs to act.
 | 2 | `knowledge:akm-cli-reference` | You know the concepts and need the main commands, flags, and proposal-review flow in one place. |
 | 3 | `knowledge:akm-stash-structure` | You're authoring or reorganizing a stash and need the v0.8.0 directory/command/workflow/task/lesson conventions. |
 | 4 | `knowledge:akm-proposals-and-lessons` | You're reviewing the proposal queue or distilling lessons and need quality values + lesson lifecycle. |
-| 5 | `knowledge:akm-registry-schema` | You're publishing a stash or building a private registry and need the index schema + install metadata fields. |
+| 5 | `knowledge:akm-improve-and-extract` | You're running or tuning the improve + extract pipeline and need flags, profiles, tuning tips, and the full operator loop. |
+| 6 | `knowledge:akm-registry-schema` | You're publishing a stash or building a private registry and need the index schema + install metadata fields. |
 
 ## Load any asset
 
@@ -22,6 +23,6 @@ akm search --type knowledge            # browse all
 akm curate "publishing a new stash"   # let akm pick relevant ones for a task
 ```
 
-These five documents are the agent-facing reference set — short, structured,
+These six documents are the agent-facing reference set — short, structured,
 and version-pinned to akm-cli 0.8.0. They teach *how* rather than answer
 specific questions; pair them with `akm search` for task-specific lookups.

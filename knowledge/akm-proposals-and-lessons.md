@@ -20,14 +20,14 @@ nothing touches the live stash until a proposal is reviewed and accepted.
    - `akm propose <type> <name> --task "..."` for drafting a new asset.
    - `akm improve <ref>` again when repeated feedback should be distilled into a lesson proposal.
 2. **Inspect the draft**
-   - `akm proposals`
-   - `akm show proposal <id>`
-   - `akm diff <id>` (accepts a UUID or UUID prefix)
+   - `akm proposal list`
+   - `akm proposal show <id>`
+   - `akm proposal diff <id>` (accepts a UUID or UUID prefix)
 3. **Decide**
-   - `akm accept <id>` validates and promotes the change.
-   - `akm reject <id> --reason "..."` archives it.
+   - `akm proposal accept <id>` validates and promotes the change.
+   - `akm proposal reject <id> --reason "..."` archives it.
 4. **Roll back if needed**
-   - `akm revert <id>` undoes a previously accepted proposal.
+   - `akm proposal revert <id>` undoes a previously accepted proposal.
 
 ## Quality values
 

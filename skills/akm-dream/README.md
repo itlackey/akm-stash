@@ -16,8 +16,6 @@ prunes stale notes, merges duplicates, converts relative dates to
 absolute, and rebuilds a clean `MEMORY.md` index — without an LLM
 having to scan the entire stash from scratch each session.
 
-The implementation target and design rationale live in
-`references/implementation-spec.md`.
 
 ## What it does
 
@@ -145,41 +143,25 @@ If `--orient`, `--signal`, or `--plan` are omitted, the scripts resolve the
 latest run directory under `<stash>/.akm-dream/runs/` and use the canonical
 artifact names there.
 
-## Architecture
+## Package layout
 
 ```
 akm-dream/
-├── SKILL.md                          # the skill manifest read by Claude Code
-├── README.md                         # this file
+├── SKILL.md          # the skill manifest read by Claude Code
+├── README.md         # this file
 ├── package.json
-├── tsconfig.json
-├── scripts/
-│   ├── dream.ts                      # orchestrator (lock + phases + run state)
-│   ├── phase1-orient.ts              # inventory memories + MEMORY.md state
-│   ├── phase2-gather.ts              # grep transcripts/logs for save signals
-│   ├── phase4-prune.ts               # regenerate MEMORY.md, run akm index
-│   ├── forget.ts                     # safe single-memory deletion shim
-│   └── lib/
-│       ├── akm.ts                    # akm CLI wrapper (JSON envelope parsing)
-│       ├── memory.ts                 # frontmatter + relative-date scanning
-│       ├── lock.ts                   # <stash>/.akm-dream.lock management
-│       ├── paths.ts                  # stash + transcript path resolution
-│       ├── run-report.ts             # review checkpoints + audit artifacts
-│       └── state.ts                  # stash-scoped durable dream state
-├── references/                       # loaded into context only when needed
-│   ├── dream-system-prompt.md        # the four-phase prompt for phase 3
-│   ├── memory-format.md              # frontmatter + body conventions
-│   └── review-flow.md                # staged validation + approval contract
+├── scripts/          # Bun scripts for phases 1, 2, and 4
+├── references/       # supporting docs loaded into context when needed
+│   ├── dream-system-prompt.md   # the four-phase prompt for phase 3
+│   ├── memory-format.md         # frontmatter + body conventions
+│   └── review-flow.md           # staged validation + approval contract
 └── evals/
-    └── evals.json                    # test prompts for skill validation
+    └── evals.json    # test prompts for skill validation
 ```
 
-The skill uses `akm` for authoritative actions and stash discovery:
-`akm show`, `akm remember`, `akm index`, `akm events list`, and
-`akm config path --all`. Phase 1 and phase 4 intentionally walk
-`<stash>/memories/` directly because the current `akm search` surface
-is optimized for retrieval/ranking, not deterministic full-memory
-enumeration with paths.
+The skill uses `akm` commands for authoritative reads, writes, and
+indexing: `akm show`, `akm remember`, `akm index`, `akm log list`,
+and `akm config path --all`.
 
 ## Safety
 
@@ -191,20 +173,12 @@ enumeration with paths.
   the stash.
 - **Pre-dream snapshot.** Before phase 3, the orchestrator copies the
   current `memories/` tree into `<stash>/.akm-dream/runs/<run-id>/backup/` so manual
-  consolidation has a local rollback point without invoking `akm save`.
+  consolidation has a local rollback point without invoking `akm sync`.
 - **Dry-run available.** `phase4-prune --dry-run` and `forget --dry-run`
   show what would change without writing.
 - **Review checkpoints are explicit.** `run-report.json` and
   `review-checklist.md` make the phase 3 approval boundary visible and
   auditable.
-
-## Dream Implementation Boundary
-
-`akm-dream` is the dream implementation. It uses current `akm` commands
-for authoritative reads, writes, indexing, feedback, and stash
-discovery, while keeping dream orchestration and run-state management in
-this skill. Future phase B/C/D work should attach `plan.json`,
-`actions.jsonl`, and `result.json` to the same per-run directory.
 
 ## Compatibility
 
@@ -217,9 +191,6 @@ this skill. Future phase B/C/D work should attach `plan.json`,
 - [Auto Dream — Claude Fast](https://claudefa.st/blog/guide/mechanics/auto-dream)
   — the original auto-dream design from which the four-phase
   structure is borrowed.
-- `references/implementation-spec.md`
-  — canonical design/architecture spec for this skill, with internal and
-  external citations for future implementation validation.
 - `references/review-flow.md`
   — staged validation, review, approval, and post-run audit expectations.
 - [akm 0.8.0 — CLI Redesign, Task Assets, and Belief-Aware Memory](https://dev.to/itlackey/akm-080-cli-redesign-task-assets-and-belief-aware-memory-3h42)
