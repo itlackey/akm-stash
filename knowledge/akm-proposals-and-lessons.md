@@ -44,9 +44,9 @@ drainer — you no longer need a manual agent session for routine queue cleanup:
 
 See `knowledge:akm-cli-reference` (the `akm proposal drain` section) and
 `knowledge:akm-improve-and-extract` (the triage pre-pass) for full flags and
-config. The manual `manage-akm-proposals` skill / `akm-process-proposals`
-command still work for hands-on review, but the drainer is now the recommended
-path for routine, unattended cleanup.
+config. For hands-on review of individual drafts, use `akm proposal show <id>` /
+`akm proposal diff <id>` then `akm proposal accept|reject`; the drainer is the
+recommended path for routine, unattended cleanup.
 
 ## Quality values
 

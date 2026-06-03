@@ -104,9 +104,9 @@ pipeline tuning guidance.
 
 `akm proposal drain` clears the standing pending backlog using a deterministic
 triage **policy**, so you no longer need a manual agent session to keep the queue
-from growing. It is the built-in replacement for the old
-`manage-akm-proposals` / `akm-process-proposals` manual workflow (which still
-works — see `knowledge:akm-proposals-and-lessons`).
+from growing. For case-by-case review of individual drafts, use the per-id
+`akm proposal show|diff|accept|reject` flow — see
+`knowledge:akm-proposals-and-lessons`.
 
 Default mode is **queue** (stage/reject-empty only — never promotes); pass
 `--promote` to actually accept matching proposals. Promotion commits to git and

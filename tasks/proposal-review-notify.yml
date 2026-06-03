@@ -8,19 +8,19 @@ tags:
   - scheduled
   - proposals
   - notification
-updated: 2026-05-24
+updated: 2026-06-02
 prompt: |
   Check whether this stash has pending proposals that need review.
 
-  1. Run `akm proposals --status pending --format json`.
+  1. Run `akm proposal list --status pending --format json`.
   2. If the result has `totalCount: 0`, exit quietly with a one-line summary and
      do not send a notification.
   3. If one or more proposals are pending, send a local OS notification using
      whichever notifier is available on the host. Try platform defaults first,
      then a cross-platform fallback:
-     - Linux: `notify-send "AKM proposals pending" "<count> proposal(s) need review in $(pwd). Run: akm proposals"`
-     - macOS: `osascript -e 'display notification "<count> proposal(s) need review in $(pwd). Run: akm proposals" with title "AKM proposals pending"'`
-     - Cross-platform (if installed): `apprise -t "AKM proposals pending" -b "<count> proposal(s) need review in $(pwd). Run: akm proposals"`
+     - Linux: `notify-send "AKM proposals pending" "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run"`
+     - macOS: `osascript -e 'display notification "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run" with title "AKM proposals pending"'`
+     - Cross-platform (if installed): `apprise -t "AKM proposals pending" -b "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run"`
        (apprise reads its own config from `$APPRISE_CONFIG`, `~/.config/apprise/`, or `~/.apprise` — do not hardcode a path.)
      Agents may adapt this list to the host's available notifiers (e.g. Windows
      `BurntToast`, custom webhooks via apprise).

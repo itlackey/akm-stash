@@ -9,12 +9,12 @@ tags:
   - improve
   - extract
   - proposals
-updated: 2026-06-01
+updated: 2026-06-02
 prompt: |
   Run a non-destructive nightly extract and improvement pass for the current AKM stash.
 
-  1. Verify the installed `akm` supports `improve`, `extract`, and `proposals`.
-  2. Inspect the current queue with `akm proposals --status pending --format json`.
+  1. Verify the installed `akm` supports `improve`, `extract`, and `proposal`.
+  2. Inspect the current queue with `akm proposal list --status pending --format json`.
      Record the pending count before the run.
   3. Harvest session knowledge from all available harnesses:
 
@@ -24,12 +24,12 @@ prompt: |
 
       akm improve --auto-accept=false --task "Review the current stash for stale guidance, outdated CLI references, missing task-asset coverage, and reusable improvements. Generate only proposal-queue entries; do not edit live assets directly."
 
-  5. Check the queue again with `akm proposals --status pending --format json`.
+  5. Check the queue again with `akm proposal list --status pending --format json`.
   6. Do not accept or reject proposals automatically.
   7. Finish with a concise summary that includes:
      - pending proposal count before and after,
      - whether extract and improve both succeeded,
-     - the next review command (`akm proposals` or `akm show proposal <id>`).
+     - the next review command (`akm proposal list` or `akm proposal show <id>`).
 
   If `akm improve` or `akm extract` is unavailable, stop and report that the
   environment is on an older AKM version.

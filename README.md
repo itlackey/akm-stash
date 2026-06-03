@@ -52,12 +52,13 @@ No akm yet? Install the CLI first — see
   subagent or use the `akm-find` command.
 - **Publishing a new stash** → follow the `publish-stash` workflow plus the
   `publish-akm-stash` skill.
-- **Improving existing assets or distilling repeated feedback** → use
-  `akm improve <ref>` plus the `manage-akm-proposals` skill.
+- **Improving existing assets or distilling repeated feedback** → run
+  `akm improve <ref>`.
 - **Draining the pending proposal backlog** → run `akm proposal drain --policy
-  personal-stash` (or enable the `processes.triage` improve pre-pass). This is
-  the built-in replacement for a manual proposal-management session; the
-  `manage-akm-proposals` skill remains the path for case-by-case judgment. See
+  personal-stash` (stage mode; add `--promote --yes` to accept), or enable the
+  `processes.triage` improve pre-pass to drain the backlog inside `akm improve`.
+  For case-by-case judgment on individual drafts, use `akm proposal show <id>` /
+  `akm proposal diff <id>` then `akm proposal accept|reject`. See
   `knowledge:akm-improve-and-extract`.
 - **Harvesting knowledge from session logs** → run `akm extract --auto` then
   review proposals with `akm proposal list`. See `knowledge:akm-improve-and-extract`.

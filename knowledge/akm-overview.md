@@ -115,7 +115,8 @@ akm tasks list
 
 - Install or clone a stash → `skill:install-akm-stash`
 - Publish a stash → `skill:publish-akm-stash`
-- Review proposals (case-by-case) → `skill:manage-akm-proposals`
+- Review proposals (case-by-case) → `akm proposal show <id>` / `akm proposal
+  diff <id>`, then `akm proposal accept|reject`
 - Drain the pending backlog (automated) → `akm proposal drain --policy
   personal-stash` or the `processes.triage` improve pre-pass
 - Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills

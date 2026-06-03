@@ -45,17 +45,18 @@ If `vaults/.migrated` does not exist, run `akm-migrate-storage --yes` first.
 
 **Config changes:** none specific to 0.9.0 vault removal.
 
-### Superseded: manual proposal-queue management workflow
+### Removed: manual proposal-queue management workflow
 
-The deterministic `akm proposal drain` verb + the `processes.triage` improve
-pre-pass (added in 0.8.0-rc.12) replace the hand-rolled hourly agent session for
-draining the proposal backlog. The manual path (`manage-akm-proposals` skill,
-`akm-process-proposals` command, an agent-prompt cron task) still works in 0.8.x
-but is no longer the recommended automated approach; 0.9.0 removes the
-prompt-task guidance from setup/docs.
+The hand-rolled manual proposal-management path — the `manage-akm-proposals`
+skill, the `akm-process-proposals` command, and the hourly agent-session cron
+task — is **removed**. It is replaced by the deterministic `akm proposal drain`
+verb plus the `processes.triage` improve pre-pass (added in 0.8.0-rc.12), which
+drain the standing pending backlog without an agent session.
 
-| Scan pattern | Replace with | Notes |
+| Removed | Replace with | Notes |
 |---|---|---|
+| `skill:manage-akm-proposals` (case-by-case queue review) | per-id `akm proposal show|diff|accept|reject`, or `akm proposal drain` for bulk | Built-in CLI; no skill needed |
+| `command:akm-process-proposals` (manual queue processing) | `akm proposal drain --policy personal-stash --promote --yes` | Deterministic, one command |
 | `tasks/*.yml` with a `prompt:` running `skill:manage-akm-proposals` on a schedule | a `command:` task running `akm proposal drain --policy personal-stash --promote --yes`, or enable `processes.triage` in the improve profile | Deterministic, no agent session |
 
 ---
