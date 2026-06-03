@@ -54,6 +54,11 @@ No akm yet? Install the CLI first — see
   `publish-akm-stash` skill.
 - **Improving existing assets or distilling repeated feedback** → use
   `akm improve <ref>` plus the `manage-akm-proposals` skill.
+- **Draining the pending proposal backlog** → run `akm proposal drain --policy
+  personal-stash` (or enable the `processes.triage` improve pre-pass). This is
+  the built-in replacement for a manual proposal-management session; the
+  `manage-akm-proposals` skill remains the path for case-by-case judgment. See
+  `knowledge:akm-improve-and-extract`.
 - **Harvesting knowledge from session logs** → run `akm extract --auto` then
   review proposals with `akm proposal list`. See `knowledge:akm-improve-and-extract`.
 - **Scheduling recurring stash maintenance or harvest runs** → use `akm tasks`

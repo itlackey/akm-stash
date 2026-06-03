@@ -2,7 +2,7 @@
 description: Use when an agent needs to run, configure, or tune the akm self-improvement pipeline — including akm improve, akm extract, and akm health.
 tags: [akm, improve, extract, health, pipeline]
 quality: curated
-updated: 2026-06-01
+updated: 2026-06-02
 ---
 
 # akm Improve and Extract Pipeline
@@ -86,7 +86,63 @@ akm improve --profile thorough skill
 
 Custom profiles live under `profiles.improve.<name>` in
 `~/.config/akm/config.json`. Each profile can enable or disable individual
-processes: `consolidate`, `distill`, `reflect`, `graph-boost`.
+processes: `consolidate`, `distill`, `reflect`, `graph-boost`, `triage`.
+
+### Triage pre-pass — drain the backlog before improving (v0.8.0-rc.12+)
+
+`triage` is a first-class improve process that **drains the standing pending
+proposal backlog before** the reflect/distill pass runs (it is a pre-pass, not a
+tail step). It is the built-in, automated replacement for running a manual
+proposal-management session — see `akm proposal drain` in
+`knowledge:akm-cli-reference` for the standalone verb and policy presets.
+
+It is **opt-in** (defaults off) and only fires on whole-stash or type-scoped
+runs — a single-ref `akm improve skill:x` never drains the queue.
+
+```yaml
+profiles:
+  improve:
+    default:
+      processes:
+        triage:
+          enabled: false          # opt-in
+          applyMode: queue         # queue (safe default, stage-only) | promote
+          policy: personal-stash   # personal-stash | conservative | manual | <path>
+          maxAcceptsPerRun: 25      # hard per-run accept ceiling
+          maxDiffLines: 200         # defer accepts larger than this
+          rejectEmpty: true
+          judgment:                # OPTIONAL judgment tier for deferred items
+            mode: llm              # llm (default) | agent | sdk
+            profile: <profile-name>
+            timeoutMs: 600000
+```
+
+`applyMode: queue` (the default) stages and reject-empties only — it never
+promotes. Set `applyMode: promote` to auto-accept. Because triage runs first,
+the queue is cleared before reflect re-analyzes assets, avoiding
+`duplicate_pending` collisions that discard fresh analysis.
+
+### End-of-run git sync (v0.8.0-rc.12+)
+
+When the primary stash is **git-backed** (recognized by a `.git` directory, not
+by a configured remote), an improve profile can commit (and optionally push) the
+stash automatically when the run finishes:
+
+```yaml
+profiles:
+  improve:
+    default:
+      sync:
+        enabled: true
+        push: true               # commit-and-push when writable + remote; else commit-only
+        message: "akm improve: {accepted} accepted, {refs} refs @ {timestamp}"
+```
+
+`message` supports `{token}` templates: `{timestamp}`, `{date}`, `{time}`,
+`{scope}`, `{refs}`, `{accepted}`. Unknown tokens pass through verbatim. The
+default message has no tokens. A sync/push failure is non-fatal (surfaced as a
+warning). CLI overrides: `akm improve --no-sync` (commit nothing) and
+`--no-push` (commit only).
 
 ## akm health — pipeline diagnostics
 
@@ -127,6 +183,16 @@ akm proposal accept <id>   # or akm proposal reject <id> --reason "..."
 
 # 4. Verify pipeline health:
 akm health --window-compare
+```
+
+To keep the backlog from growing without a manual review session, either enable
+the `triage` pre-pass (above) so `akm improve` drains it automatically, or run
+the standalone verb:
+
+```bash
+# Deterministically drain the pending backlog (preview, then promote):
+akm proposal drain --policy personal-stash --dry-run
+akm proposal drain --policy personal-stash --promote --yes
 ```
 
 Automate this as a scheduled task — see `tasks/nightly-improve-cycle.yml` in

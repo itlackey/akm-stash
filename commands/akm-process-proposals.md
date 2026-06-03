@@ -2,8 +2,21 @@
 name: akm-process-proposals
 type: command
 description: "Review and process all pending proposals in the user's personal akm stash using a built-in rubric: accept what has real content, reject only what is broken/empty/duplicate, and escalate only genuine conflicts that require human judgment. Arguments: $1 = limit (default: process all), $2 = optional generator filter (extract | consolidate | reflect | distill)."
-updated: 2026-06-01
+updated: 2026-06-02
 ---
+
+> **Built-in alternative (v0.8.0-rc.12+):** the deterministic core of this rubric
+> now ships as the `personal-stash` drain policy. For routine cleanup prefer:
+>
+> ```bash
+> akm proposal drain --policy personal-stash --dry-run            # preview
+> akm proposal drain --policy personal-stash --promote --yes      # apply
+> ```
+>
+> or enable the `processes.triage` improve pre-pass (see
+> `knowledge:akm-improve-and-extract`). This command remains useful when you want
+> an **agent in the loop** to apply the ESCALATE/judgment steps below that the
+> deterministic policy intentionally defers. Both paths coexist.
 
 Review and process pending proposals in the **personal akm stash**. This command
 is calibrated for a personal stash where session-extracted project knowledge,

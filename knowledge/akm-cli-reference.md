@@ -2,7 +2,7 @@
 description: Use when an agent needs the main akm-cli v0.8.0 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
 tags: [akm, cli, reference]
 quality: curated
-updated: 2026-05-23
+updated: 2026-06-02
 ---
 
 # akm CLI Reference
@@ -92,12 +92,58 @@ Current as of **v0.8.0** (2026-05-09). For authoritative syntax, run
 | `akm proposal diff <id>` | Diff a proposal against the live asset. Accepts a UUID or UUID prefix. |
 | `akm proposal accept <id>` | Validate and promote a proposal into the stash. |
 | `akm proposal reject <id> --reason "..."` | Reject and archive a proposal. |
-| `akm proposal revert <id>` | Roll back a previously accepted proposal. |
+| `akm proposal revert <id>` | Roll back a previously accepted proposal (per-id only — no batch revert). |
+| `akm proposal drain [--policy <preset\|path>] [--promote] [--yes] [--dry-run] [--max-accepts N] [--max-diff-lines N] [--older-than D] [--judgment] [--profile <p>]` | Drain the standing **pending** backlog by a deterministic policy. **Mutating** when `--promote` is set: promotes/rejects proposals and commits to git. See below. |
 | `akm health [--window-compare] [--format json]` | Probe runtime health and improve-pipeline metrics. Use `--window-compare` to spot throughput regressions. |
 
 In 0.8.0, lesson distillation is part of `akm improve <ref>` rather than a
 separate public `distill` command. See `knowledge:akm-improve-and-extract` for
 pipeline tuning guidance.
+
+### `akm proposal drain` — deterministic backlog triage (v0.8.0-rc.12+)
+
+`akm proposal drain` clears the standing pending backlog using a deterministic
+triage **policy**, so you no longer need a manual agent session to keep the queue
+from growing. It is the built-in replacement for the old
+`manage-akm-proposals` / `akm-process-proposals` manual workflow (which still
+works — see `knowledge:akm-proposals-and-lessons`).
+
+Default mode is **queue** (stage/reject-empty only — never promotes); pass
+`--promote` to actually accept matching proposals. Promotion commits to git and
+has no batch revert, so `--dry-run` first.
+
+Built-in presets (`--policy`):
+
+| Preset | Accepts | Rejects | Leaves pending |
+|---|---|---|---|
+| `personal-stash` | extract w/ real content; reflect ≤80 lines; consolidate ≤ band | empty diffs | consolidate mid-band, distill dups, contradictions |
+| `conservative` | small extract + consolidate only | empty diffs | everything else |
+| `manual` | nothing | empty diffs | everything else |
+
+`--policy <path>` loads a custom policy file. Key flags:
+
+- `--promote` — actually accept (default is stage-only queue mode).
+- `--yes` — required for promotion in non-interactive mode.
+- `--dry-run` — list accept/reject/defer decisions without writing.
+- `--max-accepts N` — hard per-run accept ceiling (overflow → `skippedByCap`).
+- `--max-diff-lines N` — defer (never promote) accepts above this size.
+- `--older-than D` — only consider proposals older than D days.
+- `--judgment` — opt into the judgment tier (llm by default; agent/sdk per config)
+  for deferred mid-band/dup/contradiction items.
+- `--profile <p>` — read the triage block (policy, applyMode, ceilings, judgment)
+  from an improve profile.
+
+```bash
+# Preview what the personal-stash policy would do:
+akm proposal drain --policy personal-stash --dry-run
+
+# Actually drain (promote) the backlog non-interactively:
+akm proposal drain --policy personal-stash --promote --yes
+```
+
+Triage also runs automatically as a **pre-pass inside `akm improve`** when
+`processes.triage` is enabled in the active profile — see
+`knowledge:akm-improve-and-extract`.
 
 ## Wikis, env, and secrets
 

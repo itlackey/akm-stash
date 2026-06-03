@@ -2,7 +2,7 @@
 description: Use when an agent needs the v0.8.0 proposal queue, quality values, and lesson lifecycle explained clearly.
 tags: [akm, proposals, lessons]
 quality: curated
-updated: 2026-05-23
+updated: 2026-06-02
 ---
 
 # akm Proposals, Quality, and Lessons
@@ -27,7 +27,26 @@ nothing touches the live stash until a proposal is reviewed and accepted.
    - `akm proposal accept <id>` validates and promotes the change.
    - `akm proposal reject <id> --reason "..."` archives it.
 4. **Roll back if needed**
-   - `akm proposal revert <id>` undoes a previously accepted proposal.
+   - `akm proposal revert <id>` undoes a previously accepted proposal
+     (per-id only — there is no batch revert).
+
+## Draining the backlog (automated, v0.8.0-rc.12+)
+
+The per-id review loop above is for deciding individual drafts. To keep the
+**standing pending backlog** from growing, akm has a built-in deterministic
+drainer — you no longer need a manual agent session for routine queue cleanup:
+
+- `akm proposal drain --policy personal-stash --dry-run` previews
+  accept/reject/defer decisions; add `--promote --yes` to apply them. Presets:
+  `personal-stash`, `conservative`, `manual`, or `--policy <path>`.
+- Enabling `processes.triage` in an improve profile runs the same drain as a
+  **pre-pass inside `akm improve`**, before reflect/distill.
+
+See `knowledge:akm-cli-reference` (the `akm proposal drain` section) and
+`knowledge:akm-improve-and-extract` (the triage pre-pass) for full flags and
+config. The manual `manage-akm-proposals` skill / `akm-process-proposals`
+command still work for hands-on review, but the drainer is now the recommended
+path for routine, unattended cleanup.
 
 ## Quality values
 

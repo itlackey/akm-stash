@@ -2,7 +2,7 @@
 name: akm-improve-cycle
 type: command
 description: "Use when you need to run the full extract → improve → review cycle for the current stash. Arguments: mode (dry-run | safe | manual), scope (optional asset ref or type)."
-updated: 2026-06-01
+updated: 2026-06-02
 ---
 
 Run the full akm improvement cycle for the current stash.
@@ -49,6 +49,17 @@ akm proposal list --status pending --format json
 
 For each pending proposal, run `akm proposal show <id>` and `akm proposal diff <id>`,
 then either `akm proposal accept <id>` or `akm proposal reject <id> --reason "..."`.
+
+For a large backlog, drain the deterministic slice first instead of reviewing
+every entry by hand:
+
+```bash
+akm proposal drain --policy personal-stash --dry-run            # preview
+akm proposal drain --policy personal-stash --promote --yes      # apply
+```
+
+Then review only what the policy left pending. (Enabling `processes.triage` in
+the improve profile folds this drain into step 3 automatically.)
 
 Skip this step when mode is `dry-run` or `safe` (safe auto-accepts high-confidence
 proposals, but still surfaces anything below the threshold).

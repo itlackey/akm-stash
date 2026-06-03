@@ -2,7 +2,7 @@
 description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major v0.8.0 surfaces.
 tags: [akm, overview, concepts]
 quality: curated
-updated: 2026-05-23
+updated: 2026-06-02
 refs: []
 ---
 
@@ -115,7 +115,9 @@ akm tasks list
 
 - Install or clone a stash → `skill:install-akm-stash`
 - Publish a stash → `skill:publish-akm-stash`
-- Review proposals → `skill:manage-akm-proposals`
+- Review proposals (case-by-case) → `skill:manage-akm-proposals`
+- Drain the pending backlog (automated) → `akm proposal drain --policy
+  personal-stash` or the `processes.triage` improve pre-pass
 - Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
   feedback into lesson proposals natively in akm-cli 0.8)
 - Harvest session knowledge → `akm extract --auto` then `akm proposal list`

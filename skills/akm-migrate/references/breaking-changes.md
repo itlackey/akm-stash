@@ -1,7 +1,7 @@
 ---
 description: Per-version quick reference of breaking changes that require stash asset updates after an akm upgrade. Use during Step 5 of the akm-migrate skill to identify what to grep for and what to replace.
 tags: [akm-migrate, breaking-changes, versions, stash-assets]
-updated: 2026-06-01
+updated: 2026-06-02
 ---
 
 # Breaking Changes — Stash Asset Update Reference
@@ -44,6 +44,19 @@ ls "$(akm config get stashDir)/vaults/.migrated"   # marker must exist
 If `vaults/.migrated` does not exist, run `akm-migrate-storage --yes` first.
 
 **Config changes:** none specific to 0.9.0 vault removal.
+
+### Superseded: manual proposal-queue management workflow
+
+The deterministic `akm proposal drain` verb + the `processes.triage` improve
+pre-pass (added in 0.8.0-rc.12) replace the hand-rolled hourly agent session for
+draining the proposal backlog. The manual path (`manage-akm-proposals` skill,
+`akm-process-proposals` command, an agent-prompt cron task) still works in 0.8.x
+but is no longer the recommended automated approach; 0.9.0 removes the
+prompt-task guidance from setup/docs.
+
+| Scan pattern | Replace with | Notes |
+|---|---|---|
+| `tasks/*.yml` with a `prompt:` running `skill:manage-akm-proposals` on a schedule | a `command:` task running `akm proposal drain --policy personal-stash --promote --yes`, or enable `processes.triage` in the improve profile | Deterministic, no agent session |
 
 ---
 
