@@ -1,12 +1,20 @@
+---
+description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major v0.8.0 surfaces.
+tags: [akm, overview, concepts]
+quality: curated
+updated: 2026-06-02
+refs: []
+---
+
 # akm Overview for Agents
 
-> **Version target:** akm-cli v0.7.0 (2026-05-04)
+> **Version target:** akm-cli v0.8.0 (2026-05-09)
 
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
 Qwen, etc.) a unified way to discover, install, run, and improve the skills,
-commands, agents, knowledge, workflows, wikis, vaults, memories, and lessons
-they need.
+commands, agents, knowledge, workflows, wikis, env configs, secrets, memories, lessons, and
+tasks they need.
 
 Canonical repo: <https://github.com/itlackey/akm>
 Official registry: <https://github.com/itlackey/akm-registry>
@@ -40,9 +48,11 @@ file extension and content, but conventional directories (`skills/`,
 | `knowledge` | Reference docs with navigation. | `knowledge/api-reference.md` |
 | `workflow` | Structured stateful procedure. | `workflows/release.md` |
 | `wiki` | Multi-page knowledge base. | `wikis/engineering/index.md` |
-| `vault` | Environment key-value pairs; secrets masked. | `vaults/prod.env` |
+| `env` | Group of related config/credential values for an app or service. | `env/prod.env` |
+| `secret` | Single whole-file secret (token, key, cert). | `secrets/deploy-key` |
 | `memory` | Context fragments recalled from external systems. | `memories/team-notes.md` |
 | `lesson` | Distilled guidance learned from feedback or reflection. | `lessons/search-ranking.md` |
+| `task` | Scheduled prompt or workflow execution. | `tasks/daily-review.yml` |
 
 ## Ref format
 
@@ -59,45 +69,58 @@ Examples:
 - `github:itlackey/akm-stash//knowledge:akm-cli-reference`
 - `npm:@acme/stash//lesson:docker-healthchecks`
 
-Use `akm show <ref>` to inspect an asset. Use `akm run <ref>` for runnable
-asset types such as commands, agents, workflows, and scripts.
+Use `akm show <ref>` to inspect an asset. Use `akm workflow start <ref>` for
+workflow runs and `akm tasks run <id>` for scheduled task assets.
 
-## What's new in v0.7.0
+## What's new in v0.8.0
 
-- **Proposal queue.** `akm reflect`, `akm propose`, and `akm distill` write to a
-  durable queue; `akm proposal *` lists, diffs, accepts, and rejects proposals
-  before they touch the live stash.
-- **`lesson` asset type.** Lessons are first-class assets stored under
-  `lessons/` and are normally produced by distillation from feedback.
+- **Improvement surface redesign.** `akm improve` replaces the public
+  `reflect` and `distill` split for updates and lesson distillation.
+- **Session knowledge extraction.** `akm extract --type claude-code|opencode`
+  reads native session files and queues durable insights as proposals, replacing
+  the legacy session-checkpoint hooks.
+- **Proposal review is a noun group.** `akm proposal list`, `akm proposal show <id>`,
+  `akm proposal diff <id>`, `akm proposal accept`, and `akm proposal reject` are the
+  canonical proposal-queue commands (bare `akm proposal` lists). `akm proposal diff`
+  accepts a UUID, a UUID prefix, or a proposal id positionally.
+- **Task assets.** `tasks/<id>.yml` is now a first-class asset type for
+  scheduled workflow or prompt execution through `akm tasks`. Each task
+  picks exactly one target: `workflow:`, `prompt:`, or `command:`.
+- **Belief-aware memory cleanup.** Improvement runs can prune or consolidate
+  memory more safely before proposing durable updates.
 - **Quality states.** Search hits can carry `quality` such as `generated`,
   `curated`, or `proposed`. Proposed content is excluded from default search
   unless you pass `--include-proposed`.
-- **Agent-friendly output.** `--detail=agent` is the preferred way to ask for
-  compact action-ready output; `--for-agent` is only a deprecated alias.
-- **Scoped search and show.** `akm search --filter key=value` and
-  `akm show --scope key=value` let agents work with multi-tenant or
-  per-run content safely.
-- **Bench support.** `akm-bench` adds paired utility benchmarking and a shared
-  fixture-stash format for measuring whether akm assets actually help agents.
+- **Env and secret asset types.** `env/<name>.env` (group of config/credential
+  values) and `secrets/<name>` (single whole-file value) replace the deprecated
+  `vault` type. Values never surface in structured output.
 
 ## Essential commands at a glance
 
 ```bash
 akm setup
 akm search "deploy"
-akm show skill:review-pr --detail=agent
+akm show skill:review-pr --shape agent
 akm add github:owner/repo
 akm workflow start workflow:release
 akm feedback skill:review-pr --negative --reason "too generic"
-akm distill skill:review-pr
+akm extract --auto
+akm improve skill:review-pr
 akm proposal list
+akm health
+akm tasks list
 ```
 
 ## Where to go next
 
 - Install or clone a stash → `skill:install-akm-stash`
 - Publish a stash → `skill:publish-akm-stash`
-- Review proposals → `skill:manage-akm-proposals`
-- Distill feedback into lessons → `skill:distill-feedback-into-lessons`
-- Understand fixture and corpus layout → `knowledge:akm-benchmark-fixtures`
+- Review proposals (case-by-case) → `akm proposal show <id>` / `akm proposal
+  diff <id>`, then `akm proposal accept|reject`
+- Drain the pending backlog (automated) → `akm proposal drain --policy
+  personal-stash` or the `processes.triage` improve pre-pass
+- Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
+  feedback into lesson proposals natively in akm-cli 0.8)
+- Harvest session knowledge → `akm extract --auto` then `akm proposal list`
+- Tune the improve pipeline → `knowledge:akm-improve-and-extract`
 - Full command list → `knowledge:akm-cli-reference`

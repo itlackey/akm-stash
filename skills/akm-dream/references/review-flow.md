@@ -10,17 +10,17 @@ destructive or index-rewriting parts complete.
    - Validate inventory completeness, broken `MEMORY.md` refs, and any memories
      that appear protected or canonical.
 2. Phase 2 output review
-   - Artifact: `signal.json`
-   - Validate that gathered signals are recent, specific, and not transcript
-     noise.
+   - Primary sources: `akm proposal list --status pending` (from `akm extract`)
+     and `akm improve memory --dry-run` output.
+   - Supplemental: `signal.json` containing daily logs and feedback events.
+   - Validate that signals are recent, specific, and not transcript noise.
 3. Phase 3 approval gate
    - Artifacts: `orient.json`, `signal.json`, `plan.json`,
      `review-checklist.md`, `run-report.json`
    - Required review: proposed merges, deletes, contradiction fixes, and any
       changes touching commonly referenced memories.
-   - Advance only after explicit approval. In the current implementation,
-     `bun run scripts/dream.ts --continue` is the approval action and also
-     executes the approved phase 3 plan before phase 4.
+   - Advance only after explicit approval. To approve and execute the phase 3
+     plan, invoke the `akm-dream` skill with the `--continue` flag.
 4. Phase 4 post-run audit
    - Artifact: `phase4-result.json`
    - Validate final `MEMORY.md` metrics, dropped refs, and index refresh status.
@@ -47,7 +47,4 @@ The explicit approval boundary remains between planning and apply. Review the
 deterministic `plan.json` first, then resume with `--continue` only when the
 checklist is satisfied.
 
-For direct phase-3 debugging outside the orchestrator, `phase3-plan.ts` and
-`phase3-apply.ts` default to the latest run directory under
-`<stash>/.akm-dream/runs/`, but you can override inputs and outputs with the
-explicit path flags documented in `references/akm-commands.md`.
+For details on available flags and path overrides, see `references/akm-commands.md`.

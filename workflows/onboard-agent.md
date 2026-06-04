@@ -3,6 +3,7 @@ description: Bootstrap a coding agent so it can discover, install, search, and i
 tags: [onboarding, akm]
 params:
   host: Host agent or tool being onboarded
+updated: 2026-05-09
 ---
 
 # Workflow: Onboard an agent onto akm
@@ -25,7 +26,7 @@ Step ID: init-stash
 ### Instructions
 Run `akm setup` for the guided flow, or `akm init && akm index` for a direct
 setup. Confirm the stash contains the standard asset directories, including
-`lessons/`.
+`lessons/` and room for `tasks/` if you plan scheduled automation.
 
 ### Completion Criteria
 - The working stash exists.
@@ -45,7 +46,7 @@ call `akm` from inside a task.
 Step ID: load-core-assets
 
 ### Instructions
-Install this repo as a source and reindex.
+Install the official akm community stash as a source and reindex.
 
 ```bash
 akm add github:itlackey/akm-stash
@@ -58,17 +59,42 @@ akm show knowledge:akm-cli-reference
 - `skill:akm-quickstart` is retrievable.
 - `knowledge:akm-cli-reference` is retrievable.
 
-## Step: Learn the v0.7.0 asset lifecycle
+## Step: Learn the v0.8.0 improvement lifecycle
 Step ID: learn-lifecycle
 
 ### Instructions
-Review how v0.7.0 handles feedback, lessons, and proposals. Inspect
-`knowledge:akm-proposals-and-lessons`, then verify the proposal queue commands
-exist with `akm proposal list`.
+Review how v0.8.0 handles feedback, improvement, lessons, and proposals.
+Inspect `knowledge:akm-proposals-and-lessons` and `knowledge:akm-improve-and-extract`,
+then verify the proposal queue commands exist with `akm proposal list`.
 
 ### Completion Criteria
-- The operator understands `feedback`, `distill`, and `proposal` basics.
+- The operator understands `feedback`, `improve`, `extract`, `propose`, and proposal-review basics.
 - `akm proposal list` runs successfully.
+
+## Step: Configure session knowledge extraction
+Step ID: configure-extract
+
+### Instructions
+Wire `akm extract` so the improvement loop has fresh signals from each session.
+Determine which harness produces the agent's session files and do a dry-run pass:
+
+```bash
+# For Claude Code sessions:
+akm extract --type claude-code --dry-run
+
+# For OpenCode sessions:
+akm extract --type opencode --dry-run
+
+# Auto-detect all available harnesses:
+akm extract --auto --dry-run
+```
+
+Review the candidate list. When satisfied, run without `--dry-run` to queue
+proposals from the most recent sessions.
+
+### Completion Criteria
+- `akm extract --auto --dry-run` runs without errors.
+- The operator knows which harness to use for their agent.
 
 ## Step: Smoke test discovery
 Step ID: smoke-test
@@ -79,9 +105,11 @@ Run a quick search-and-show flow:
 ```bash
 akm curate "code review"
 akm search "proposal queue" --type knowledge --source both
-akm show knowledge:akm-proposals-and-lessons --detail=agent
+akm show knowledge:akm-proposals-and-lessons --shape agent
+akm health
 ```
 
 ### Completion Criteria
 - Search returns results.
 - `akm show` returns readable content.
+- `akm health` reports no critical errors.

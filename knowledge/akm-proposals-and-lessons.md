@@ -1,23 +1,52 @@
+---
+description: Use when an agent needs the v0.8.0 proposal queue, quality values, and lesson lifecycle explained clearly.
+tags: [akm, proposals, lessons]
+quality: curated
+updated: 2026-06-02
+---
+
 # akm Proposals, Quality, and Lessons
 
-> **Version target:** akm-cli v0.7.0
+> **Version target:** akm-cli v0.8.0
 
-akm v0.7.0 adds a safe self-improvement loop: agents can suggest changes, but
+akm v0.8.0 keeps a safe self-improvement loop: agents can suggest changes, but
 nothing touches the live stash until a proposal is reviewed and accepted.
 
 ## The proposal loop
 
 1. **Create a draft**
-   - `akm reflect <ref> --task "..."` for improving an existing asset.
+   - `akm improve <ref> --task "..."` for improving an existing asset.
+   - `akm improve <type>` for broad improvement passes over one asset type.
    - `akm propose <type> <name> --task "..."` for drafting a new asset.
-   - `akm distill <ref>` for turning feedback into a lesson proposal.
+   - `akm improve <ref>` again when repeated feedback should be distilled into a lesson proposal.
 2. **Inspect the draft**
    - `akm proposal list`
    - `akm proposal show <id>`
-   - `akm proposal diff <id>`
+   - `akm proposal diff <id>` (accepts a UUID or UUID prefix)
 3. **Decide**
    - `akm proposal accept <id>` validates and promotes the change.
    - `akm proposal reject <id> --reason "..."` archives it.
+4. **Roll back if needed**
+   - `akm proposal revert <id>` undoes a previously accepted proposal
+     (per-id only — there is no batch revert).
+
+## Draining the backlog (automated, v0.8.0-rc.12+)
+
+The per-id review loop above is for deciding individual drafts. To keep the
+**standing pending backlog** from growing, akm has a built-in deterministic
+drainer — you no longer need a manual agent session for routine queue cleanup:
+
+- `akm proposal drain --policy personal-stash --dry-run` previews
+  accept/reject/defer decisions; add `--promote --yes` to apply them. Presets:
+  `personal-stash`, `conservative`, `manual`, or `--policy <path>`.
+- Enabling `processes.triage` in an improve profile runs the same drain as a
+  **pre-pass inside `akm improve`**, before reflect/distill.
+
+See `knowledge:akm-cli-reference` (the `akm proposal drain` section) and
+`knowledge:akm-improve-and-extract` (the triage pre-pass) for full flags and
+config. For hands-on review of individual drafts, use `akm proposal show <id>` /
+`akm proposal diff <id>` then `akm proposal accept|reject`; the drainer is the
+recommended path for routine, unattended cleanup.
 
 ## Quality values
 
@@ -35,7 +64,7 @@ draft material.
 
 ## Lessons
 
-A **lesson** is a first-class v0.7.0 asset stored under `lessons/`. Lessons are
+A lesson is a first-class asset stored under `lessons/`. Lessons are
 meant to capture reusable guidance learned from repeated wins or misses.
 
 Typical lesson frontmatter:
@@ -53,7 +82,7 @@ single benchmark answer, it should not live in the stash.
 
 ## Good operator habits
 
-- Record feedback with reasons so distillation has useful input.
+- Record feedback with reasons so `akm improve` has useful input.
 - Read the proposal diff before accepting.
 - Promote only changes that improve a real workflow, not just wording churn.
 - Keep lessons focused on a repeated pattern or failure mode.

@@ -65,10 +65,10 @@ function main(): void {
     const remembered = JSON.parse(result.stdout) as Record<string, unknown>;
     assert(remembered.ref === "memory:stdin-probe", "remember stdin did not create expected ref");
 
-    result = runCli(["feedback", "memory:release-process", "--negative", "--note", "stale"], { stashDir });
+    result = runCli(["feedback", "memory:release-process", "--negative", "--reason", "stale"], { stashDir });
     assert(result.status === 0, `feedback failed: ${result.stderr}`);
 
-    result = runCli(["events", "list", "--type", "feedback", "--detail", "full", "--format", "json"], { stashDir });
+    result = runCli(["log", "list", "--type", "feedback", "--detail", "full", "--format", "json"], { stashDir });
     assert(result.status === 0, `events list failed: ${result.stderr}`);
     const events = JSON.parse(result.stdout) as { events?: Array<Record<string, unknown>> };
     assert(Array.isArray(events.events) && events.events.length > 0, "feedback event not found in events list");
