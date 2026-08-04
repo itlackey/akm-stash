@@ -43,19 +43,21 @@ For environments without Node, use the standalone installer from the
 ```bash
 akm setup
 # or, for a non-interactive flow:
-akm init
+akm bundle create
 akm index
 ```
 
 Expected type directories include `scripts/`, `skills/`, `commands/`,
-`agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`, `wikis/`,
-`lessons/`, and `tasks/` when you start authoring scheduled jobs.
+`agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`,
+`lessons/`, and `tasks/` when you start authoring scheduled jobs. An LLM
+wiki bundle (`schema.md` + `pages/`) is a separate installable source, not a
+directory inside this stash.
 
 ### 4. Verify the official registry is reachable
 
 ```bash
 akm registry list
-akm registry search akm
+akm search akm --from registry
 ```
 
 If the registry is empty, add the official one explicitly:
@@ -68,11 +70,15 @@ akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/in
 
 ```bash
 akm info
-akm help migrate 0.8.0
+akm help migrate 0.9.0
 akm proposal list
 ```
 
-Only proceed once `akm info` succeeds. On 0.8.0:
-- `akm proposal list` and `akm extract --auto --dry-run` should both work.
-- The old `reflect` / `distill` / `proposal *` / `vault` commands are removed
-  or deprecated — do not use them in new automation.
+Only proceed once `akm info` succeeds. On 0.9.0:
+- `akm proposal list` and `akm proposal extract --auto --dry-run` should both work.
+- The old `reflect` / `distill` / `extract` / `propose` / `vault` / `wiki`
+  commands are removed with no compatibility alias — do not use them in new
+  automation. `reflect`/`distill` folded into `akm improve`; `extract`/
+  `propose` moved to `akm proposal extract`/`akm proposal new`.
+- `akm improve` has no confidence-gated auto-accept — every generated
+  proposal lands `pending`.

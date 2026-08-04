@@ -1,7 +1,7 @@
 ---
 description: Complete field glossary and signal thresholds for akm health output (schemaVersion 2). Use when interpreting health report numbers or setting alert thresholds.
 tags: [akm-health, metrics, reference, thresholds]
-updated: 2026-06-01
+updated: 2026-08-04
 ---
 
 # akm Health Metrics Reference

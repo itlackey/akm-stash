@@ -5,15 +5,15 @@ description: Use when you need to review a candidate akm stash before installing
 updated: 2026-05-23
 ---
 
-Review the akm stash at `$1` before the user installs it. Do not run `akm add`
-as part of this review.
+Review the akm stash at `$1` before the user installs it. Do not run `akm
+bundle add` as part of this review.
 
 ## Inspect
 
 Run these in order:
 
 ```bash
-akm registry search "$1"
+akm search "$1" --from registry
 akm show "$1"
 ```
 
@@ -36,6 +36,6 @@ Score each dimension with one short justification:
 
 End with exactly one of:
 
-- **Install** — safe to `akm add $1`
+- **Install** — safe to `akm bundle add $1`
 - **Install with caveats** — say what to audit next
 - **Skip** — state the blocking reason

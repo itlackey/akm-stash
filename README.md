@@ -2,7 +2,7 @@
 
 The official akm stash: a curated collection of assets that teach coding
 agents how to use [akm](https://github.com/itlackey/akm) effectively on
-**akm-cli v0.8.0**.
+**akm-cli 0.9.0**.
 
 If akm is the package manager for agent assets, this is the starter stash:
 install it once and an akm-aware agent gains practical skills, commands,
@@ -29,15 +29,15 @@ leaking task-specific answers.
 With akm already on PATH:
 
 ```bash
-akm add github:itlackey/akm-stash
+akm bundle add github:itlackey/akm-stash
 akm index
 ```
 
 Then verify:
 
 ```bash
-akm show skill:akm-quickstart
-akm show knowledge:akm-cli-reference
+akm show skills/akm-quickstart
+akm show knowledge/akm-cli-reference
 akm search "proposal queue" --type knowledge
 ```
 
@@ -56,20 +56,21 @@ No akm yet? Install the CLI first — see
   `akm improve <ref>`.
 - **Draining the pending proposal backlog** → run `akm proposal drain --policy
   personal-stash` (stage mode; add `--promote --yes` to accept), or enable the
-  `processes.triage` improve pre-pass to drain the backlog inside `akm improve`.
-  For case-by-case judgment on individual drafts, use `akm proposal show <id>` /
-  `akm proposal diff <id>` then `akm proposal accept|reject`. See
-  `knowledge:akm-improve-and-extract`.
-- **Harvesting knowledge from session logs** → run `akm extract --auto` then
-  review proposals with `akm proposal list`. See `knowledge:akm-improve-and-extract`.
-- **Scheduling recurring stash maintenance or harvest runs** → use `akm tasks`
+  `processes.triage` improve strategy pre-pass to drain the backlog inside
+  `akm improve`. For case-by-case judgment on individual drafts, use `akm
+  proposal show <id>` / `akm proposal diff <id>` then `akm proposal
+  accept|reject`. See `knowledge/akm-improve-and-extract`.
+- **Harvesting knowledge from session logs** → run `akm proposal extract
+  --auto` then review proposals with `akm proposal list`. See
+  `knowledge/akm-improve-and-extract`.
+- **Scheduling recurring stash maintenance or harvest runs** → use `akm task`
   and model the task file after the examples in `tasks/`.
 - **After upgrading akm to a new version** → run the `akm-migrate` skill to read migration notes, apply config and storage migrations, update stash assets for deprecated commands, and verify system health.
 - **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
 
 ## Conventions
 
-- Assets target **akm-cli v0.8.0** and call out version-sensitive behavior.
+- Assets target **akm-cli 0.9.0** and call out version-sensitive behavior.
 - Descriptions are written as trigger sentences so host agents can decide when
   to load an asset without reading the whole body.
 - For reusable guidance, teach **how**, not one benchmark answer or verifier

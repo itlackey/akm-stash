@@ -1,7 +1,7 @@
 ---
 description: Conventions for the akm memory file format used by the akm-dream pipeline (filenames, headings, frontmatter, and reference syntax).
 tags: [akm-dream, reference, memories]
-updated: 2026-05-23
+updated: 2026-08-04
 refs: []
 ---
 
@@ -25,7 +25,7 @@ files following the conventions below.
 
 The filename (minus `.md`) is the memory's `name`. With `akm remember
 --name release-process`, the file is `memories/release-process.md` and
-the ref is `memory:release-process`. Names containing `/` create
+the ref is `memories/release-process`. Names containing `/` create
 subdirectories.
 
 ## Frontmatter
@@ -55,7 +55,7 @@ beliefState: asserted
 | `evidenceSources`| Array of refs/URLs that justify this memory. Surfaced by improve passes. |
 | `lastConfirmedAt`| ISO timestamp from staleness-detection / improve runs. Refreshed when the indexer revalidates the memory. |
 | `supersededBy`   | Array of refs that replace this memory. Used with `beliefState: superseded`. |
-| `source`         | For derived memories (filename suffix `.derived` OR `inferred: true`): the parent ref in the form `memory:<parent>`. Powers the `derived_from` indexer column and the `expandTo` search-hit enrichment. |
+| `source`         | For derived memories (filename suffix `.derived` OR `inferred: true`): the parent ref in the form `memories/<parent>`. Powers the `derived_from` indexer column and the `expandTo` search-hit enrichment. |
 
 The dream pipeline tolerates frontmatter-less memories — it falls back
 to file mtime for age and the first sentence for description. New
@@ -91,7 +91,7 @@ disables the filter.
 - **Use absolute dates.** "On 2026-05-04 we decided X." Not "yesterday".
 - **Cross-reference other assets** with akm refs:
   ```
-  See also: `memory:ci-pipeline`, `skill:deploy`.
+  See also: `memories/ci-pipeline`, `skills/deploy`.
   ```
   These are picked up automatically by the dream scan phase and used to keep the
   dependency graph consistent during consolidation.
@@ -128,7 +128,7 @@ likely doesn't have a global bun install yet. Install bun by following
 the official instructions at https://bun.sh (download + run the
 installer script as two separate steps so you can inspect it first).
 
-See also: `memory:ci-pipeline`, `skill:release`.
+See also: `memories/ci-pipeline`, `skills/release`.
 ```
 
 ## What dream looks for
@@ -138,8 +138,8 @@ The dream scan phase flags:
 - **Relative-date phrases** — "yesterday", "last week", "X days ago",
   "recently", "the other day". These need rewriting to absolute dates
   during phase 3.
-- **Internal refs** — every `<type>:<name>` mention is recorded so
-  phase 3 can keep the cross-references consistent when memories
+- **Internal refs** — every `<subdir>/<name>` conceptId mention is recorded
+  so phase 3 can keep the cross-references consistent when memories
   are merged or deleted.
 - **External URLs** — bare `https?://...` links. Surfaced for the
   agent so it can decide whether they should be archived as

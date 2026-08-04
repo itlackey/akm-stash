@@ -40,13 +40,13 @@
     {
       "id": 7,
       "prompt": "What memories does akm have stored?",
-      "expected_output": "DOES NOT trigger akm-dream (this is just a listing query). Agent should run `akm search --type memory --source stash` directly. Dream is for consolidation, not browsing.",
+      "expected_output": "DOES NOT trigger akm-dream (this is just a listing query). Agent should run `akm search --type memory --from local` directly. Dream is for consolidation, not browsing.",
       "files": []
     },
     {
       "id": 8,
       "prompt": "Forget the memory about old-deploy.sh — we don't use that script anymore.",
-      "expected_output": "Skill triggers (delete-stale-memory falls under dream's scope). Agent uses bun run scripts/forget.ts memory:old-deploy. May also offer to do a fuller dream cycle.",
+      "expected_output": "Skill triggers (delete-stale-memory falls under dream's scope). Agent uses bun run scripts/forget.ts memories/old-deploy. May also offer to do a fuller dream cycle.",
       "files": []
     },
     {

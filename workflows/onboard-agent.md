@@ -1,115 +1,133 @@
 ---
+type: workflow
 description: Bootstrap a coding agent so it can discover, install, search, and improve akm assets in the current environment.
 tags: [onboarding, akm]
 params:
-  host: Host agent or tool being onboarded
-updated: 2026-05-09
+  host: { type: string, description: Host agent or tool being onboarded }
+updated: 2026-08-04
+steps:
+  - id: install-cli
+  - id: init-bundle
+    inputs: [steps.install-cli.output]
+  - id: wire-plugin
+  - id: load-core-assets
+    inputs: [steps.init-bundle.output]
+  - id: learn-lifecycle
+    inputs: [steps.load-core-assets.output]
+  - id: configure-extract
+  - id: smoke-test
+    inputs: [steps.load-core-assets.output, steps.configure-extract.output]
 ---
 
 # Workflow: Onboard an agent onto akm
 
-## Step: Install the CLI
-Step ID: install-cli
+Bootstraps a coding agent (named by the `host` parameter) from zero to a
+working akm installation with the official onboarding bundle loaded, so
+later skills and workflows can run without setup errors.
 
-### Instructions
-Install `akm-cli` with the package manager already in use, or use the
+## install-cli
+
+Install `akm-cli` with the package manager already in use (`bun add -g
+akm-cli`, `npm install -g akm-cli`, or `pnpm add -g akm-cli`), or use the
 standalone installer from the akm repository. Verify with `akm --version` and
 `akm info`.
 
-### Completion Criteria
+Verify:
 - `akm --version` succeeds.
 - `akm info` succeeds.
 
-## Step: Initialize the working stash
-Step ID: init-stash
+## init-bundle
 
-### Instructions
-Run `akm setup` for the guided flow, or `akm init && akm index` for a direct
-setup. Confirm the stash contains the standard asset directories, including
-`lessons/` and room for `tasks/` if you plan scheduled automation.
+Run `akm setup` for the guided flow (config, bundle dir, providers,
+registries, and initial index in one pass), or `akm bundle create && akm
+index` for a direct, non-interactive scaffold. Confirm the bundle contains
+the standard asset directories, including `lessons/` and room for `tasks/`
+if you plan scheduled automation.
 
-### Completion Criteria
-- The working stash exists.
+Verify:
+- The working bundle exists.
 - `akm index` succeeds.
 
-## Step: Wire the host agent integration
-Step ID: wire-plugin
+## wire-plugin
 
-### Instructions
-Install the appropriate plugin or prompt snippet for the host agent so it can
-call `akm` from inside a task.
+Install the appropriate plugin or prompt snippet for the host agent named by
+the `host` parameter so it can call `akm` from inside a task.
 
-### Completion Criteria
+Verify:
 - The host agent can execute an `akm` command.
 
-## Step: Load the official onboarding stash
-Step ID: load-core-assets
+## load-core-assets
 
-### Instructions
-Install the official akm community stash as a source and reindex.
+Install the official akm onboarding bundle as a source and reindex, using
+the bundle attached to this unit from the prior step.
 
 ```bash
-akm add github:itlackey/akm-stash
+akm bundle add github:itlackey/akm-stash
 akm index
-akm show skill:akm-quickstart
-akm show knowledge:akm-cli-reference
+akm show skills/akm-quickstart
+akm show knowledge/akm-cli-reference
 ```
 
-### Completion Criteria
-- `skill:akm-quickstart` is retrievable.
-- `knowledge:akm-cli-reference` is retrievable.
+Verify:
+- `skills/akm-quickstart` is retrievable.
+- `knowledge/akm-cli-reference` is retrievable.
 
-## Step: Learn the v0.8.0 improvement lifecycle
-Step ID: learn-lifecycle
+## learn-lifecycle
 
-### Instructions
-Review how v0.8.0 handles feedback, improvement, lessons, and proposals.
-Inspect `knowledge:akm-proposals-and-lessons` and `knowledge:akm-improve-and-extract`,
+Review how 0.9.0 handles feedback, improvement, and the proposal queue,
+using the bundle assets attached to this unit as context. Inspect
+`knowledge/akm-proposals-and-lessons` and `knowledge/akm-improve-and-extract`,
 then verify the proposal queue commands exist with `akm proposal list`.
 
-### Completion Criteria
-- The operator understands `feedback`, `improve`, `extract`, `propose`, and proposal-review basics.
+There is no separate `reflect`, `distill`, `propose`, or `extract` verb —
+`akm improve <ref>` covers reflection and lesson distillation, `akm proposal
+new` drafts a brand-new asset, and `akm proposal extract` harvests session
+knowledge.
+
+Verify:
+- The operator understands `feedback`, `improve`, `proposal extract`,
+  `proposal new`, and proposal-review basics.
 - `akm proposal list` runs successfully.
 
-## Step: Configure session knowledge extraction
-Step ID: configure-extract
+## configure-extract
 
-### Instructions
-Wire `akm extract` so the improvement loop has fresh signals from each session.
-Determine which harness produces the agent's session files and do a dry-run pass:
+Wire `akm proposal extract` so the improvement loop has fresh signals from
+each session. Determine which harness produces the agent's session files and
+do a dry-run pass:
 
 ```bash
 # For Claude Code sessions:
-akm extract --type claude-code --dry-run
+akm proposal extract --type claude-code --dry-run
 
 # For OpenCode sessions:
-akm extract --type opencode --dry-run
+akm proposal extract --type opencode --dry-run
 
 # Auto-detect all available harnesses:
-akm extract --auto --dry-run
+akm proposal extract --auto --dry-run
 ```
 
 Review the candidate list. When satisfied, run without `--dry-run` to queue
-proposals from the most recent sessions.
+proposals from the most recent sessions. For recurring harvesting, schedule
+`akm proposal extract --auto` as a task instead of polling by hand — there is
+no `--watch`/`--debounce-ms` daemon mode.
 
-### Completion Criteria
-- `akm extract --auto --dry-run` runs without errors.
+Verify:
+- `akm proposal extract --auto --dry-run` runs without errors.
 - The operator knows which harness to use for their agent.
 
-## Step: Smoke test discovery
-Step ID: smoke-test
+## smoke-test
 
-### Instructions
-Run a quick search-and-show flow:
+Run a quick search-and-show flow over the assets loaded in `load-core-assets`
+and the extraction wiring from `configure-extract`:
 
 ```bash
 akm curate "code review"
-akm search "proposal queue" --type knowledge --source both
-akm show knowledge:akm-proposals-and-lessons --shape agent
+akm search "proposal queue" --type knowledge --from all
+akm show knowledge/akm-proposals-and-lessons --shape agent
 akm health
 ```
 
-### Completion Criteria
+Verify:
 - Search returns results.
 - `akm show` returns readable content.
 - `akm health` reports no critical errors.

@@ -5,7 +5,7 @@
  * Regenerates `<stash>/memories/MEMORY.md` from the current state of
  * the memories directory. The output is an INDEX, not a dump:
  *
- *   - One line per memory: `- [name](memory:name) — short description`
+ *   - One line per memory: `- \`memories/name\` — short description`
  *   - Description is read from the memory's frontmatter `description`
  *     field, or falls back to the first non-frontmatter sentence.
  *   - Sections are organized by tag, then alphabetical.

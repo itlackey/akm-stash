@@ -20,7 +20,7 @@ function runCli(args: string[], options: { stashDir: string; input?: string }) {
     timeout: 30_000,
     env: {
       ...process.env,
-      AKM_STASH_DIR: options.stashDir,
+      AKM_BUNDLE_DIR: options.stashDir,
       XDG_CONFIG_HOME: xdgConfig,
       XDG_CACHE_HOME: xdgCache,
     },
@@ -44,7 +44,7 @@ function main(): void {
     let result = runCli(["index", "--full"], { stashDir });
     assert(result.status === 0, `index failed: ${result.stderr}`);
 
-    result = runCli(["search", "release", "--type", "memory", "--source", "stash", "--detail", "normal", "--format", "json"], {
+    result = runCli(["search", "release", "--type", "memory", "--from", "local", "--detail", "normal", "--format", "json"], {
       stashDir,
     });
     assert(result.status === 0, `search failed: ${result.stderr}`);
@@ -55,7 +55,7 @@ function main(): void {
     result = runCli(["config", "path", "--all", "--format", "json"], { stashDir });
     assert(result.status === 0, `config path failed: ${result.stderr}`);
     const paths = JSON.parse(result.stdout) as Record<string, unknown>;
-    assert(typeof paths.stash === "string", "config path --all did not return flat stash key");
+    assert(typeof paths.bundle === "string", "config path --all did not return the bundle key");
 
     result = runCli(["remember", "--name", "stdin-probe", "--force"], {
       stashDir,
@@ -63,12 +63,12 @@ function main(): void {
     });
     assert(result.status === 0, `remember stdin failed: ${result.stderr}`);
     const remembered = JSON.parse(result.stdout) as Record<string, unknown>;
-    assert(remembered.ref === "memory:stdin-probe", "remember stdin did not create expected ref");
+    assert(remembered.ref === "memories/stdin-probe", "remember stdin did not create expected ref");
 
-    result = runCli(["feedback", "memory:release-process", "--negative", "--reason", "stale"], { stashDir });
+    result = runCli(["feedback", "memories/release-process", "--negative", "--reason", "stale"], { stashDir });
     assert(result.status === 0, `feedback failed: ${result.stderr}`);
 
-    result = runCli(["log", "list", "--type", "feedback", "--detail", "full", "--format", "json"], { stashDir });
+    result = runCli(["log", "--type", "feedback", "--detail", "full", "--format", "json"], { stashDir });
     assert(result.status === 0, `events list failed: ${result.stderr}`);
     const events = JSON.parse(result.stdout) as { events?: Array<Record<string, unknown>> };
     assert(Array.isArray(events.events) && events.events.length > 0, "feedback event not found in events list");

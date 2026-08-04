@@ -14,11 +14,11 @@ function baseOrient(): OrientReport {
       lineCount: 10,
       overLineLimit: false,
       brokenLinks: [],
-      refsLinked: ["memory:release-process"],
+      refsLinked: ["memories/release-process"],
     },
     memories: [
       {
-        ref: "memory:release-process",
+        ref: "memories/release-process",
         name: "release-process",
         description: "Release process uses bun publish.",
         path: "/tmp/stash/memories/release-process.md",
@@ -30,7 +30,7 @@ function baseOrient(): OrientReport {
         linkedFromIndex: true,
       },
       {
-        ref: "memory:release/process",
+        ref: "memories/release/process",
         name: "release/process",
         description: "Release process uses bun publish.",
         path: "/tmp/stash/memories/release/process.md",
@@ -42,7 +42,7 @@ function baseOrient(): OrientReport {
         linkedFromIndex: false,
       },
       {
-        ref: "memory:legacy-deploy",
+        ref: "memories/legacy-deploy",
         name: "legacy-deploy",
         description: "Old deployment notes.",
         path: "/tmp/stash/memories/legacy-deploy.md",
@@ -70,7 +70,7 @@ describe("buildPlan", () => {
           file: "/tmp/stash/logs/2026/05/2026-05-05.md",
           line: 12,
           matchedPattern: "explicit-decision",
-          excerpt: "We decided memory:release-process uses bun publish going forward.",
+          excerpt: "We decided memories/release-process uses bun publish going forward.",
         },
       ],
     };
@@ -83,15 +83,15 @@ describe("buildPlan", () => {
     expect(plan.summary.operations.delete).toBe(1);
 
     const update = plan.candidates.find((candidate) => candidate.operation === "update");
-    expect(update?.targetRef).toBe("memory:release-process");
+    expect(update?.targetRef).toBe("memories/release-process");
     expect(update?.approved).toBe(false);
 
     const merge = plan.candidates.find((candidate) => candidate.operation === "merge-into");
-    expect(merge?.targetRef).toBe("memory:release-process");
-    expect(merge?.sourceRefs).toEqual(["memory:release/process"]);
+    expect(merge?.targetRef).toBe("memories/release-process");
+    expect(merge?.sourceRefs).toEqual(["memories/release/process"]);
 
     const deletion = plan.candidates.find((candidate) => candidate.operation === "delete");
-    expect(deletion?.targetRef).toBe("memory:legacy-deploy");
+    expect(deletion?.targetRef).toBe("memories/legacy-deploy");
     expect(deletion?.approved).toBe(false);
   });
 
@@ -107,7 +107,7 @@ describe("buildPlan", () => {
           file: "session.jsonl",
           line: 30,
           matchedPattern: "user-correction",
-          excerpt: "Actually that's wrong: memory:release-process no longer uses npm publish.",
+          excerpt: "Actually that's wrong: memories/release-process no longer uses npm publish.",
         },
       ],
     };
@@ -115,7 +115,7 @@ describe("buildPlan", () => {
     const plan = buildPlan(orient, signal, { runId: "dream-test" });
     const update = plan.candidates.find((candidate) => candidate.operation === "update");
 
-    expect(update?.targetRef).toBe("memory:release-process");
+    expect(update?.targetRef).toBe("memories/release-process");
     expect(update?.indicators.contradiction).toBe(true);
     expect(update?.approved).toBe(false);
   });

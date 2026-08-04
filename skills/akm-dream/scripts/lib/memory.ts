@@ -121,7 +121,7 @@ const RELATIVE_DATE_PATTERNS: RegExp[] = [
 
 export interface MemorySignals {
   relativeDates: string[]; // matched phrases
-  internalRefs: string[]; // memory:foo / skill:bar / etc. refs found in body
+  internalRefs: string[]; // memories/foo / skills/bar / etc. refs found in body
   externalUrls: string[]; // bare http(s) URLs
   approxAgeDays: number | null;
 }
@@ -134,7 +134,13 @@ export function scanMemorySignals(parsed: ParsedMemory): MemorySignals {
     if (m) relativeDates.push(m[0]);
   }
 
-  const refRe = /\b(skill|command|agent|knowledge|workflow|memory|script|env|secret|wiki|lesson):[a-zA-Z0-9._\/-]+/g;
+  // 0.9.0 `[bundle//]conceptId` grammar: an optional bundle-slug prefix,
+  // then one of the known stash subdirs, then the asset name. `wiki` was
+  // retired as an AKM-owned subdir (LLM wiki pages resolve to
+  // `bundle//pages/<slug>` instead, which is a foreign/opaque conceptId this
+  // scan does not special-case).
+  const refRe =
+    /\b(?:[a-zA-Z0-9][a-zA-Z0-9._-]*\/\/)?(skills|commands|agents|knowledge|workflows|memories|scripts|env|secrets|lessons|instructions|tasks)\/[a-zA-Z0-9._\/-]+/g;
   const internalRefs = Array.from(new Set(text.match(refRe) ?? []));
 
   const urlRe = /https?:\/\/[^\s)>\]]+/g;

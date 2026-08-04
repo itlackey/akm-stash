@@ -64,7 +64,7 @@ export function loadMemoryInventory(stashDir: string): MemoryInventoryEntry[] {
       const name = path.slice(root.length + 1, -3).replaceAll("\\", "/");
       return {
         name,
-        ref: `memory:${name}`,
+        ref: `memories/${name}`,
         path,
         description,
         tags,

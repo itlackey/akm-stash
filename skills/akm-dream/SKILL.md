@@ -1,12 +1,12 @@
 ---
 name: akm-dream
-description: Consolidate, prune, and reorganize akm memories with explicit staged review gates. Use when the user says "dream", "/dream", "auto dream", "consolidate memories", "clean up my memories", "prune stale memories", or "my memory files are a mess". For routine consolidation without staged review, prefer `akm improve memory` + `akm extract --auto` directly.
-updated: 2026-06-01
+description: Consolidate, prune, and reorganize akm memories with explicit staged review gates. Use when the user says "dream", "/dream", "auto dream", "consolidate memories", "clean up my memories", "prune stale memories", or "my memory files are a mess". For routine consolidation without staged review, prefer `akm improve memory` + `akm proposal extract --auto` directly.
+updated: 2026-08-04
 ---
 
 # akm Dream — Reviewed Memory Consolidation
 
-This skill wraps the native `akm improve` + `akm extract` pipeline with an
+This skill wraps the native `akm improve` + `akm proposal extract` pipeline with an
 explicit plan-review gate, a lock to prevent concurrent runs, pre-apply
 backups, and per-run audit artifacts. It also manages the `MEMORY.md` index
 file that `akm improve` does not own.
@@ -15,7 +15,7 @@ file that `akm improve` does not own.
 
 | Responsibility | Native CLI | This skill |
 |---|---|---|
-| Harvest recent session knowledge | `akm extract --auto` | calls it in Phase 2 |
+| Harvest recent session knowledge | `akm proposal extract --auto` | calls it in Phase 2 |
 | Surface contradictions + relative-date fixes | `akm improve memory --dry-run` | calls it before Phase 3 |
 | Merge/delete/promote/contradict proposals | `akm improve memory` | review gate on top |
 | Single-file memory deletion | — (no native verb) | bundled forget helper |
@@ -56,7 +56,7 @@ has a stable, complete picture before any extraction or improvement runs.
 bun run scripts/phase1-orient.ts > <stash>/.akm-dream/runs/<run-id>/orient.json
 ```
 
-The output includes every `memory:` ref with size, age, relative-date phrases,
+The output includes every `memories/` ref with size, age, relative-date phrases,
 internal cross-refs, and whether it is linked from `MEMORY.md`. Read
 `orient.json` before loading any individual memories.
 
@@ -67,7 +67,7 @@ Use the native CLI first, then supplement with direct sources if needed.
 **Step 1 — extract session knowledge:**
 
 ```bash
-akm extract --auto --since 7d
+akm proposal extract --auto --since 7d
 ```
 
 This reads native Claude Code and OpenCode session files and queues candidates
@@ -86,14 +86,14 @@ signal.
 **Step 3 — supplement (optional):**
 
 If the stash uses daily logs (`<stash>/logs/YYYY/MM/YYYY-MM-DD.md`) or you
-need signals that `akm extract` doesn't cover, run the supplemental script:
+need signals that `akm proposal extract` doesn't cover, run the supplemental script:
 
 ```bash
 bun run scripts/phase2-gather.ts > <stash>/.akm-dream/runs/<run-id>/signal.json
 ```
 
 Use this for daily-log entries and targeted feedback events only — not as a
-replacement for `akm extract`.
+replacement for `akm proposal extract`.
 
 ### Phase 3 — Consolidate
 
@@ -112,7 +112,7 @@ from Phase 2 supplemental signals.
 
 ```bash
 # Read a memory before touching it:
-akm show memory:<name> --detail full
+akm show memories/<name> --detail full
 
 # Update or create via stdin:
 akm remember --name "<name>" --force <<'EOF'
@@ -124,7 +124,7 @@ Body text here.
 EOF
 
 # Delete a single memory (akm has no native forget verb):
-bun run scripts/forget.ts memory:<name>
+bun run scripts/forget.ts memories/<name>
 ```
 
 **Consolidation rules:**
@@ -168,7 +168,7 @@ It:
 1. Acquires `<stash>/.akm-dream.lock` (refuses to run if another session holds it).
 2. Backs up `<stash>/memories/` to `<stash>/.akm-dream/runs/<run-id>/backup/`.
 3. Runs Phase 1 → `orient.json`.
-4. Runs Phase 2 (`akm extract --auto`, `akm improve memory --dry-run`, optional `phase2-gather.ts`) → `signal.json`.
+4. Runs Phase 2 (`akm proposal extract --auto`, `akm improve memory --dry-run`, optional `phase2-gather.ts`) → `signal.json`.
 5. Runs the planner → `plan.json` + `review-checklist.md`.
 6. **Pauses at the review gate.** Inspect artifacts, verify the plan, then:
 
