@@ -244,8 +244,10 @@ If something went wrong and you need to revert, use the standalone
 `apply` already created a verified recovery run before it touched anything:
 
 ```bash
-# List available backup runs for a target version
-akm migrate status
+# Find the run id. `akm migrate apply` prints `backupRunId` when it creates
+# a run; no command enumerates them, so otherwise list the backup directory:
+#   $DATA/backups/migrations/<installation-id>/<run-id>/
+# ($DATA is the akm data dir — `~/.local/share/akm` on Linux by default.)
 
 # Restore is explicit and destructive — it creates and verifies a rescue
 # backup of the CURRENT (post-attempt) state before replacing anything:
@@ -254,8 +256,15 @@ akm-migrate restore --for 0.9.0 --run <backup-run-id> --confirm
 
 There is no `akm db` command and no ad hoc `scripts/migrations/restore-data-dir.sh`
 helper — `akm-migrate restore` is the one supported path back to a prior
-backup run, for both config and the durable databases (`state.db`/`index.db`/
-`logs.db`) together.
+backup run.
+
+A recovery run covers exactly four artifacts: `config.json`, `state.db`,
+`workflow.db`, and `index.db`. **`logs.db` is deliberately outside the
+migration system** — it is never backed up, restored, or version-gated, and
+it self-bootstraps its schema on open. A restore therefore rolls the other
+four back while `logs.db` stays as-is. That is safe (task logs are a
+purgeable cache, not durable state), but do not expect a restore to rewind
+them.
 
 ---
 
