@@ -1,3 +1,4 @@
+version: 2
 schedule: "0 2 * * *"
 enabled: true
 timeoutMs: 1800000
@@ -9,7 +10,7 @@ tags:
   - improve
   - extract
   - proposals
-updated: 2026-06-02
+updated: 2026-08-04
 prompt: |
   Run a non-destructive nightly extract and improvement pass for the current AKM stash.
 
@@ -20,7 +21,7 @@ prompt: |
 
       akm proposal extract --auto --since 24h
 
-  4. Run one whole-stash improve pass without auto-accept:
+  4. Run one whole-stash improve pass:
 
       akm improve --no-sync --no-push --task "Review the current stash for stale guidance, outdated CLI references, missing task-asset coverage, and reusable improvements. Generate only proposal-queue entries; do not edit live assets directly."
 

@@ -1,7 +1,7 @@
 ---
 description: Decision tree and fix playbook for common akm improve pipeline issues. Use when a health report shows anomalies and you need to identify root causes and apply fixes.
 tags: [akm-health, troubleshooting, tuning, improve]
-updated: 2026-06-01
+updated: 2026-08-04
 ---
 
 # akm Health Troubleshooting Playbook
@@ -17,11 +17,11 @@ later ones.
 
 | Check | Fix |
 |---|---|
-| `state-db-schema` | Run `akm db` to inspect. Restore from backup: `akm db backups`. |
+| `state-db-schema` | Run `akm migrate status` to inspect config/database state (there is no `akm db` command). If it reports `blocked`, resolve the named artifact first; restore a pre-migration backup with the standalone `akm-migrate restore --for <version> --run <backup-run-id> --confirm`. |
 | `state-db-round-trip` | Disk full or permissions issue. Check `df -h` and the path in evidence. |
-| `agent-profile` | Run `akm setup` to configure an agent profile, or `akm config set defaults.agent <name>`. |
+| `agent-profile` | Run `akm setup` to configure an engine, or `akm config set defaults.engine <name>` after defining it under `engines`. |
 | `task-log-backing` | Log files were deleted. Safe to ignore if intentional; otherwise check backup. |
-| `active-runs` | A run is stuck. Kill the process, then clean the stale run: `akm tasks doctor`. |
+| `active-runs` | A run is stuck. Kill the process, then clean the stale run: `akm task doctor`. |
 
 ---
 
@@ -69,23 +69,23 @@ See `jna-diagnosis.md` §4 for the full three-signal discriminator.
 **Hypothesis B (cohort shift — most common sudden spike):**
 ```bash
 # 1. Clear proposal backlog (dedup_pending_proposal is blocking consolidation)
-akm proposal accept --max-diff-lines 15 --dry-run   # preview
-akm proposal accept --max-diff-lines 15 -y          # accept low-risk proposals
+akm proposal drain --policy personal-stash --max-diff-lines 15 --dry-run   # preview
+akm proposal drain --policy personal-stash --max-diff-lines 15 --promote -y  # accept low-risk proposals
 
 # 2. Fix missing descriptions (reduces merge_missing_description guard hits)
-akm improve memory --task "add concise one-line descriptions to memories missing a description frontmatter field" --auto-accept safe --limit 60
+akm improve memory --task "add concise one-line descriptions to memories missing a description frontmatter field" --limit 60
 ```
 
 **Hypothesis A (pool saturation — gradual rise over weeks):**
 ```json
 // ~/.config/akm/config.json — only after ruling out B
-"profiles.improve.default.processes.consolidate.poolSize": 500
+"improve.strategies.default.processes.consolidate.poolSize": 500
 ```
 
 **Hypothesis C (LLM degradation):**
 ```bash
 akm health --since 1h --format json   # check hardChecks.agent-profile
-akm improve memory:<known-ref> --dry-run  # targeted test on known-good memory
+akm improve memories/<known-ref> --dry-run  # targeted test on known-good memory
 ```
 
 ---
@@ -98,8 +98,8 @@ The consolidation LLM wants to merge memories but the target lacks a `descriptio
 
 **Fix — automated:**
 ```bash
-akm improve memory --task "add concise one-line descriptions to memories that are missing a description frontmatter field" --auto-accept safe --limit 50
-akm proposal list --status pending   # review any that weren't auto-accepted
+akm improve memory --task "add concise one-line descriptions to memories that are missing a description frontmatter field" --limit 50
+akm proposal list --status pending   # review the resulting proposals; nothing auto-promotes
 ```
 
 **Fix — manual:** For each memory missing a description, add:
@@ -160,7 +160,7 @@ Watch for whether `written > 0` on recent memories after new sessions.
 
 ### 5b. No fresh memories in the pool
 **Check:** `freshAttempts == 0` or very low.
-**Fix:** Run `akm extract --auto` to harvest recent session knowledge, then re-run improve. Fresh memories (no `.derived.md`) will be eligible.
+**Fix:** Run `akm proposal extract --auto` to harvest recent session knowledge, then re-run improve. Fresh memories (no `.derived.md`) will be eligible.
 
 ### 5c. LLM finding no facts (`skippedNoFacts` high)
 **Check:** `memoryInference.skippedNoFacts > 10`.
@@ -199,15 +199,15 @@ failures need investigation.
 
 **Check:**
 ```bash
-akm config get profiles.improve.default.processes.distill.enabled
+akm config get improve.strategies.default.processes.distill.enabled
 ```
 
 If `false` or absent:
 ```bash
-akm config set profiles.improve.default.processes.distill.enabled true
+akm config set improve.strategies.default.processes.distill.enabled true
 ```
 
-If distill is enabled but `queued` is still 0 after multiple runs, check `skippedByReason.no new signal since last proposal` — this means distillation is being skipped because there are no new signals to distill from. Ensure `akm extract --auto` is running regularly to provide fresh session signals.
+If distill is enabled but `queued` is still 0 after multiple runs, check `skippedByReason.no new signal since last proposal` — this means distillation is being skipped because there are no new signals to distill from. Ensure `akm proposal extract --auto` is running regularly to provide fresh session signals.
 
 ---
 
@@ -219,41 +219,41 @@ The active profile is excluding asset types that have signal waiting for reflect
 
 **Check:**
 ```bash
-akm config get profiles.improve.default.processes.reflect.assetTypes
+akm config get improve.strategies.default.processes.reflect.assetTypes
 ```
 
 **Fix:** Add the types with accumulated signal to the `assetTypes` list, or remove the filter entirely to allow all types.
 
 ---
 
-## 9. `akm extract` finding nothing
+## 9. `akm proposal extract` finding nothing
 
-**Symptom:** `akm extract --auto --dry-run` returns no candidates.
+**Symptom:** `akm proposal extract --auto --dry-run` returns no candidates.
 
 **Check options:**
 
 1. **Window too narrow:**
    ```bash
-   akm extract --auto --since 7d --dry-run
+   akm proposal extract --auto --since 7d --dry-run
    ```
    Extend the window to find older unprocessed sessions.
 
 2. **Sessions already processed:**
    ```bash
-   akm extract --type claude-code --force --dry-run
+   akm proposal extract --type claude-code --force --dry-run
    ```
    `--force` re-processes already-seen sessions. If candidates appear, they were
    previously extracted. No action needed.
 
 3. **Wrong harness:**
    ```bash
-   akm extract --type opencode --dry-run   # if using OpenCode
-   akm extract --type claude-code --dry-run  # if using Claude Code
+   akm proposal extract --type opencode --dry-run   # if using OpenCode
+   akm proposal extract --type claude-code --dry-run  # if using Claude Code
    ```
 
 4. **Session location override:**
    ```bash
-   akm extract --type claude-code --location <path> --dry-run
+   akm proposal extract --type claude-code --location <path> --dry-run
    ```
    Use if session files are not in the default location.
 
@@ -295,10 +295,10 @@ Common regression causes:
 | `judgedNoAction` high, guard skips flat, wall time flat | LLM degradation (C) | Check agent profile + API health |
 | `merge_missing_description` large | Memories lack frontmatter | `akm improve memory --task "add descriptions"` |
 | `consolidation.failedChunks` > 5% | API errors or oversized chunks | Check agent profile, reduce chunk size |
-| `memoryInference.yieldRate` < 0.1 | Pool saturated or no fresh memories | Run `akm extract --auto` |
+| `memoryInference.yieldRate` < 0.1 | Pool saturated or no fresh memories | Run `akm proposal extract --auto` |
 | `graphExtraction.truncations` > 0 | Oversized files | Find and split large assets |
 | `graphExtraction.failures` > 1 | API / model issue | Check agent profile + LLM provider |
-| `distill.queued == 0` for weeks | Distill disabled or no signal | Enable distill; run `akm extract` |
+| `distill.queued == 0` for weeks | Distill disabled or no signal | Enable distill; run `akm proposal extract` |
 | `reflect.cooldown` always high | Cooldown too long for cadence | Reduce cooldown in config |
 | `wallTime.p95` >> `median` | Outlier chunks or API latency | Check `failedChunks`; inspect large memories |
 | `hardChecks` failing | Infrastructure issue | Fix before interpreting any other metrics |

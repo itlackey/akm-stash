@@ -1,3 +1,4 @@
+version: 2
 schedule: "*/15 * * * *"
 enabled: true
 timeoutMs: 300000
@@ -8,7 +9,7 @@ tags:
   - scheduled
   - proposals
   - notification
-updated: 2026-06-02
+updated: 2026-08-04
 prompt: |
   Check whether this stash has pending proposals that need review.
 

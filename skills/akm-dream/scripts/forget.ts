@@ -2,15 +2,16 @@
 /**
  * forget.ts — delete a single memory.
  *
- * akm 0.4.x does not yet expose a `forget` or `rm` verb for individual
- * assets (the locked v1 CLI surface is search/show/add/remove/...,
- * where `remove` deletes a SOURCE, not an asset). Until the native
- * command exists, we provide this small shim so the dream pipeline
- * can prune contradicted memories.
+ * akm does not expose a `forget` or `rm` verb for individual assets (the
+ * bundle CLI surface is search/show/bundle add/bundle remove/..., where
+ * `bundle remove` deletes a SOURCE, not an asset). Until the native command
+ * exists, we provide this small shim so the dream pipeline can prune
+ * contradicted memories.
  *
  * Safety rules — every one of these is non-negotiable:
  *
- *   1. The ref MUST resolve to type `memory`. Refuse anything else.
+ *   1. The ref MUST resolve to type `memory` (a `memories/` conceptId).
+ *      Refuse anything else.
  *   2. The resolved path MUST live inside `<stash>/memories/`. We
  *      compute that prefix from `akm config path --all`, never trust
  *      the path returned by `akm show` blindly.
@@ -19,8 +20,8 @@
  *   4. `--dry-run` is the safe default for unattended use.
  *
  * Usage:
- *   bun run scripts/forget.ts memory:release-process
- *   bun run scripts/forget.ts memory:release-process --dry-run
+ *   bun run scripts/forget.ts memories/release-process
+ *   bun run scripts/forget.ts memories/release-process --dry-run
  */
 
 import { existsSync, unlinkSync, rmSync } from "node:fs";
@@ -40,12 +41,12 @@ export async function forget(
   ref: string,
   options: { dryRun?: boolean; skipIndex?: boolean } = {},
 ): Promise<ForgetResult> {
-  if (!ref.startsWith("memory:")) {
+  if (!ref.startsWith("memories/")) {
     return {
       ok: false,
       ref,
       removed: false,
-      reason: `ref must be a memory: got ${ref}`,
+      reason: `ref must be a memories/ conceptId, got ${ref}`,
     };
   }
 

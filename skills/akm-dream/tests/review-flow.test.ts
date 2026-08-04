@@ -83,8 +83,8 @@ describe("review/apply flow", () => {
       },
       {
         showMemory: async () => null,
-        rememberMemory: async () => ({ ref: "memory:new-policy" }),
-        forgetMemory: async () => ({ ok: true, ref: "memory:noop", removed: false, reason: "noop" }),
+        rememberMemory: async () => ({ ref: "memories/new-policy" }),
+        forgetMemory: async () => ({ ok: true, ref: "memories/noop", removed: false, reason: "noop" }),
       },
     );
 

@@ -146,7 +146,7 @@ function memoryProtectionReasons(memory: MemoryReport): string[] {
   if (memory.tags.some((tag) => /^(canonical|protected|policy)$/i.test(tag))) {
     reasons.push("protected-tag");
   }
-  if (memory.signals.internalRefs.some((ref) => !ref.startsWith("memory:"))) {
+  if (memory.signals.internalRefs.some((ref) => !ref.startsWith("memories/"))) {
     reasons.push("references-non-memory-assets");
   }
   return reasons;
@@ -158,7 +158,7 @@ function candidateId(operation: PlanOperation, key: string): string {
 
 function explicitMemoryRefs(signal: Signal): string[] {
   return Array.from(
-    new Set(signal.excerpt.match(/\bmemory:[a-zA-Z0-9._\/-]+/g) ?? []),
+    new Set(signal.excerpt.match(/\bmemories\/[a-zA-Z0-9._/-]+/g) ?? []),
   );
 }
 
@@ -219,7 +219,7 @@ function bestSignalMatch(
 
 function deriveCreateName(signal: Signal): string {
   const explicit = explicitMemoryRefs(signal)[0];
-  if (explicit) return explicit.replace(/^memory:/, "");
+  if (explicit) return explicit.replace(/^memories\//, "");
 
   const tokens = tokenize(signal.excerpt).slice(0, 6);
   const name = slugify(tokens.join("-"));
