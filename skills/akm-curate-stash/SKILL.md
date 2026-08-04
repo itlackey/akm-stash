@@ -175,7 +175,7 @@ user.
 |---|---|---|
 | **Broad filesystem access** | `find /`, `ls ~`, reading files outside stash | Warn; include only if goal requires it |
 | **Network calls** | `curl`, `wget`, API calls in executable positions | Warn; note the endpoint |
-| **Hardcoded paths** | Absolute paths like `/home/alice/...` | Warn; may not work on user's system |
+| **Hardcoded paths** | An absolute path baked into one user's home directory instead of a relative or `$HOME`-rooted one | Warn; may not work on user's system |
 | **Stale commands** | References `akm vault`, `akm reflect`, `akm distill`, `akm extract`, `akm tasks`, `akm add`, or a `type:name` ref | Warn; commands/ref grammar removed or renamed in 0.9.0 |
 | **Hot permissions** | Requests `--force`, `--yes`, or destructive flags without confirmation gate | Warn; review before executing |
 | **Third-party model calls** | Instructs use of a specific external API (OpenAI, Anthropic) without configuration opt-in | Warn; may incur cost |
