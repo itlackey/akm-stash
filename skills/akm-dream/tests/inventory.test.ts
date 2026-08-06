@@ -19,7 +19,7 @@ describe("loadMemoryInventory", () => {
     const entries = loadMemoryInventory(stashDir);
     expect(entries).toHaveLength(1);
     expect(entries[0]?.name).toBe("release/process");
-    expect(entries[0]?.ref).toBe("memory:release/process");
+    expect(entries[0]?.ref).toBe("memories/release/process");
     expect(entries[0]?.description).toBe("Release process");
     expect(entries[0]?.tags).toEqual(["release", "ci"]);
   });

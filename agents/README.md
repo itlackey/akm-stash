@@ -14,5 +14,5 @@ Browse the full set with:
 akm search --type agent
 ```
 
-See [`knowledge:akm-stash-structure`](../knowledge/akm-stash-structure.md) for
+See [`knowledge/akm-stash-structure`](../knowledge/akm-stash-structure.md) for
 authoring conventions.

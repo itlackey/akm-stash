@@ -1,13 +1,13 @@
 ---
-description: Use when an agent is authoring or reorganizing a stash and needs the v0.8.0 directory, command, workflow, task, and lesson conventions.
+description: Use when an agent is authoring or reorganizing a stash and needs the 0.9.0 directory, command, workflow, task, and lesson conventions.
 tags: [akm, stash, structure]
 quality: curated
-updated: 2026-05-23
+updated: 2026-08-04
 ---
 
 # akm Stash Structure
 
-> **Version target:** akm-cli v0.8.0
+> **Version target:** akm-cli 0.9.0
 
 akm classifies assets by **file extension and content**, not by directory name.
 Conventional directories are still the best default because they improve search
@@ -30,11 +30,13 @@ my-stash/
 ├── lessons/*.md
 ├── env/*.env
 ├── secrets/
-├── wikis/<name>/*.md
 └── tasks/*.yml
 ```
 
-Use only the directories you need, but prefer this layout when you can.
+Use only the directories you need, but prefer this layout when you can. An
+LLM wiki (`schema.md` + `pages/`) is a separate first-class **bundle
+format**, not a directory inside an AKM-native stash — see the LLM Wiki note
+under Workflows below.
 
 ## Asset file conventions
 
@@ -53,7 +55,7 @@ The `description` is a trigger sentence. Write “Use when …”, not a title.
 
 ### Commands
 
-akm v0.8.0 command assets follow the OpenCode-style prompt-template convention:
+akm 0.9.0 command assets follow the OpenCode-style prompt-template convention:
 
 ```markdown
 ---
@@ -81,28 +83,51 @@ tools: [Read, Grep, Glob, Bash]
 
 ### Workflows
 
-akm v0.8.0 workflows are structured markdown, not frontmatter step arrays:
+akm 0.9.0 workflows are unified markdown with the orchestration graph in
+frontmatter and step instructions in the body — the retired 0.8.0
+`## Step: <title>` / `Step ID:` / `### Instructions` / `### Completion
+Criteria` heading contract fails `akm lint --type workflows` with
+`invalid-workflow-structure` and is skipped by `akm index`:
 
 ```markdown
 ---
+type: workflow
 description: Cut and verify a release
 tags: [release]
 params:
-  version: Version to publish
+  version: { type: string, description: Version to publish }
+steps:
+  - id: validate-inputs
 ---
 
-# Workflow: Publish a release
+# Publish a release
 
-## Step: Validate inputs
-Step ID: validate-inputs
+## validate-inputs
 
-### Instructions
-Check the version, changelog, and release target.
+Check the version, changelog, and release target, using the `version`
+parameter.
 
-### Completion Criteria
+### gate
+
 - Version is confirmed.
 - Release notes exist.
 ```
+
+Every `## <step-id>` heading must match a declared `steps[].id` exactly. An
+optional `### gate` sub-heading carries the step's completion rubric —
+evaluated fail-closed by `workflow.judgeEngine` when non-empty; omitted or
+empty skips validation. Run `akm workflow create <name> --print` for a
+starter template, and `akm lint --type workflows` to validate before
+running. See `knowledge/akm-cli-reference` for the full contract.
+
+### LLM Wiki bundles
+
+A Karpathy-style LLM wiki (`schema.md` rulebook + agent-authored `pages/`)
+is a first-class **bundle format** in 0.9.0, not an AKM-native asset type or
+directory. Install one with `akm bundle add <source>` like any other
+source; akm's LLM Wiki adapter recognizes it automatically and its pages
+resolve to `bundle//pages/<slug>` refs. There is no `akm wiki` command
+family and no `wiki:` asset type.
 
 ### Lessons
 
@@ -122,19 +147,21 @@ quality: curated
 
 ### Tasks
 
-Task assets are first-class 0.8.0 assets stored under `tasks/` as YAML
-(`tasks/<id>.yml`). The file is pure YAML — no markdown frontmatter
-delimiters, no body section. Legacy `.md` task files are warned and
-silently skipped by the loader.
+Task assets are first-class assets stored under `tasks/` as pure YAML
+(`tasks/<id>.yml`) — no markdown frontmatter delimiters, no body section.
+Only **version-2** task YAML is discovered: the file must begin with
+`version: 2`. A v1 file (including one with no `version` key) is diagnosed
+by `sync`/`doctor` but is never rewritten or executed.
 
 ```yaml
 # tasks/<id>.yml
+version: 2
 schedule: "0 9 * * *"
 enabled: true
 description: "Use when a nightly AKM extract + improve pass should run without hand-built cron notes."
 tags: [scheduled, improve, extract]
 # Pick exactly one of `workflow:`, `prompt:`, or `command:`:
-workflow: workflow:evolve-assets
+workflow: workflows/evolve-assets
 # OR an inline agent prompt:
 # prompt: |
 #   multi-line prompt body
@@ -143,13 +170,17 @@ workflow: workflow:evolve-assets
 ```
 
 Pick exactly one of `workflow:`, `prompt:`, or `command:`. Manage tasks with
-`akm tasks add|list|show|run|history|enable|disable|remove|sync|doctor`.
+`akm task add|run|history|sync|doctor` (singular `task`, not `tasks`) — there
+is no `task list`/`show`/`remove`/`enable`/`disable`/`init`. Use `akm search
+--type task` / `akm show tasks/<id>` to inspect a task; edit the YAML's
+`enabled:` field plus `akm task sync` to enable, disable, or (after deleting
+the file) remove one.
 
 ### Metadata guidance
 
 Prefer inline metadata in frontmatter and file-local headers. Older curated
-stashes may still carry `.stash.json` during migration, but 0.8.0-facing assets
-should not rely on it as the primary authoring contract.
+stashes may still carry `.stash.json` during migration, but 0.9.0-facing
+assets should not rely on it as the primary authoring contract.
 
 ## Asset quality rules
 

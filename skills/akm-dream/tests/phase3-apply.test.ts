@@ -52,9 +52,9 @@ function basePlan(): PlanReport {
         ],
       },
       {
-        id: "delete:memory:old-note",
+        id: "delete:memories/old-note",
         operation: "delete",
-        targetRef: "memory:old-note",
+        targetRef: "memories/old-note",
         targetName: "old-note",
         approved: false,
         confidence: 0.6,
@@ -70,7 +70,7 @@ function basePlan(): PlanReport {
           {
             kind: "memory",
             source: "old-note.md",
-            ref: "memory:old-note",
+            ref: "memories/old-note",
             excerpt: "Old note.",
           },
         ],
@@ -82,8 +82,8 @@ function basePlan(): PlanReport {
 describe("applyPlan", () => {
   test("applies only approved candidates by default", async () => {
     const plan = basePlan();
-    const rememberMemory = mock(async () => ({ ref: "memory:new-policy" }));
-    const forgetMemory = mock(async () => ({ ok: true, ref: "memory:old-note", removed: true }));
+    const rememberMemory = mock(async () => ({ ref: "memories/new-policy" }));
+    const forgetMemory = mock(async () => ({ ok: true, ref: "memories/old-note", removed: true }));
 
     const result = await applyPlan(
       plan,
@@ -113,7 +113,7 @@ describe("applyPlan", () => {
 
   test("enforces delete budget for reviewed destructive actions", async () => {
     const plan = basePlan();
-    const forgetMemory = mock(async () => ({ ok: true, ref: "memory:old-note", removed: true }));
+    const forgetMemory = mock(async () => ({ ok: true, ref: "memories/old-note", removed: true }));
 
     const result = await applyPlan(
       plan,
@@ -128,7 +128,7 @@ describe("applyPlan", () => {
       },
       {
         showMemory: async () => null,
-        rememberMemory: async () => ({ ref: "memory:new-policy" }),
+        rememberMemory: async () => ({ ref: "memories/new-policy" }),
         forgetMemory,
       },
     );

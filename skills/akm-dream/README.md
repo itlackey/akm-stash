@@ -1,7 +1,7 @@
 ---
 description: Repository README for the akm-dream skill. The active asset entrypoint is SKILL.md; this file documents the package layout, phase scripts, and CLI usage.
 tags: [akm-dream, readme]
-updated: 2026-05-24
+updated: 2026-08-04
 ---
 
 # akm-dream
@@ -40,7 +40,7 @@ The skill ships as part of [akm-stash](https://github.com/itlackey/akm-stash).
 ### Via akm (recommended)
 
 ```bash
-akm add github:itlackey/akm-stash
+akm bundle add github:itlackey/akm-stash
 akm index
 akm search "dream consolidate memories"
 ```
@@ -48,7 +48,7 @@ akm search "dream consolidate memories"
 ### Single-asset clone
 
 ```bash
-akm clone "github:itlackey/akm-stash//skill:akm-dream"
+akm clone "github:itlackey/akm-stash//skills/akm-dream"
 ```
 
 ### Standalone
@@ -128,7 +128,7 @@ bun run phase3:plan          # default: latest run's orient.json + signal.json
 bun run phase3:apply         # default: latest run's plan.json in .akm-dream/runs/
 bun run phase4               # rebuild MEMORY.md + akm index
 bun run phase4:dry           # preview the new MEMORY.md without writing
-bun run forget memory:foo    # delete a single memory
+bun run forget memories/foo  # delete a single memory
 ```
 
 Phase 3 standalone commands accept explicit artifact paths when you do not want
@@ -160,7 +160,7 @@ akm-dream/
 ```
 
 The skill uses `akm` commands for authoritative reads, writes, and
-indexing: `akm show`, `akm remember`, `akm index`, `akm log list`,
+indexing: `akm show`, `akm remember`, `akm index`, `akm log`,
 and `akm config path --all`.
 
 ## Safety
@@ -182,7 +182,9 @@ and `akm config path --all`.
 
 ## Compatibility
 
-- akm `>= 0.4.0` (locked v1 CLI surface assumed)
+- akm `>= 0.9.0` (uses the 0.9.0 command surface: `akm proposal extract`,
+  `akm bundle add`, `[bundle//]conceptId` refs — see `references/breaking-changes.md`
+  in the `akm-migrate` skill if you're consolidating memories on an older install)
 - Bun `>= 1.1.0` (uses `Bun.spawn`)
 - Works on Linux and macOS. Windows is untested but should work under WSL.
 
@@ -194,7 +196,7 @@ and `akm config path --all`.
 - `references/review-flow.md`
   — staged validation, review, approval, and post-run audit expectations.
 - [akm 0.8.0 — CLI Redesign, Task Assets, and Belief-Aware Memory](https://dev.to/itlackey/akm-080-cli-redesign-task-assets-and-belief-aware-memory-3h42)
-  — context for `akm improve`/`propose` and the renamed proposal-review
+  — context for `akm improve`/`akm proposal new` and the renamed proposal-review
   commands. Dream is complementary: those commands generate proposals; dream
   consolidates what's already in the live stash.
 

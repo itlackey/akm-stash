@@ -1,7 +1,7 @@
 ---
 name: akm-migrate
 description: Guide an agent through verifying and completing an akm upgrade — reading migration notes, running config and storage migrations, updating stash assets that reference deprecated commands, and confirming the system is healthy. Use after `akm upgrade` or after manually installing a new akm version.
-updated: 2026-06-01
+updated: 2026-08-04
 ---
 
 # akm Migration Guide
@@ -16,17 +16,15 @@ migrate storage, then verify stash assets and system health.
 
 ```bash
 akm --version
+akm migrate status
 ```
 
-If you don't know the previous version, check the config backup directory:
-
-```bash
-ls ~/.cache/akm/config-backups/
-```
-
-The backup filenames contain timestamps. The most recent backup before today
-is the pre-upgrade config and shows the old version via `configVersion` inside
-it.
+If you don't know the previous version, `akm migrate status` reports the
+current config/database classification and, once an `apply` has run at least
+once, points at the verified recovery run it created — that run's
+`configVersion` shows the pre-upgrade version. Do not hand-inspect or copy
+files under the data directory directly; treat `akm migrate status` /
+`akm-migrate restore` as the source of truth for backup state.
 
 ---
 
@@ -56,44 +54,71 @@ akm help migrate
 
 ---
 
-## Step 3 — Run the config migration
+## Step 3 — Run the config and database migration
 
-akm auto-migrates config on every invocation, but running it explicitly lets
-you preview and confirm the changes:
+**Config no longer auto-migrates on every invocation as of 0.9.0.** Migration
+is an explicit coordinator step: `akm migrate` inspects and applies config
+plus durable-database (`state.db`) migration as one installation lifecycle.
+Normal commands refuse an old, future, or divergent durable schema instead of
+silently migrating it as a side effect.
 
 ```bash
-# Preview changes without writing
-akm migrate --dry-run --diff
+# Read-only status check first — exits nonzero when apply is blocked
+akm migrate status
 
-# Apply the migration
-akm migrate
+# Preview against a prepared target config, without writing
+akm migrate apply --config ./prepared-config.json --dry-run
+
+# Apply
+akm migrate apply --config ./prepared-config.json
 ```
 
-**What it does:** renames deprecated config keys, moves fields to their new
-locations (e.g. `agent.default` → `defaults.agent`), removes keys that no
-longer exist, and sets `configVersion` to the current version.
+`--config` is required when the active config is legacy or absent; when the
+active config is already current, `apply` safely uses it as the target with
+no `--config` needed. Apply is idempotent and creates a semantically verified
+recovery run before changing any artifact — it refuses before that backup if
+managed handles, maintenance activities, mutation locks, or a workflow claim
+are live.
 
-If `akm migrate` reports no changes, your config was already up to date.
+**Crossing 0.8 → 0.9 specifically:** the installed 0.8 binary does not know
+the 0.9 migration protocol. Before running anything else: create an
+independent filesystem backup, prepare a valid 0.9 config, install or stage
+the 0.9 binary, then invoke that **new** binary with `akm migrate apply
+--config <prepared-0.9-config>`. Do not use an 0.8 `akm upgrade
+--migration-config` flow — 0.8 code cannot enforce the safeguards 0.9
+introduced.
+
+If `akm migrate status` reports `blocked`, stop: preserve the reported backup
+run and resolve the named artifact or active-operation error before retrying
+`apply`.
+
+If `akm migrate status` reports `ready`/`current`, your config and database
+were already up to date.
 
 ---
 
 ## Step 4 — Run the storage migration (if needed)
 
-Some version upgrades also move files in the stash directory. Check whether
-a storage migration is needed:
+Some version upgrades also move files in the stash directory. This is a
+separate step from `akm migrate` — it is the standalone `akm-migrate` tool's
+`storage` subcommand:
 
 ```bash
 # Preview storage migration (no changes written)
-akm-migrate-storage --dry-run
+akm-migrate storage --dry-run
 
 # Apply storage migration
-akm-migrate-storage --yes
+akm-migrate storage --yes
 ```
 
-The most common storage migration is `vaults/` → `env/` (introduced in 0.8.0).
-If the command is not found, your version does not include a storage migration.
+The most common storage migration is the non-destructive `vaults/` → `env/`
+copy needed when crossing into 0.9.0 from an older stash that still stores
+`.env` files only under `vaults/`. If the command reports nothing to do, your
+stash does not need a storage migration.
 
-After any storage migration, rebuild the search index:
+After any storage migration, rebuild the search index — indexing does not
+migrate config or durable schemas, so run it only **after** migration status
+reports `current`:
 
 ```bash
 akm index
@@ -110,12 +135,19 @@ specific patterns to look for in your target version.
 ### Scan for deprecated patterns
 
 ```bash
-# Find assets mentioning deprecated commands (adjust patterns per version)
-grep -r "akm vault\|akm reflect\|akm distill\|akm index --enrich\|--for-agent\|proposal list\|proposal show\|proposal diff\|proposal accept\|proposal reject" \
-  "$(akm config get stashDir)" --include="*.md" --include="*.yml" -l
+BUNDLE_DIR="$(akm info --format json | jq -r .bundleDir)"
 
-# Find task assets that use the old .md extension (must be .yml)
-find "$(akm config get stashDir)/tasks" -name "*.md" 2>/dev/null
+# Find assets mentioning retired commands or the old type:name ref grammar
+# (adjust patterns per version — see references/breaking-changes.md)
+grep -rn "akm vault\|akm reflect\|akm distill\|akm extract\|akm tasks \|akm add \|akm list\b\|akm init\b\|akm propose \|akm remove\b\|akm update\b\|akm save\b\|akm events\b\|akm wiki\|akm accept\|akm proposals\b\|akm proposal drain\|--auto-accept\|--profile " \
+  "$BUNDLE_DIR" --include="*.md" --include="*.yml" -l
+
+grep -rnoE '\b(skill|knowledge|memory|workflow|command|agent|script|env|secret|lesson|task|vault|wiki):[a-zA-Z0-9_/-]+' \
+  "$BUNDLE_DIR" --include="*.md" --include="*.yml"
+
+# Find task assets that use the old .md extension (must be .yml) or lack `version: 2`
+find "$BUNDLE_DIR/tasks" -name "*.md" 2>/dev/null
+grep -rL '^version: 2' "$BUNDLE_DIR/tasks" --include="*.yml" 2>/dev/null
 ```
 
 For each file that matches:
@@ -126,19 +158,26 @@ For each file that matches:
 
 ### Common asset updates
 
-**Task files must be `.yml`** (enforced from 0.8.0):
+**Task files must be `.yml` and begin with `version: 2`** (only version-2
+task YAML is discovered as of 0.9.0; a v1 file, including one with no
+`version` key, is diagnosed by `sync`/`doctor` but never rewritten or
+executed):
 
 ```bash
 # Rename any .md task files to .yml — read the content first and convert
-# the frontmatter-based format to pure YAML
-find "$(akm config get stashDir)/tasks" -name "*.md" -exec echo "Needs renaming: {}" \;
+# to pure YAML with a leading `version: 2` key
+find "$BUNDLE_DIR/tasks" -name "*.md" -exec echo "Needs renaming: {}" \;
 ```
 
 **Update stash skills and commands that call deprecated CLI verbs:**
 
 ```bash
-# Use akm lint to find stale refs in your stash assets
-akm lint --format json | jq '.issues[] | select(.rule == "stale-command" or .rule == "missing-ref")'
+# Use akm lint to find structural issues, then grep for stale refs directly —
+# akm lint does not have a dedicated "stale-command" rule; the CLI itself
+# fails a retired command with UNKNOWN_COMMAND and a replacement hint, which
+# is the fastest way to confirm a fix (run the command, expect it to succeed).
+akm lint --format json | jq '.flagged[]'
+akm lint --type workflows --format json | jq '.flagged[]'   # invalid-workflow-structure findings
 ```
 
 ---
@@ -159,7 +198,7 @@ akm health
 
 `akm health` reports:
 - `state.db` schema and round-trip integrity
-- Agent profile configuration
+- Agent engine configuration
 - Task history backing
 - Recent improve pipeline metrics
 
@@ -177,9 +216,9 @@ akm proposal list --status pending
 # Check lessons are indexed
 akm search --type lesson --limit 5
 
-# Check the configured agent profile is still valid
-akm config get defaults.agent
-akm info | grep -A5 "agent"
+# Check the configured default engine is still valid
+akm config get defaults.engine
+akm info
 ```
 
 ---
@@ -191,7 +230,7 @@ akm info | grep -A5 "agent"
 akm curate "test query after upgrade"
 
 # Confirm a known asset is still reachable
-akm show skill:akm-quickstart
+akm show skills/akm-quickstart
 ```
 
 If these succeed, the upgrade is complete.
@@ -200,23 +239,32 @@ If these succeed, the upgrade is complete.
 
 ## Rollback
 
-If something went wrong and you need to revert:
+If something went wrong and you need to revert, use the standalone
+`akm-migrate` tool's `restore` subcommand rather than hand-copying files —
+`apply` already created a verified recovery run before it touched anything:
 
 ```bash
-# Restore the pre-upgrade config from backup
-ls ~/.cache/akm/config-backups/
-cp ~/.cache/akm/config-backups/config-<timestamp>.json ~/.config/akm/config.json
+# Find the run id. `akm migrate apply` prints `backupRunId` when it creates
+# a run; no command enumerates them, so otherwise list the backup directory:
+#   $DATA/backups/migrations/<installation-id>/<run-id>/
+# ($DATA is the akm data dir — `~/.local/share/akm` on Linux by default.)
 
-# Restore the pre-upgrade data directory (only if DB was corrupted)
-# First: stop any running akm processes
-# Then:
-akm db backups   # list available backups
-bash scripts/migrations/restore-data-dir.sh <backup-path> ~/.local/share/akm
+# Restore is explicit and destructive — it creates and verifies a rescue
+# backup of the CURRENT (post-attempt) state before replacing anything:
+akm-migrate restore --for 0.9.0 --run <backup-run-id> --confirm
 ```
 
-The data directory backup is written automatically by akm before any
-destructive DB schema upgrade. Backups live at:
-`~/.local/share/akm/backups/<timestamp>-pre-v<version>/`
+There is no `akm db` command and no ad hoc `scripts/migrations/restore-data-dir.sh`
+helper — `akm-migrate restore` is the one supported path back to a prior
+backup run.
+
+A recovery run covers exactly four artifacts: `config.json`, `state.db`,
+`workflow.db`, and `index.db`. **`logs.db` is deliberately outside the
+migration system** — it is never backed up, restored, or version-gated, and
+it self-bootstraps its schema on open. A restore therefore rolls the other
+four back while `logs.db` stays as-is. That is safe (task logs are a
+purgeable cache, not durable state), but do not expect a restore to rewind
+them.
 
 ---
 

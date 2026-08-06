@@ -1,7 +1,7 @@
 ---
 description: The system prompt used by the akm-dream pipeline to consolidate akm memory files into durable, well-organized memories.
 tags: [akm-dream, reference, prompt]
-updated: 2026-06-01
+updated: 2026-08-04
 refs: []
 ---
 
@@ -29,19 +29,19 @@ This is your candidate list for new or updated memories.
 
 Phase 1 runs automatically when you invoke `akm dream`. The output JSON contains:
 
-- Every `memory:` ref with size, age, and frontmatter tags.
+- Every `memories/` ref with size, age, and frontmatter tags.
 - The current state of `MEMORY.md`: line count, links found,
   links that point at memories that no longer exist.
 - For each memory, a `signals` block flagging:
   - **relativeDates** — phrases like "yesterday" or "last week"
     that need conversion to absolute dates.
-  - **internalRefs** — `memory:foo`, `skill:bar` cross-references
+  - **internalRefs** — `memories/foo`, `skills/bar` cross-references
     in the body. Useful when consolidating: if you delete
-    `memory:foo`, fix anything that links to it.
+    `memories/foo`, fix anything that links to it.
   - **approxAgeDays** — days since the file was last modified.
 
 Skim `orient.json` first. Don't load every memory's content yet — `akm
-show memory:<name> --format json --detail full` lets you load only the
+show memories/<name> --format json --detail full` lets you load only the
 ones you need to inspect.
 
 ## Phase 2 — Gather recent signal
@@ -51,11 +51,11 @@ Signal comes from two native CLI calls and, optionally, supplemental sources.
 **Primary: session knowledge extraction**
 
 ```bash
-akm extract --auto --since 7d
+akm proposal extract --auto --since 7d
 akm proposal list --status pending --format json
 ```
 
-`akm extract` reads native Claude Code and OpenCode session files and queues
+`akm proposal extract` reads native Claude Code and OpenCode session files and queues
 candidates as proposals. Review the pending proposal list — these are your
 primary signals.
 
@@ -72,7 +72,7 @@ use it as input to the review gate.
 
 **Supplemental (optional): direct-source signals**
 
-Phase 2 also covers daily logs and feedback events that `akm extract` doesn't
+Phase 2 also covers daily logs and feedback events that `akm proposal extract` doesn't
 reach. Use supplemental sources when the stash has
 `<stash>/logs/YYYY/MM/YYYY-MM-DD.md` entries or you need targeted grep:
 
@@ -92,7 +92,7 @@ to review the plan, approve it, and then apply only the approved operations.
 
 - Relative-date resolution ("yesterday" → ISO date) is done by `akm improve memory`.
   If you see unresolved phrases, it means `akm improve` was skipped or the memory
-  predates 0.8.
+  predates that pass.
 - Contradiction detection: `akm improve memory` writes `contradictedBy` edges.
   Use these as input to the plan — resolve them here by fixing or deleting the
   contradicted side.
@@ -115,7 +115,7 @@ to review the plan, approve it, and then apply only the approved operations.
 
 ```bash
 # Read before touching.
-akm show memory:<name> --detail full
+akm show memories/<name> --detail full
 
 # Update or create via stdin.
 akm remember --name "<name>" --force <<'EOF'
@@ -127,8 +127,8 @@ updated: 2026-06-01
 Body text here.
 EOF
 
-# Delete a single memory.
-akm forget memory:<old-name>
+# Delete a single memory (akm has no native forget verb — use this skill's helper):
+bun run scripts/forget.ts memories/<old-name>
 ```
 
 **Rules:**

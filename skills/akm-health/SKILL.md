@@ -1,7 +1,7 @@
 ---
 name: akm-health
 description: Produce well-formatted markdown health reports for the akm improve pipeline, interpret metrics, troubleshoot issues, and tune pipeline behavior. Use when the user asks for a health report, wants to understand improve metrics, diagnose slow/silent/failing runs, or tune consolidation and distillation.
-updated: 2026-06-01
+updated: 2026-08-04
 ---
 
 # akm Health Reporting
@@ -236,7 +236,7 @@ See `references/troubleshooting.md` for the full playbook covering:
 - slow consolidation
 - low memory inference yield
 - graph extraction truncations/failures
-- `akm extract` finding nothing
+- `akm proposal extract` finding nothing
 
 ### JNA rate changes — deep diagnosis
 

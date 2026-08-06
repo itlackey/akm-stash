@@ -247,19 +247,19 @@ export async function rememberMemory(
   return await akm<{ ref: string }>(args, { stdin: content });
 }
 
-/** Resolve the working stash directory via `akm config path --all`. */
+/** Resolve the working bundle directory via `akm config path --all`. */
 export async function getStashDir(): Promise<string> {
-  const out = await akm<{ stash?: string; config?: string; cache?: string; index?: string }>([
+  const out = await akm<{ bundle?: string; config?: string; cache?: string; index?: string }>([
     "config",
     "path",
     "--all",
     "--format",
     "json",
   ]);
-  const dir = out.stash ?? null;
+  const dir = out.bundle ?? null;
   if (!dir) {
     throw new Error(
-      "Could not resolve stash directory from `akm config path --all`. Run `akm setup` first.",
+      "Could not resolve the working bundle directory from `akm config path --all`. Run `akm setup` first.",
     );
   }
   return dir;
@@ -276,7 +276,6 @@ export async function indexStash(verbose = false): Promise<unknown> {
 export async function listFeedbackEvents(limit = 50): Promise<FeedbackEvent[]> {
   const result = await akm<{ events?: FeedbackEvent[] }>([
     "log",
-    "list",
     "--type",
     "feedback",
     "--detail",

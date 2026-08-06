@@ -10,7 +10,7 @@ destructive or index-rewriting parts complete.
    - Validate inventory completeness, broken `MEMORY.md` refs, and any memories
      that appear protected or canonical.
 2. Phase 2 output review
-   - Primary sources: `akm proposal list --status pending` (from `akm extract`)
+   - Primary sources: `akm proposal list --status pending` (from `akm proposal extract`)
      and `akm improve memory --dry-run` output.
    - Supplemental: `signal.json` containing daily logs and feedback events.
    - Validate that signals are recent, specific, and not transcript noise.
@@ -47,4 +47,5 @@ The explicit approval boundary remains between planning and apply. Review the
 deterministic `plan.json` first, then resume with `--continue` only when the
 checklist is satisfied.
 
-For details on available flags and path overrides, see `references/akm-commands.md`.
+For details on available flags and path overrides, see the `## Just one
+phase` section of `README.md` and the CLI wrapper in `scripts/lib/akm.ts`.

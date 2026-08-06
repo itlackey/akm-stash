@@ -1,7 +1,7 @@
 ---
 description: Step-by-step methodology for diagnosing judgedNoAction (JNA) rate changes in akm consolidation. Covers the three root-cause hypotheses, cross-signal discrimination, inflection-point detection, and resolution for each cause.
 tags: [akm-health, judgedNoAction, consolidation, diagnosis, tuning]
-updated: 2026-06-01
+updated: 2026-08-04
 ---
 
 # Diagnosing judgedNoAction (JNA) Changes
@@ -223,12 +223,12 @@ cycles back to fresher memories.
    is backing up and blocking consolidation on memories that have pending proposals.
    Clear reviewed proposals to unlock them:
    ```bash
-   akm proposal accept --max-diff-lines 15 --dry-run   # preview
-   akm proposal accept --max-diff-lines 15 -y          # accept low-risk ones
+   akm proposal drain --policy personal-stash --max-diff-lines 15 --dry-run   # preview
+   akm proposal drain --policy personal-stash --max-diff-lines 15 --promote -y  # accept low-risk ones
    ```
 2. Check `merge_missing_description`. If still > 20/run, run the description fix:
    ```bash
-   akm improve memory --task "add concise one-line descriptions to memories missing a description frontmatter field" --auto-accept safe --limit 60
+   akm improve memory --task "add concise one-line descriptions to memories missing a description frontmatter field" --limit 60
    ```
 3. Monitor the next 2h window. If JNA drops below 65%, the sampler rotated back —
    no config change needed.
@@ -252,7 +252,7 @@ could be a model change, API degradation, or prompt drift.
 2. Check `reflect.failed` and `consolidation.failedChunks`. API errors would show here.
 3. Run a targeted test on a small set of known-good memories:
    ```bash
-   akm improve memory:<known-ref> --dry-run
+   akm improve memories/<known-ref> --dry-run
    ```
 4. If model/API is fine, check whether akm was recently upgraded and whether a consolidation
    behavior change was noted in the changelog (`akm --version` to confirm your installed version,
@@ -307,7 +307,7 @@ runs after 16:40 UTC June 1. Not concentrated.
 consolidated memories. LLM correctly proposing nothing.
 
 **Actions taken:**
-1. `akm improve memory --task "add descriptions..." --auto-accept safe --limit 60`
+1. `akm improve memory --task "add descriptions..." --limit 60`
    → reduced `merge_missing_description` from 16.6/run to 8/run (52% drop)
 2. Identified 415 pending proposals backing up `dedup_pending_proposal`
    → bulk-accept small proposals to unblock consolidation

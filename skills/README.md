@@ -12,6 +12,12 @@ Start here:
   directory.
 - [`akm-migrate/`](./akm-migrate) — verify and complete an akm version upgrade.
 - [`akm-curate-stash/`](./akm-curate-stash) — build a goal-specific mini-stash by discovering and cloning the best assets from all sources.
+- [`publish-akm-stash/`](./publish-akm-stash) — turn a directory of assets into
+  a searchable, installable stash.
+- [`akm-health/`](./akm-health) — report on improve-pipeline metrics and
+  troubleshoot slow, silent, or failing runs.
+- [`akm-dream/`](./akm-dream) — consolidate and prune memories through staged
+  review gates.
 
 Browse the full set with:
 
