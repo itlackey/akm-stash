@@ -1,7 +1,7 @@
 ---
 name: install-akm-stash
 description: Use when the user wants to install or clone an akm stash or individual asset from npm, GitHub, a git URL, or a local directory into their working stash.
-updated: 2026-05-24
+updated: 2026-08-04
 ---
 
 # Install an akm Stash

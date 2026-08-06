@@ -16,7 +16,7 @@ self-improvement, proposal review, and scheduled task authoring.
 | [`agents/`](./agents) | Subagents that specialize in akm tasks (`akm-librarian`). |
 | [`commands/`](./commands) | Prompt templates for discovery, stash review, and proposal review. |
 | [`knowledge/`](./knowledge) | Reference docs for the CLI, stash structure, the improve+extract pipeline, proposal/lesson lifecycle, and registry schema. |
-| [`skills/`](./skills) | Progressive-disclosure skills for bootstrapping, installing, publishing, reviewing proposals, and memory consolidation. |
+| [`skills/`](./skills) | Progressive-disclosure skills for bootstrapping, installing, publishing, migrating, curating, health reporting, and memory consolidation. |
 | [`tasks/`](./tasks) | Scheduled prompt assets for recurring improve and proposal-review checks. |
 | [`workflows/`](./workflows) | Runnable playbooks for onboarding, publishing, and evolving assets. |
 
@@ -67,6 +67,11 @@ No akm yet? Install the CLI first — see
   and model the task file after the examples in `tasks/`.
 - **After upgrading akm to a new version** → run the `akm-migrate` skill to read migration notes, apply config and storage migrations, update stash assets for deprecated commands, and verify system health.
 - **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
+- **Improve runs are slow, silent, or producing odd numbers** → run the
+  `akm-health` skill to turn `akm health` output into a readable report and
+  work through the troubleshooting tree.
+- **Memories have drifted or grown messy** → run the `akm-dream` skill for a
+  staged, reviewable consolidation and prune pass.
 
 ## Conventions
 
