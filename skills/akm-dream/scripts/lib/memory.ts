@@ -134,7 +134,7 @@ export function scanMemorySignals(parsed: ParsedMemory): MemorySignals {
     if (m) relativeDates.push(m[0]);
   }
 
-  // 0.9.0 `[bundle//]conceptId` grammar: an optional bundle-slug prefix,
+  // 0.9.2 `[bundle//]conceptId` grammar: an optional bundle-slug prefix,
   // then one of the known stash subdirs, then the asset name. `wiki` was
   // retired as an AKM-owned subdir (LLM wiki pages resolve to
   // `bundle//pages/<slug>` instead, which is a foreign/opaque conceptId this

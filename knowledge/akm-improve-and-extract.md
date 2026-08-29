@@ -2,12 +2,12 @@
 description: Use when an agent needs to run, configure, or tune the akm self-improvement pipeline — including akm improve, akm proposal extract, and akm health.
 tags: [akm, improve, extract, health, pipeline]
 quality: curated
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Improve and Extract Pipeline
 
-> **Version target:** akm-cli 0.9.0
+> **Version target:** akm-cli 0.9.2
 
 akm's self-improvement loop is built on three commands: **proposal extract**
 (harvest durable insights from session logs), **improve** (analyze and
@@ -25,7 +25,7 @@ described below.
 
 ```bash
 # Harvest the last 24 hours from Claude Code sessions (default window):
-akm proposal extract --type claude-code
+akm proposal extract --type claude
 
 # Harvest from OpenCode sessions in the last 7 days:
 akm proposal extract --type opencode --since 7d
@@ -34,10 +34,10 @@ akm proposal extract --type opencode --since 7d
 akm proposal extract --auto
 
 # Preview without queuing (dry run):
-akm proposal extract --type claude-code --dry-run
+akm proposal extract --type claude --dry-run
 
 # Re-process a specific session even if already seen:
-akm proposal extract --type claude-code --session-id <id> --force
+akm proposal extract --type claude --session-id <id> --force
 ```
 
 There is no `--watch`/`--debounce-ms` polling mode. For recurring
@@ -66,7 +66,7 @@ akm improve skill
 akm improve
 
 # Add a specific task directive:
-akm improve --task "Update CLI flag references for 0.9.0"
+akm improve --task "Update CLI flag references for 0.9.2"
 
 # Dry run — show planned actions without writing:
 akm improve --dry-run
@@ -132,7 +132,7 @@ queue.
             "maxDiffLines": 200,         // defer accepts larger than this
             "rejectEmpty": true,
             "judgment": {                // OPTIONAL judgment tier for deferred items
-              "mode": "llm",             // llm (default) | agent | sdk
+              "enabled": true,
               "timeoutMs": 600000
             }
           }
@@ -167,7 +167,8 @@ Strategy sync defaults: `catchup`, `consolidate`, `default`, `frequent`,
 
 ## akm health — pipeline diagnostics
 
-`akm health` probes the runtime state and surfaces improve-pipeline metrics.
+`akm health` probes the runtime state and surfaces improve-pipeline metrics in
+its schemaVersion 3 JSON envelope.
 
 ```bash
 akm health

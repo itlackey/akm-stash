@@ -143,7 +143,7 @@ async function scanFeedback(total: { count: number }): Promise<Signal[]> {
     const note = typeof event.metadata?.note === "string" ? event.metadata.note : "";
     signals.push({
       source: "akm-feedback",
-      file: "akm log list --type feedback",
+      file: "akm log --type feedback",
       line: 0,
       matchedPattern: `feedback-${signal}`,
       excerpt: `${event.ref ?? "(unknown ref)"}${note ? ` — ${note}` : ""}`,
@@ -189,7 +189,7 @@ async function buildReport(): Promise<SignalReport> {
   const feedbackSignals = await scanFeedback(totals);
   scannedSources.push({
     kind: "akm-feedback",
-    path: "akm log list --type feedback",
+    path: "akm log --type feedback",
     fileCount: feedbackSignals.length,
   });
   signals.push(...feedbackSignals);

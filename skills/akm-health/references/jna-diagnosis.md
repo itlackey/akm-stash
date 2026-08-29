@@ -1,7 +1,7 @@
 ---
 description: Step-by-step methodology for diagnosing judgedNoAction (JNA) rate changes in akm consolidation. Covers the three root-cause hypotheses, cross-signal discrimination, inflection-point detection, and resolution for each cause.
 tags: [akm-health, judgedNoAction, consolidation, diagnosis, tuning]
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # Diagnosing judgedNoAction (JNA) Changes
@@ -52,11 +52,11 @@ This is the most important diagnostic step. It reveals whether the change is
 (transient or structural issue).
 
 ```bash
-akm health --since 48h --detail per-run --format json | python3 -c "
+akm health --since 48h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 runs = sorted(d['runs'], key=lambda r: r.get('completedAt',''))
-print(f\"{'completedAt':26} {'runId':8} {'JNA%':6} {'promoted':8} {'processed':9} {'wallS':6} {'chunks':10}\")
+print(f\"{'completedAt':26} {'id':8} {'JNA%':6} {'promoted':8} {'processed':9} {'wallS':6} {'chunks':10}\")
 for r in runs:
     c = r.get('consolidation', {})
     proc = c.get('processed', 0)
@@ -64,7 +64,7 @@ for r in runs:
     wt = r.get('wallTime', r.get('wallTimeMs', 0))
     if isinstance(wt, dict): wt = wt.get('medianMs', 0)
     chunks = f\"{c.get('failedChunks',0)}/{c.get('totalChunks',0)}\"
-    print(f\"{r.get('completedAt','?'):26} {r['runId'][:8]:8} {jna:5.1f}% {c.get('promoted',0):8} {proc:9} {wt//1000:6} {chunks:10}\")
+    print(f\"{r.get('completedAt','?'):26} {r['id'][:8]:8} {jna:5.1f}% {c.get('promoted',0):8} {proc:9} {wt//1000:6} {chunks:10}\")
 "
 ```
 
@@ -82,7 +82,7 @@ Sort the per-run output by `completedAt` and find where the rolling 4-run averag
 of JNA crossed the elevated threshold and stayed there.
 
 ```bash
-akm health --since 48h --detail per-run --format json | python3 -c "
+akm health --since 48h --group-by run --format json | python3 -c "
 import sys, json
 from collections import deque
 d = json.load(sys.stdin)
@@ -125,7 +125,7 @@ These are mechanically independent. Their relationship at the inflection tells y
 
 ```bash
 # Extract guard skips per run around the inflection
-akm health --since 24h --detail per-run --format json | python3 -c "
+akm health --since 24h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for r in sorted(d['runs'], key=lambda r: r.get('completedAt','')):
@@ -147,7 +147,7 @@ JNA and wall time should be inversely correlated. When JNA rises (LLM proposing
 less), the LLM spends less time generating proposals → wall time should drop.
 
 ```bash
-akm health --since 24h --detail per-run --format json | python3 -c "
+akm health --since 24h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for r in sorted(d['runs'], key=lambda r: r.get('completedAt','')):
@@ -239,13 +239,13 @@ cycles back to fresher memories.
 
 **Signals:** JNA rises but guard skips stay flat or rise, wall time stays the
 same or rises, `promoted` drops to near-zero, the inflection correlates with an
-agent profile change or model update.
+engine configuration or model update.
 
 **Interpretation:** The LLM is making fewer valid proposals on the same pool. This
 could be a model change, API degradation, or prompt drift.
 
 **Actions:**
-1. Verify the agent profile is unchanged:
+1. Verify the selected engine and model are unchanged:
    ```bash
    akm health --since 1h --format json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['hardChecks'])"
    ```

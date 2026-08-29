@@ -12,6 +12,8 @@ const akmCli = process.env.AKM_AUDIT_CLI?.trim() || path.resolve(scriptDir, ".."
 function runCli(args: string[], options: { stashDir: string; input?: string }) {
   const xdgConfig = path.join(options.stashDir, "xdg-config");
   const xdgCache = path.join(options.stashDir, "xdg-cache");
+  const xdgData = path.join(options.stashDir, "xdg-data");
+  const xdgState = path.join(options.stashDir, "xdg-state");
   mkdirSync(xdgConfig, { recursive: true });
   mkdirSync(xdgCache, { recursive: true });
   return spawnSync("bun", [akmCli, ...args], {
@@ -23,6 +25,8 @@ function runCli(args: string[], options: { stashDir: string; input?: string }) {
       AKM_BUNDLE_DIR: options.stashDir,
       XDG_CONFIG_HOME: xdgConfig,
       XDG_CACHE_HOME: xdgCache,
+      XDG_DATA_HOME: xdgData,
+      XDG_STATE_HOME: xdgState,
     },
   });
 }
@@ -63,7 +67,11 @@ function main(): void {
     });
     assert(result.status === 0, `remember stdin failed: ${result.stderr}`);
     const remembered = JSON.parse(result.stdout) as Record<string, unknown>;
-    assert(remembered.ref === "memories/stdin-probe", "remember stdin did not create expected ref");
+    assert(
+      typeof remembered.ref === "string" &&
+        (remembered.ref === "memories/stdin-probe" || remembered.ref.endsWith("//memories/stdin-probe")),
+      "remember stdin did not create expected ref",
+    );
 
     result = runCli(["feedback", "memories/release-process", "--negative", "--reason", "stale"], { stashDir });
     assert(result.status === 0, `feedback failed: ${result.stderr}`);

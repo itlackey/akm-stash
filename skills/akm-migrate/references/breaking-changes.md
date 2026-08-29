@@ -1,287 +1,182 @@
 ---
-description: Per-version quick reference of breaking changes that require stash asset updates after an akm upgrade. Use during Step 5 of the akm-migrate skill to identify what to grep for and what to replace.
-tags: [akm-migrate, breaking-changes, versions, stash-assets]
-updated: 2026-08-04
+description: Current AKM 0.9.2 migration contract, plus a clearly historical 0.9.0 rename table. Use when updating authored assets or machine consumers after an upgrade.
+tags: [akm, migration, 0.9.2, compatibility, tasks, workflows]
+updated: 2026-08-29
 ---
 
-# Breaking Changes — Stash Asset Update Reference
+# AKM 0.9.2 Migration Reference
 
-For each version below, the **Scan pattern** is what to grep for in your stash.
-The **Replace with** column is the correct equivalent. The **Config change**
-column describes config key renames to verify with `akm migrate status`.
+This page is organized around the **current 0.9.2 contract**. The 0.9.0 table
+near the end is historical translation help only; do not copy its retired
+syntax into newly authored assets.
 
----
+## 0.9.2: task source v4 is mandatory
 
-## akm 0.9.0
+Only `tasks/<id>.yml` files with `version: 4` execute. A task selects exactly
+one of `uses:` or `run:`; scheduling is optional and `enabled` belongs to
+each `schedule:` entry. The v3 `akm:` options bag and `on:` trigger block
+are gone. Execution settings such as `timeout`, `engine`, `model`,
+`redact`, `maxSteps`, and `maxRetries` are top-level keys.
 
-**Full rename table:** `akm help migrate 0.9.0`
-**Longform guide:** `akm help migrate` → `v0.8-to-v0.9.md`
-
-0.9.0 is a hard-break command-surface overhaul — retired spellings fail with
-`UNKNOWN_COMMAND` and a replacement hint, and there are no compatibility
-aliases anywhere in this section.
-
-### Ref grammar: `type:name` → `[bundle//]conceptId`
-
-The colon grammar is gone with no alias — a `type:name` ref now fails to
-resolve. Subdir pluralization is not mechanical; derive it per type:
-
-| Old ref | New ref |
-|---|---|
-| `skill:<name>` | `skills/<name>` |
-| `command:<name>` | `commands/<name>` |
-| `agent:<name>` | `agents/<name>` |
-| `knowledge:<name>` | `knowledge/<name>` |
-| `workflow:<name>` | `workflows/<name>` |
-| `script:<name>` | `scripts/<name>` |
-| `memory:<name>` | `memories/<name>` |
-| `env:<name>` | `env/<name>` (unchanged subdir) |
-| `secret:<name>` | `secrets/<name>` |
-| `lesson:<name>` | `lessons/<name>` |
-| `task:<name>` | `tasks/<name>` |
-| `instruction:<name>` | `instructions/<name>` |
-| `vault:<name>` | gone — see below |
-| `origin//type:name` | `bundle//conceptId` (e.g. `github:owner/repo//knowledge/guide`) |
-
-### Command-surface overhaul (selected renames — full table in `akm help migrate 0.9.0`)
-
-| Scan pattern | Replace with | Notes |
-|---|---|---|
-| `akm init` | `akm bundle create` | |
-| `akm add <source>` | `akm bundle add <source>` | |
-| `akm list` | `akm bundle list` | |
-| `akm remove <source>` | `akm bundle remove <source>` | |
-| `akm update` | `akm bundle update` | To update akm itself, use `akm upgrade` |
-| `akm tasks <sub>` | `akm task <sub>` | Singular group; `list`/`show`/`remove`/`init`/`enable`/`disable` are gone |
-| `akm extract` | `akm proposal extract` | |
-| `akm propose` | `akm proposal new` | |
-| `akm reflect` / `akm distill` | `akm improve <ref>` | Folded into improve |
-| `akm proposals` / `akm accept` / `akm reject` / `akm diff` / `akm revert` | `akm proposal list\|accept\|reject\|diff\|revert` | Bare `akm proposal` (no verb) is now a usage error |
-| `akm log list` | `akm log` | Now a single command |
-| `akm registry search <q>` | `akm search <q> --from registry` | |
-| `akm workflow template` | `akm workflow create --print` | |
-| `akm workflow validate` | `akm lint --type workflows` | Add `--fail-on-flagged` for CI gates |
-| `akm config show` | `akm config list` | |
-| `akm improve --profile <name>` | `akm improve --strategy <name>` | Config moved `profiles.improve.<name>` → `improve.strategies.<name>` |
-| `akm improve --auto-accept <n\|safe\|false>` | (removed, no replacement flag) | `improve` never auto-promotes in 0.9.0 — every proposal lands `pending`; adjudicate with `akm proposal accept`/`reject` or `akm proposal drain` |
-| `akm workflow start\|next\|complete` | `akm workflow run <ref>` for execution, `akm workflow status <ref>` for inspection | External-driver `brief`/`report` protocol is also gone |
-| `akm history` | `akm log --ref <ref>` | |
-| `akm mv` | move the file, then `akm index` + `akm lint` | Optional `bun scripts/rekey-asset-ref.ts <old-ref> <new-ref>` from a source checkout carries ranking signal |
-| `akm log tail` | poll `akm log --since @offset:<id>` | Durable cursor, no daemon |
-| `akm workflow watch` | `akm log --run <run-id>` | |
-| `akm env set` / `akm env unset` | edit the `.env` file directly | akm loads it as-is |
-| `akm config validate` | (removed) | Config is validated on every load |
-| `akm task enable` / `akm task disable` | edit `enabled:` in the task YAML, then `akm task sync` | |
-| `akm task init` | `akm setup` | Seeds the default schedules |
-
-### Removed: `vault` asset type and `akm vault` command
-
-`vault` is fully removed. All `vault:` refs fail to resolve.
-
-| Scan pattern | Replace with | Notes |
-|---|---|---|
-| `akm vault list` | `akm env list` (whole `.env` group) or `akm secret list` (single value) | |
-| `akm vault show <ref>` | `akm show env/<name>` | |
-| `akm vault path <ref>` | `akm env path env/<name>` | |
-| `akm vault run <ref>` | `akm env run env/<name> --` | |
-| `akm vault load <ref>` | `akm env run env/<name> -- $SHELL` | For interactive shell |
-| `akm vault create` | `akm env create` | |
-| `akm vault set` | Edit the `.env` file directly, or `akm secret set` | One-value use → secret |
-| `vault:<name>` refs | `env/<name>` refs | Update all stash asset bodies |
-| `/akm-vault` slash command | `/akm-env` | Update Claude plugin commands |
-
-**Storage check:**
-
-```bash
-BUNDLE_DIR="$(akm info --format json | jq -r .bundleDir)"
-# Confirm vaults/ was migrated to env/ before relying on 0.9.0 behavior
-ls "$BUNDLE_DIR/env/"
-akm-migrate storage --dry-run   # reports whether a copy is still needed
-```
-
-If a copy is still needed, run `akm-migrate storage --yes` first.
-
-**Config changes:** `stashDir`/`sources`/`installed`/`wikiName` (flat keys) →
-`bundles`/`defaultBundle`; `AKM_STASH_DIR` env var → `AKM_BUNDLE_DIR`. `akm
-migrate apply` handles the rewrite; it never guesses profile-to-engine
-mappings, so review `engines`/`defaults` by hand afterward.
-
-### Removed: `akm wiki` command family and `wiki` asset type
-
-The Karpathy-style LLM wiki structure (`schema.md` + `pages/`) is now a
-first-class **bundle format** recognized directly by `akm index`/`search`/
-`show` — no dedicated verb surface.
-
-| Scan pattern | Replace with | Notes |
-|---|---|---|
-| `akm wiki list\|ingest\|register\|lint` | `akm bundle add <source>` then `akm search`/`akm show` | Install like any other source |
-| `wiki:<name>` refs | `bundle//pages/<slug>` refs | Copy the ref from search output |
-
-### Removed: manual proposal-queue management workflow
-
-The hand-rolled manual proposal-management path — the `manage-akm-proposals`
-skill, the `akm-process-proposals` command, and the hourly agent-session cron
-task — is **removed**. It is replaced by the deterministic `akm proposal drain`
-verb plus the `processes.triage` improve strategy pre-pass, which drain the
-standing pending backlog without an agent session.
-
-| Removed | Replace with | Notes |
-|---|---|---|
-| `skills/manage-akm-proposals` (case-by-case queue review) | per-id `akm proposal show\|diff\|accept\|reject`, or `akm proposal drain` for bulk | Built-in CLI; no skill needed |
-| `commands/akm-process-proposals` (manual queue processing) | `akm proposal drain --policy personal-stash --promote --yes` | Deterministic, one command |
-| `tasks/*.yml` with a `prompt:` running `skills/manage-akm-proposals` on a schedule | a `command:` task running `akm proposal drain --policy personal-stash --promote --yes`, or enable `processes.triage` in the improve strategy | Deterministic, no agent session; task file must begin with `version: 2` |
-
-### Migration itself is now explicit
-
-| Scan pattern | Replace with | Notes |
-|---|---|---|
-| `akm migrate --dry-run --diff` / bare `akm migrate` | `akm migrate status` then `akm migrate apply --config <path> [--dry-run]` | Config no longer auto-migrates as a side effect of a normal command |
-| `akm-migrate-storage` | `akm-migrate storage` | Space, not a hyphenated command name |
-| Hand-copying config/data-dir backups | `akm-migrate restore --for <version> --run <backup-run-id> --confirm` | The one supported restore path |
-
----
-
-## akm 0.8.0
-
-**Full migration guide:** `akm help migrate 0.8.0`
-**Longform guide:** `akm help migrate` → `v0.7-to-v0.8.md`
-
-### Removed: `reflect`, `distill`, `proposal *` subcommands
-
-The old self-improvement CLI was replaced by `akm improve` and the proposal queue.
-
-| Scan pattern | Replace with | Notes |
-|---|---|---|
-| `akm reflect` | `akm improve <ref>` | |
-| `akm distill` | `akm improve <ref>` | Distillation is now part of improve |
-| `akm proposals` | `akm proposal list` | bare `akm proposal` also lists |
-| `akm show proposal <id>` | `akm proposal show <id>` | |
-| `akm diff <id>` | `akm proposal diff <id>` | now under the `proposal` noun |
-| `akm accept <id>` | `akm proposal accept <id>` | bulk `--generator <g>` form needs `-y`/`--yes` |
-| `akm reject <id>` | `akm proposal reject <id> --reason "..."` | Reason is required |
-| `akm revert <id>` | `akm proposal revert <id>` | |
-| `akm index --enrich` | `akm improve` | Memory inference moved to improve |
-| `akm index --re-enrich` | `akm improve` | |
-| `--for-agent` flag | `--shape agent` | also `--detail summary\|agent` → `--shape summary\|agent`; `--detail` is now verbosity (`brief\|normal\|full`) |
-| `--source` (on `accept`/`reject`/`history`) | `--generator` | unchanged on `search`/`curate`/`graph`/`remember` |
-| `akm save` | `akm sync` | `sync` = commit + optional push; adds `--no-push` |
-| `akm enable <component>` | `akm config enable <component>` | also `akm disable` → `akm config disable` |
-| `akm events` | `akm log` | `log` is primary; `history` is asset-scoped |
-| `akm feedback --note <text>` | `akm feedback --reason <text>` | |
-| `akm enable context-hub` | (removed) | No replacement |
-| `akm disable context-hub` | (removed) | No replacement |
-| `akm improve --format` | (removed) | Use `--json-to-stdout` for legacy JSON |
-| `akm search` (no query) | `akm search <query>` | No-query now fails |
-
-### Task file format: `.md` → `.yml`
-
-```bash
-# Scan for old-format task files
-find "$(akm config get stashDir)/tasks" -name "*.md" 2>/dev/null
-```
-
-Each `tasks/*.md` file must be converted to a pure YAML `tasks/*.yml` file.
-The `.md` format is warned and silently skipped — tasks will not run.
-
-Old format (`.md` with frontmatter):
-```markdown
----
-schedule: "0 2 * * *"
-workflow: workflows/my-workflow
----
-```
-
-New format (`tasks/<id>.yml`, pure YAML, no `---` delimiters):
 ```yaml
-schedule: "0 2 * * *"
-workflow: workflows/my-workflow
-description: "What this task does"
-enabled: true
+# Retired v2 source
+version: 2
+schedule: "@daily"
+enabled: false
+prompt: Review the bundle.
+timeoutMs: 300000
+
+# Current v4 source
+version: 4
+uses: akm/command
+with:
+  content: Review the bundle.
+schedule:
+  - cron: "@daily"
+    enabled: false
+timeout: 5m
 ```
 
-### Config key renames (handled by `akm migrate`)
-
-| Old key | New key |
+| Retired form | 0.9.2 replacement |
 |---|---|
-| `agent.default` | `defaults.agent` |
-| `agent.profiles.*` | `profiles.agent.*` |
-| `improve.autoAccept` | `profiles.improve.default.autoAccept` |
-| `stashes[]` (old array form) | `sources[]` |
+| v2/v3 task source | `akm migrate apply --dry-run`, review every result, then `akm migrate apply` |
+| `workflow:`, `prompt:`, or `command:` selector | `uses:` or `run:` |
+| v3 `akm.schedule` / `on.schedule` | optional top-level `schedule:` string or list |
+| document-level `enabled:` | `schedule: [{cron, enabled}]` |
+| `timeoutMs:` in a task | top-level `timeout:` (integer milliseconds or `Nm`/`Nh`/`Nd`) |
+| arbitrary `with:` | only `uses: akm/command`; declare `inputs:` for other targets |
+| GitHub Action-shaped `uses:` | manually rewrite as `commands/`, `scripts/`, `workflows/`, or `akm/command` |
 
-Run `akm migrate --dry-run --diff` to see the exact changes for your config.
+The migrator is task-source specific. It has no `--config`, `--diff`,
+storage, or restore interface. It reports each source as `changed`,
+`skipped`, or `blocked`; a blocked task needs a human decision rather than a
+forced rewrite.
 
-### Storage migration required: `vaults/` → `env/`
+## 0.9.2: workflow source and plan cutover
+
+Workflow runs freeze `irVersion: 5` plans with `hashVersion: 7`. Older stored
+plans can be inspected, listed, and abandoned, but cannot resume, advance,
+complete, or run. Recover by abandoning the old run and starting a fresh run
+from current source:
 
 ```bash
-akm-migrate-storage --dry-run   # preview
-akm-migrate-storage --yes       # apply
-akm index                        # rebuild after migration
+akm workflow status <old-run-id>
+akm workflow abandon <old-run-id>
+akm workflow run workflows/<name>
 ```
 
-### Post-upgrade: rebuild graph data
-
-After the DB schema upgrade (v12 → v13), graph tables are dropped and
-repopulated on the next improve cycle:
+Markdown workflows and single-job GitHub-shaped YAML workflows are peer source
+forms. YAML must be `.yml`; multi-job YAML and `inherit_env` are rejected.
+Use named environment bindings and `pass_env` instead. Check an authored
+workflow without publishing a run:
 
 ```bash
-akm improve   # triggers graph extraction
-akm health    # verify graph data repopulated
+akm workflow plan workflows/<name>
+akm lint --type workflows
 ```
 
----
+Markdown workflow frontmatter retains ordered `steps:`; each declared unit
+has one matching `## <step-id>` body heading. The document H1 must not use
+the retired `# Workflow:` prefix. A task-composed workflow step binds the
+task's declared inputs with its own `with:`; `with:` on commands or scripts
+is rejected rather than silently ignored.
 
-## akm 0.7.0
+## 0.9.2: task history and JSON consumers
 
-**Full migration guide:** `akm help migrate 0.7.0`
+`akm task history` and `akm task run --format json` use this stable
+`target.kind` vocabulary:
 
-### Renamed: `stashes[]` → `sources[]`
+| 0.9.1 row value | 0.9.2 value | Meaning |
+|---|---|---|
+| `prompt` | `command` | Agent/LLM command dispatch |
+| `command` | `shell` or `script` | Native shell or script execution |
+| `workflow` | `workflow` | Workflow execution |
+| unrecognized | `unknown` | Unclassifiable historical row |
 
-| Scan pattern | Replace with |
+0.9.2 maps older rows into this vocabulary when reading them. New rows carry a
+`targetVocab` marker, so do not downgrade below 0.9.2 after it writes a given
+`state.db`.
+
+## 0.9.2: ref, locator, and JSON-output boundaries
+
+Generic asset refs are `[bundle-slug//]conceptId[#fragment]`, such as a
+bundle-qualified knowledge ref written `<bundle-slug>//knowledge/<asset>` or
+`skills/code-review`. Use them with
+`show`, workflow/task source, and search-result handling. A source locator
+such as `github:owner/repo` or `npm:@scope/pkg` belongs to
+`akm bundle add`, not a generic asset ref.
+
+`akm clone` is the deliberate exception: it accepts a supported source
+locator plus `//conceptId`, for example
+`akm clone github:owner/repo//skills/deploy`. Do not generalize that exception
+to `akm show` or workflow/task fields. `akm show` resolves the local index
+only; registry search results must be reviewed at their returned source or
+homepage until installed intentionally.
+
+`akm workflow create --format json` returns `bundleDir`, not the retired
+`stashDir`.
+
+## 0.9.2: health and improve configuration
+
+`akm health --format json` returns `schemaVersion: 3`. Its task/engine
+telemetry is under `metrics` (not `runtime`); improve rollups are under
+`improve`. Per-run output uses `--group-by run`, not `--detail per-run`;
+window deltas have `{from, to, pctChange}`.
+
+`improve.strategies.<name>.processes.triage.judgment` accepts a boolean or a
+strict object with only `enabled`, `engine`, `model`, `timeoutMs`, and
+`llm`. The retired `judgment.mode` is invalid:
+
+```json
+{
+  "improve": {
+    "strategies": {
+      "default": {
+        "processes": {
+          "triage": {
+            "judgment": { "enabled": true, "timeoutMs": 600000 }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Historical 0.9.0 rename table
+
+These were 0.9.0 changes and remain useful when translating old bundle text.
+They are historical facts, not an alternative to the 0.9.2 requirements above.
+
+| Retired pre-0.9 command/form | Current spelling |
 |---|---|
-| `"stashes":` in config | `"sources":` |
-| `akm add --kind stash` | `akm add` (kind inferred) |
+| `akm add/list/remove/update` | `akm bundle add/list/remove/update` |
+| `akm save` | `akm sync` |
+| `akm extract` | `akm proposal extract` |
+| `akm propose` | `akm proposal new` |
+| `akm proposals` | `akm proposal list` |
+| `akm accept/reject/diff/revert` | `akm proposal accept/reject/diff/revert` |
+| `akm reflect` / `akm distill` | `akm improve` |
+| `akm improve --profile <name>` | `akm improve --strategy <name>` |
+| `akm vault ...` | `akm env ...` or `akm secret ...`, depending on the data |
+| `type:name` ref grammar | `[bundle//]conceptId` |
+| frontmatter-free `## Step:` workflow | unified source with `steps:` plus exact `## <step-id>` sections |
 
-Config migration handles this automatically via `akm migrate`.
-
-### Removed: `openviking` source provider
-
-Any stash registered as an `openviking` source must be removed:
-
-```bash
-akm list   # look for sources with kind=openviking
-akm remove <id>
-```
-
----
-
-## How to run the full scan
+## Focused audit commands
 
 ```bash
-# Run against all stash assets at once
 BUNDLE_DIR="$(akm info --format json | jq -r .bundleDir)"
 
-grep -rn \
-  "akm vault\|akm reflect\|akm distill\|akm extract\|akm tasks \|akm add \|akm proposals\b\|akm accept\b\|akm reject\b\|akm diff\b\|akm revert\b\|--auto-accept\|--profile \|context-hub\|akm-migrate-storage" \
-  "$BUNDLE_DIR" \
-  --include="*.md" --include="*.yml" \
-  -l
+rg -n --glob '*.md' --glob '*.yml' \
+  'akm (vault|reflect|distill|extract|tasks|add|list|remove|update|save|events|wiki|propose|proposals|accept|reject|diff|revert)\b|--auto-accept|--profile |\b(?:skill|knowledge|memory|workflow|command|agent|script|env|secret|lesson|task|vault|wiki):[A-Za-z0-9_/-]+' \
+  "$BUNDLE_DIR"
 
-grep -rnoE '\b(skill|knowledge|memory|workflow|command|agent|script|env|secret|lesson|task|vault|wiki):[a-zA-Z0-9_/-]+' \
-  "$BUNDLE_DIR" --include="*.md" --include="*.yml"
+rg -n '^(version: (2|3)|akm:|on:|enabled:|timeoutMs:|prompt:|workflow:|command:)' \
+  "$BUNDLE_DIR/tasks" -g '*.yml'
+rg -n '^# Workflow:' "$BUNDLE_DIR/workflows" -g '*.md'
 
-# Show line-level matches for targeted review
-grep -rn "akm vault" "$BUNDLE_DIR" --include="*.md" --include="*.yml"
+akm migrate apply --dry-run
+akm lint
+akm task doctor
+akm health --format json
 ```
-
-After scanning, use `akm lint` to catch structural issues the grep won't find
-(it exits 0 regardless of findings — read `summary.flagged` or pass
-`--fail-on-flagged`):
-
-```bash
-akm lint --format json | jq '.flagged[]'
-akm lint --type workflows --format json | jq '.flagged[]'
-```
-
-`akm lint` flags: missing `updated` dates, unquoted colons in descriptions,
-stale absolute paths, and missing-ref errors (where a `<type>:<name>` ref no
-longer resolves).

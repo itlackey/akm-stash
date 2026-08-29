@@ -1,13 +1,13 @@
 ---
-description: Use when an agent is authoring or reorganizing a stash and needs the 0.9.0 directory, command, workflow, task, and lesson conventions.
+description: Use when an agent is authoring or reorganizing a bundle and needs the 0.9.2 directory, command, workflow, task, and lesson conventions.
 tags: [akm, stash, structure]
 quality: curated
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
-# akm Stash Structure
+# AKM Bundle Structure
 
-> **Version target:** akm-cli 0.9.0
+> **Version target:** akm-cli 0.9.2
 
 akm classifies assets by **file extension and content**, not by directory name.
 Conventional directories are still the best default because they improve search
@@ -19,18 +19,21 @@ confidence, readability, and benchmark-fixture reuse.
 my-stash/
 ├── README.md
 ├── LICENSE
-├── akm.json                         # optional stash-level metadata
+├── akm.json                         # optional bundle-level metadata
 ├── scripts/
 ├── skills/<name>/SKILL.md
 ├── commands/*.md
 ├── agents/*.md
 ├── knowledge/*.md
+├── instructions/*.md
 ├── workflows/*.md
 ├── memories/*.md
 ├── lessons/*.md
 ├── env/*.env
 ├── secrets/
-└── tasks/*.yml
+├── tasks/*.yml
+├── sessions/<harness>/*.md
+└── facts/*.md
 ```
 
 Use only the directories you need, but prefer this layout when you can. An
@@ -55,7 +58,7 @@ The `description` is a trigger sentence. Write “Use when …”, not a title.
 
 ### Commands
 
-akm 0.9.0 command assets follow the OpenCode-style prompt-template convention:
+akm 0.9.2 command assets follow the OpenCode-style prompt-template convention:
 
 ```markdown
 ---
@@ -83,7 +86,7 @@ tools: [Read, Grep, Glob, Bash]
 
 ### Workflows
 
-akm 0.9.0 workflows are unified markdown with the orchestration graph in
+akm 0.9.2 workflows are unified markdown with the orchestration graph in
 frontmatter and step instructions in the body — the retired 0.8.0
 `## Step: <title>` / `Step ID:` / `### Instructions` / `### Completion
 Criteria` heading contract fails `akm lint --type workflows` with
@@ -123,7 +126,7 @@ running. See `knowledge/akm-cli-reference` for the full contract.
 ### LLM Wiki bundles
 
 A Karpathy-style LLM wiki (`schema.md` rulebook + agent-authored `pages/`)
-is a first-class **bundle format** in 0.9.0, not an AKM-native asset type or
+is a first-class **bundle format** in 0.9.2, not an AKM-native asset type or
 directory. Install one with `akm bundle add <source>` like any other
 source; akm's LLM Wiki adapter recognizes it automatically and its pages
 resolve to `bundle//pages/<slug>` refs. There is no `akm wiki` command
@@ -148,38 +151,40 @@ quality: curated
 ### Tasks
 
 Task assets are first-class assets stored under `tasks/` as pure YAML
-(`tasks/<id>.yml`) — no markdown frontmatter delimiters, no body section.
-Only **version-2** task YAML is discovered: the file must begin with
-`version: 2`. A v1 file (including one with no `version` key) is diagnosed
-by `sync`/`doctor` but is never rewritten or executed.
+(`tasks/<id>.yml`) — no markdown frontmatter delimiters or body section.
+Only **task source v4** is executable: the file must begin with `version: 4`.
+A v2 or v3 file is rejected until converted with `akm migrate apply --dry-run`
+followed by `akm migrate apply`.
 
 ```yaml
 # tasks/<id>.yml
-version: 2
-schedule: "0 9 * * *"
-enabled: true
+version: 4
+name: nightly-improve
 description: "Use when a nightly AKM extract + improve pass should run without hand-built cron notes."
 tags: [scheduled, improve, extract]
-# Pick exactly one of `workflow:`, `prompt:`, or `command:`:
-workflow: workflows/evolve-assets
-# OR an inline agent prompt:
-# prompt: |
-#   multi-line prompt body
-# OR a deterministic shell command:
-# command: "akm improve --task \"...\""
+# Pick exactly one of `uses:` or `run:`.
+uses: akm/command
+with:
+  content: Review the bundle and queue improvement proposals only.
+schedule:
+  - cron: "0 9 * * *"
+    enabled: true
+timeout: 30m
 ```
 
-Pick exactly one of `workflow:`, `prompt:`, or `command:`. Manage tasks with
-`akm task add|run|history|sync|doctor` (singular `task`, not `tasks`) — there
-is no `task list`/`show`/`remove`/`enable`/`disable`/`init`. Use `akm search
---type task` / `akm show tasks/<id>` to inspect a task; edit the YAML's
-`enabled:` field plus `akm task sync` to enable, disable, or (after deleting
-the file) remove one.
+Pick exactly one of `uses:` or `run:`. `uses:` accepts `akm/command` or a
+canonical `commands/`, `scripts/`, or `workflows/` ref; `with:` is legal only
+with `akm/command`. Scheduling is optional; enablement belongs to an individual
+`schedule:` entry, not the document. Manage tasks with
+`akm task add|run|explain|history|sync|doctor` (singular `task`, not `tasks`) —
+there is no task list/show/remove/enable/disable/init command. Use `akm search
+--type task` / `akm show tasks/<id>` to inspect a locally indexed task, and edit
+the YAML plus `akm task sync` to reconcile schedules.
 
 ### Metadata guidance
 
 Prefer inline metadata in frontmatter and file-local headers. Older curated
-stashes may still carry `.stash.json` during migration, but 0.9.0-facing
+bundles may still carry `.stash.json` during migration, but 0.9.2-facing
 assets should not rely on it as the primary authoring contract.
 
 ## Asset quality rules

@@ -1,7 +1,7 @@
 ---
 name: akm-health
 description: Produce well-formatted markdown health reports for the akm improve pipeline, interpret metrics, troubleshoot issues, and tune pipeline behavior. Use when the user asks for a health report, wants to understand improve metrics, diagnose slow/silent/failing runs, or tune consolidation and distillation.
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Health Reporting
@@ -19,7 +19,7 @@ akm health --since 24h --format json
 akm health --since 24h --window-compare 24h --format json
 
 # Per-run breakdown — one row per improve run
-akm health --since 24h --detail per-run --format json
+akm health --since 24h --group-by run --format json
 
 # 7-day view for weekly review
 akm health --since 7d --window-compare 7d --format json
@@ -31,7 +31,9 @@ akm health \
   --format json
 ```
 
-The result envelope is `schemaVersion: 2`. All improve metrics live under `.improve`.
+The result envelope is `schemaVersion: 3`. Task/engine telemetry lives under
+`.metrics`; pipeline metrics live under `.improve`. Optional `.runs`, `.windows`,
+`.deltas`, and `.report` appear only for their corresponding request modes.
 
 ## Report sections
 
@@ -62,7 +64,7 @@ List hard checks. Surface any non-passing checks as **blocking issues**.
 |---|---|---|
 | state-db-schema | ✅ pass | |
 | state-db-round-trip | ✅ pass | 9 ms |
-| agent-profile | ✅ pass | opencode |
+| default-engine | ✅ pass | configured engine available |
 | task-history-read | ✅ pass | 96 rows |
 ```
 
@@ -76,7 +78,7 @@ List hard checks. Surface any non-passing checks as **blocking issues**.
 | Runs invoked | 48 | |
 | Runs completed | 48 | 100% — ✅ |
 | Skipped (no new signal) | 112 272 | normal |
-| Skipped (profile filtered) | 16 538 | normal |
+| Skipped (strategy filtered) | 16 538 | normal |
 | Planned refs | 4 | |
 | Coverage gap count | 0 | |
 ```
@@ -244,7 +246,7 @@ When `judgedNoAction` changes significantly between windows, use
 `references/jna-diagnosis.md` for the full diagnostic methodology:
 
 1. **Establish the delta** — `akm health --since 8h --window-compare 8h`
-2. **Per-run breakdown** — `akm health --since 48h --detail per-run` to find whether
+2. **Per-run breakdown** — `akm health --since 48h --group-by run` to find whether
    the change is spread or concentrated, and to pin the inflection timestamp
 3. **Three-signal discriminator** to distinguish:
    - **Hypothesis A** (pool saturation) — JNA rising gradually, no inflection, guard skips flat

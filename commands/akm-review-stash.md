@@ -2,7 +2,7 @@
 name: akm-review-stash
 type: command
 description: Use when you need to review a candidate akm stash before installing it. The first argument is the stash or asset ref to inspect.
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 Review the akm stash at `$1` before the user installs it. Do not run `akm
@@ -10,15 +10,19 @@ bundle add` as part of this review.
 
 ## Inspect
 
-Run these in order:
+Search the configured registries first:
 
 ```bash
 akm search "$1" --from registry
-akm show "$1"
 ```
 
-If the ref points at a GitHub repo, also inspect `README.md`, `LICENSE`, and
-any root `akm.json` or `package.json`.
+`akm show` resolves only assets already indexed locally; do not pass an
+uninstalled registry hit to it. Inspect the registry result's source or
+homepage read-only instead. If the candidate is already installed, use its
+canonical asset ref with `akm show <ref>`.
+
+If the source points at a GitHub repo, also inspect `README.md`, `LICENSE`,
+and any root `akm.json` or `package.json`.
 
 ## Evaluate
 

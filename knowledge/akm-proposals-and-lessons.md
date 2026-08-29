@@ -1,13 +1,13 @@
 ---
-description: Use when an agent needs the 0.9.0 proposal queue, quality values, and lesson lifecycle explained clearly.
+description: Use when an agent needs the 0.9.2 proposal queue, quality values, and lesson lifecycle explained clearly.
 tags: [akm, proposals, lessons]
 quality: curated
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Proposals, Quality, and Lessons
 
-> **Version target:** akm-cli 0.9.0
+> **Version target:** akm-cli 0.9.2
 
 akm keeps a safe self-improvement loop: agents can suggest changes, but
 nothing touches the live bundle until a proposal is reviewed and accepted.
@@ -32,7 +32,7 @@ writes to the queue, never directly to a live asset.
    - `akm proposal revert <id>` undoes a previously accepted proposal
      (full id or ref only — no UUID prefix, no batch revert).
 
-There is no bare `akm proposal` (no verb) — it is a usage error in 0.9.0;
+There is no bare `akm proposal` (no verb) — it is a usage error in 0.9.2;
 name the subcommand. There are also no flat verbs (`akm proposals`, `akm
 extract`, `akm propose`, `akm accept`, `akm reject`, `akm diff`, `akm
 revert`, `akm reflect`, `akm distill`) — everything lives under `akm

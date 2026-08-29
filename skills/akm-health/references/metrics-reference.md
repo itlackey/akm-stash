@@ -1,12 +1,12 @@
 ---
-description: Complete field glossary and signal thresholds for akm health output (schemaVersion 2). Use when interpreting health report numbers or setting alert thresholds.
+description: Complete field glossary and signal thresholds for akm health output (schemaVersion 3). Use when interpreting health report numbers or setting alert thresholds.
 tags: [akm-health, metrics, reference, thresholds]
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Health Metrics Reference
 
-Schema version: **2** (`akm health --format json` → `schemaVersion: 2`)
+Schema version: **3** (`akm health --format json` → `schemaVersion: 3`)
 
 ## Top-level fields
 
@@ -17,9 +17,11 @@ Schema version: **2** (`akm health --format json` → `schemaVersion: 2`)
 | `since` | ISO timestamp | Start of the reporting window |
 | `hardChecks[]` | array | Deterministic pass/fail checks (see below) |
 | `advisories[]` | array | Non-fatal warnings |
-| `runtime` | object | Task fail rate, agent fail rate, probe latency |
+| `metrics` | object | Task fail rate, agent fail rate, probe latency, and LLM usage |
 | `improve` | object | Improve pipeline metrics (main section) |
-| `sessionLogAdvisories[]` | array | Session-log scan findings |
+| `runs[]` | array, optional | Per-improve-run summaries when `--group-by run` or `--report` is used |
+| `windows[]` / `deltas` | optional | Explicit or duration-window comparison projections |
+| `report` | object, optional | Pending-proposal and comparison context requested by `--report` |
 
 ---
 
@@ -34,13 +36,18 @@ Each entry has `name`, `status` (`pass`/`warn`/`fail`), `kind`, `confidence`, `m
 | `task-history-read` | task_history rows readable for the window |
 | `task-log-backing` | every task_history log_path resolves on disk |
 | `active-runs` | no stuck active runs past stale threshold |
-| `agent-profile` | v2 agent profile configured |
+| `default-engine` | default agent engine is configured and available |
+| `model-map-files` | installed/user model-map files are usable |
+| `selected-model-aliases` | selected model aliases resolve for their engine |
+| `default-llm-engine` | default LLM engine is configured and available |
+| `configured-engines` | explicitly configured engines are available |
+| `active-improve-strategy` | enabled improve processes can resolve their engines/credentials |
 
 Any non-`pass` hard check is a **blocking issue** — fix before interpreting improve metrics.
 
 ---
 
-## `runtime` — task-level health
+## `metrics` — task-level health
 
 | Field | Meaning | ✅ Healthy | ⚠️ Warn | 🔴 Critical |
 |---|---|---|---|---|
@@ -49,6 +56,7 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | `stuckActiveRuns` | Runs exceeding stale threshold | 0 | — | > 0 |
 | `logBackingRate` | Fraction of logs with on-disk backing | 1.0 | > 0.95 | ≤ 0.95 |
 | `probeRoundTripMs` | state.db round-trip latency (ms) | < 50 | 50–200 | > 200 |
+| `llmUsage` | Token and duration totals, with `byStage`, `byProcess`, and `byEngine` breakdowns | Inspect trends | — | — |
 
 ---
 
@@ -62,7 +70,7 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | `completed` | Completed without error | `completed == invoked` | any gap |
 | `skipped` | Total skipped (all reasons) | — | — |
 | `plannedRefs` | Refs selected for improvement | > 0 | 0 (nothing to improve) |
-| `profileFilteredRefs` | Refs filtered by active profile | — | — |
+| `strategyFilteredRefs` | Refs filtered by the active improve strategy | — | — |
 | `coverageGapCount` | Coverage gap proposals generated | ≥ 0 | — |
 
 ### `skipReasons` (top-level)
@@ -70,7 +78,7 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | Reason | Meaning | Normal? |
 |---|---|---|
 | `no_new_signal` | Asset has no new feedback/event signal since last run | Yes — most assets |
-| `profile_filtered_all_passes` | All processes disabled for this asset's type by active profile | Yes — expected for filtered types |
+| `strategy_filtered_all_passes` | All processes disabled for this asset's type by active strategy | Yes — expected for filtered types |
 
 ---
 
@@ -189,7 +197,7 @@ Memory inference creates `.derived.md` sibling files from accumulated evidence.
 
 **Truncations:** A truncation means a document exceeded the LLM context window. Check which files are being extracted and whether they can be split or summarized.
 
-**Failures:** Extraction failures are LLM call errors. Check agent profile and API health. A single failure is usually transient; multiple failures indicate a systematic issue.
+**Failures:** Extraction failures are LLM call errors. Check engine configuration and API health. A single failure is usually transient; multiple failures indicate a systematic issue.
 
 ---
 
@@ -218,16 +226,16 @@ can cause tail latency spikes.
 
 ---
 
-## `--detail per-run` fields
+## `--group-by run` fields
 
-Each entry in `runs[]` has the same shape as the aggregate `improve` object,
-plus:
+Each entry in `runs[]` is a per-run summary with phase metrics, plus:
 
 | Field | Meaning |
 |---|---|
-| `runId` | UUID of the improve run |
+| `id` | UUID of the improve run |
 | `completedAt` | ISO completion timestamp |
-| `status` | `completed` / `failed` / `timed-out` |
+| `ok` | Whether the persisted improve result was successful |
+| `strategy` / `scope` / `taskId` | Resolved strategy, scope, and scheduled-task attribution |
 | `wallTimeMs` | Total run duration |
 
 Use per-run detail for incident investigation (find the specific run that spiked)
@@ -246,12 +254,13 @@ The response adds:
     { "name": "prior",   "since": "...", "until": "...", "runs": 51, ... }
   ],
   "deltas": {
-    "improve.completed": { "prior": 51, "current": 48, "pctChange": -0.059 },
-    "consolidation.promoted": { ... },
+    "improve.consolidation.promoted": { "from": 51, "to": 48, "pctChange": -5.88 },
+    "improve.memoryInference.written": { ... },
     ...
   }
 }
 ```
 
-A `pctChange` of `+0.1` means 10% improvement. Look for regressions in
+A `pctChange` of `+10` means 10% improvement; the field is expressed in
+percentage points, not a 0–1 ratio. Look for regressions in
 `consolidation.promoted`, `memoryInference.yieldRate`, and `wallTime.medianMs`.

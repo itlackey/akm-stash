@@ -1,7 +1,7 @@
 ---
 name: akm-quickstart
 description: "Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations."
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Quickstart
@@ -49,7 +49,8 @@ akm index
 
 Expected type directories include `scripts/`, `skills/`, `commands/`,
 `agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`,
-`lessons/`, and `tasks/` when you start authoring scheduled jobs. An LLM
+`lessons/`, `tasks/`, `instructions/`, `sessions/`, and `facts/` when you
+start authoring those assets. An LLM
 wiki bundle (`schema.md` + `pages/`) is a separate installable source, not a
 directory inside this stash.
 
@@ -70,11 +71,11 @@ akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/in
 
 ```bash
 akm info
-akm help migrate 0.9.0
+akm help migrate 0.9.2
 akm proposal list
 ```
 
-Only proceed once `akm info` succeeds. On 0.9.0:
+Only proceed once `akm info` succeeds. On 0.9.2:
 - `akm proposal list` and `akm proposal extract --auto --dry-run` should both work.
 - The old `reflect` / `distill` / `extract` / `propose` / `vault` / `wiki`
   commands are removed with no compatibility alias — do not use them in new

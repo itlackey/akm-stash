@@ -1,14 +1,14 @@
 ---
-description: Use when an agent needs the main akm-cli 0.9.0 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
+description: Use when an agent needs the main akm-cli 0.9.2 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
 tags: [akm, cli, reference]
 quality: curated
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm CLI Reference
 
 Quick reference for the main `akm` surfaces an agent is likely to use.
-Current as of **0.9.0** (2026-08-04). For authoritative syntax, run
+Current as of **0.9.2** (2026-08-29). For authoritative syntax, run
 `akm <cmd> --help`.
 
 ## Global output controls
@@ -25,12 +25,12 @@ Current as of **0.9.0** (2026-08-04). For authoritative syntax, run
 | Command | Purpose |
 |---|---|
 | `akm setup` | Guided first-run wizard: config, bundle dir, providers, registries, and initial index. |
-| `akm bundle create [--dir <path>]` | Scaffold the working bundle skeleton only (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`, `lessons/`, `tasks/`). Use `setup` for full first-time onboarding. |
+| `akm bundle create [--dir <path>]` | Scaffold the working bundle skeleton only (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `instructions/`, `workflows/`, `memories/`, `env/`, `secrets/`, `lessons/`, `tasks/`, `sessions/`, `facts/`). Use `setup` for full first-time onboarding. |
 | `akm index [--full]` | Build or refresh the local search index. |
 | `akm info` | Print version, configured sources, registries, and index/search capabilities (`bundleDir`, not the retired `stashDir`). |
-| `akm health` | Runtime / telemetry probe: surfaces backend status, artifact dirs, recent improve metrics, and scheduler reachability. |
+| `akm health` | Health and telemetry probe: emits schemaVersion 3 checks, metrics, and recent improve-pipeline rollups. |
 | `akm config get <key>` / `set <key> <value>` / `list` / `unset <key>` | Read or write configuration. `akm config show` was removed — use `list`. |
-| `akm migrate status` / `akm migrate apply --config <path>` | Inspect or apply config and durable-database migration explicitly. |
+| `akm migrate status` / `akm migrate apply [--dry-run]` | Inspect or atomically convert task-v2 and task-v3 sources to task source v4. |
 | `akm upgrade` | Self-update the CLI. |
 | `akm help migrate <version>` | Preview release notes and migration guidance. |
 
@@ -46,13 +46,17 @@ Current as of **0.9.0** (2026-08-04). For authoritative syntax, run
 | `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
 | `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
 | `akm curate <query>` | Return a compact shortlist plus suggested next commands. |
-| `akm show <ref>` / `akm show <ref>#<fragment>` | Display an asset; `#fragment` selects one markdown section by heading slug. |
+| `akm show <ref>` / `akm show <ref>#<fragment>` | Display a locally indexed asset; `#fragment` selects one markdown section by heading slug. |
 | `akm show <ref> --filter key=value` | Require a scope match when resolving the asset. |
 | `akm registry list` / `akm registry add <url> --name <alias>` / `akm registry remove <url-or-name>` | Manage discovery registries. Searching a registry is `akm search --from registry` — there is no `akm registry search`. |
 
-Refs use the 0.9.0 `[bundle//]conceptId` grammar — `skills/code-review`,
-`memories/vpn-note`, `github:owner/repo//knowledge/guide`. The pre-0.9.0
-`type:name` colon grammar was removed with no compatibility alias.
+Generic asset refs use the 0.9.2 `[bundle-slug//]conceptId[#fragment]`
+grammar — `skills/code-review`, `memories/vpn-note`, and a bundle-qualified
+knowledge ref written as `<bundle-slug>//knowledge/<asset>`. `github:owner/repo` and `npm:@scope/pkg` are
+source locators for `akm bundle add`, not generic `show` or search-result
+refs. `akm clone` is the narrow exception: it accepts a supported source
+locator plus `//conceptId`. The pre-0.9.0 `type:name` colon grammar was
+removed with no compatibility alias.
 
 ## Sources and install flows
 
@@ -62,7 +66,7 @@ Refs use the 0.9.0 `[bundle//]conceptId` grammar — `skills/code-review`,
 | `akm bundle list` | List configured sources. |
 | `akm bundle update [--all\|<target>] [--force]` | Refresh managed sources. |
 | `akm bundle remove <target>` | Remove a configured source and reindex. |
-| `akm clone <ref> [--dest <dir>] [--name <new-name>] [--bundle <name>]` | Copy a single asset into a writable bundle or a custom destination. |
+| `akm clone <ref> [--dest <dir>] [--name <new-name>] [--bundle <name>]` | Copy a single asset into a writable bundle or a custom destination. For clone only, a GitHub/npm source locator plus `//conceptId` is also accepted. |
 
 `akm add`/`akm list`/`akm remove`/`akm update` are retired 0.8 spellings —
 the whole group moved under `akm bundle`. To update akm itself, use `akm
@@ -74,11 +78,11 @@ upgrade`, not `akm bundle update`.
 |---|---|
 | `akm workflow run <ref\|run-id>` | Start, resume, or continue a workflow run to completion, failure, or an explicit limit. There is no separate `start`/`next`/`complete`. |
 | `akm workflow status <ref\|run-id>` / `akm workflow list [--active]` / `akm workflow resume <run-id>` | Inspect or resume runs. |
-| `akm workflow create <name> [--print] [--from <file>]` | Author a unified markdown workflow (frontmatter `params`/`steps` + step sections in the body). `--print` prints the starter template without writing. There is no `akm workflow template` or `validate` — use `akm lint --type workflows`. |
-| `akm task add <id> --schedule "..." --workflow <ref>` | Register a scheduled task in `tasks/<id>.yml` and install it in the OS scheduler. |
+| `akm workflow plan <ref>` | Compile and freeze a workflow graph read-only before a durable run. |
+| `akm workflow create <name> [--print] [--from <file>]` | Author a unified markdown workflow (frontmatter `params`/`steps` + step sections in the body). `--print` prints the starter template without writing; JSON output names its write root `bundleDir`. There is no `akm workflow template` or `validate` — use `akm lint --type workflows`. |
 | `akm task add <id> --schedule "..." --prompt "..."` | Register a scheduled prompt task. |
 | `akm task add <id> --schedule "..." --command "..."` | Register a scheduled shell command task. |
-| `akm task run <id>` / `akm task history` / `akm task doctor` / `akm task sync [--rebind]` | Execute, inspect, diagnose, or reconcile scheduled task assets. |
+| `akm task run <id>` / `akm task explain <ref>` / `akm task history` / `akm task doctor` / `akm task sync [--rebind]` | Execute, explain read-only resolution, inspect, diagnose, or reconcile task assets. |
 | `akm search --type task` / `akm show tasks/<id>` | Enumerate or inspect task assets — there is no `task list`/`task show`. |
 | `akm remember "<text>"` | Append a memory fragment to the working bundle. |
 | `akm import <file\|url\|->` | Ingest a knowledge document into the bundle. |
@@ -86,20 +90,20 @@ upgrade`, not `akm bundle update`.
 | `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
 | `akm sync -m "msg" [--no-push]` | Commit and optionally push the git-backed working bundle (`--no-push` to skip the push). Replaces the retired `akm save`. |
 
-> ⚠️ **Task files must be `.yml` and begin with `version: 2`.** Only
-> version-2 task YAML is discovered; a v1 file (including one with no
-> `version` key) is diagnosed by `sync`/`doctor` but never rewritten or
-> executed. Each task file picks exactly one target: `workflow:`, `prompt:`,
-> or `command:`. To disable a task, set `enabled: false` and run `akm task
-> sync` — the cron line stays, commented. To remove one, delete the file and
-> run `akm task sync`. There is no `task enable`/`disable`/`remove`/`init`/
-> `list`/`show` — edit the YAML plus `sync`, or use `akm search --type task`.
+> ⚠️ **Task files must be `.yml` and use `version: 4`.** A task selects exactly
+> one top-level target: `uses:` (an `akm/command`, `commands/`, `scripts/`, or
+> `workflows/` ref) or `run:` (one explicit shell string). `with:` is only for
+> `uses: akm/command`; task controls such as `timeout` are top-level. Scheduling
+> is optional and each list binding owns its `enabled:` state. V2/v3 files are
+> rejected until migrated with `akm migrate apply --dry-run` then `akm migrate
+> apply`. There is no task enable/disable/remove/list/show command — edit the
+> YAML and run `akm task sync`, or use `akm search --type task`.
 
-## Proposal queue and self-improvement (0.9.0)
+## Proposal queue and self-improvement (0.9.2)
 
 | Command | Purpose |
 |---|---|
-| `akm proposal extract [--type claude-code\|opencode\|--auto] [--since <window>] [--dry-run]` | Extract durable insights from native session files (Claude Code, OpenCode) and queue them as proposals. `--auto` iterates all available harnesses; `--since` sets the discovery window (default 24h). There is no `--watch`/`--debounce-ms` — schedule it as a task instead. |
+| `akm proposal extract [--type claude\|opencode\|--auto] [--since <window>] [--dry-run]` | Extract durable insights from native session files (Claude Code, OpenCode) and queue them as proposals. `--auto` iterates all available harnesses; `--since` sets the discovery window (default 24h). There is no `--watch`/`--debounce-ms` — schedule it as a task instead. |
 | `akm improve [ref\|type] [--task "..."] [--strategy <name>] [--dry-run]` | Propose improvements to an existing asset, type, or the whole bundle. Runs memory consolidation and lesson distillation when enabled in the active strategy. **`improve` never auto-promotes** — every proposal lands `pending`; there is no confidence-gated `--auto-accept`. |
 | `akm proposal new <type> <name> --task "..."` | Draft a brand-new asset and queue it as a proposal. |
 | `akm proposal list [--status pending\|accepted\|rejected\|reverted]` | List proposal-queue entries. Bare `akm proposal` (no verb) is a usage error — name the verb. |
@@ -190,9 +194,9 @@ The legacy `vault` type and `akm vault ...` command family are gone. There
 is also no `akm env set`/`akm env unset` — edit the `.env` file directly;
 akm loads it as-is.
 
-## Workflow authoring contract (0.9.0)
+## Workflow authoring contract (0.9.2)
 
-akm 0.9.0 workflows are unified markdown documents with:
+akm 0.9.2 workflows are unified markdown documents with:
 
 - frontmatter carrying the asset envelope plus the orchestration graph:
   `params` (JSON-Schema-typed), `steps` (an ordered list of `{ id, unit?,
@@ -203,6 +207,11 @@ akm 0.9.0 workflows are unified markdown documents with:
 - an optional `### gate` sub-heading inside a step section: the step's
   completion rubric, evaluated fail-closed by `workflow.judgeEngine` when
   non-empty. Omitted or empty skips validation.
+
+Durable workflow plans produced by this release use `irVersion: 5` and
+`hashVersion: 7`. Earlier plans remain inspectable and may be abandoned, but
+cannot be resumed or advanced; abandon them and start a fresh run from current
+source instead.
 
 The old frontmatter-free `## Step: <title>` / `Step ID:` / `### Instructions`
 / `### Completion Criteria` heading contract is retired — a workflow written
