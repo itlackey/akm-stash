@@ -2,7 +2,7 @@
 name: akm-improve-cycle
 type: command
 description: "Use when you need to run the full extract → improve → review cycle for the current stash. Arguments: mode (dry-run | live), scope (optional asset ref or type)."
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 Run the full akm improvement cycle for the current stash.
@@ -38,7 +38,7 @@ Add `--dry-run` when mode is `dry-run`. When a scope argument is provided,
 append it: `akm improve <scope>`.
 
 Add `--task "..."` when there is a specific area to target (e.g. "update CLI
-references for 0.9.0"). `akm improve` never auto-promotes — every generated
+references for 0.9.2"). `akm improve` never auto-promotes — every generated
 proposal lands `pending` regardless of mode; step 4 below is always required.
 
 ## 4. Review pending proposals

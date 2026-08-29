@@ -1,7 +1,7 @@
 ---
 name: akm-dream
 description: Consolidate, prune, and reorganize akm memories with explicit staged review gates. Use when the user says "dream", "/dream", "auto dream", "consolidate memories", "clean up my memories", "prune stale memories", or "my memory files are a mess". For routine consolidation without staged review, prefer `akm improve memory` + `akm proposal extract --auto` directly.
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Dream — Reviewed Memory Consolidation

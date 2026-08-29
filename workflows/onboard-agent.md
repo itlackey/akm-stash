@@ -4,7 +4,7 @@ description: Bootstrap a coding agent so it can discover, install, search, and i
 tags: [onboarding, akm]
 params:
   host: { type: string, description: Host agent or tool being onboarded }
-updated: 2026-08-04
+updated: 2026-08-29
 steps:
   - id: install-cli
   - id: init-bundle
@@ -19,7 +19,7 @@ steps:
     inputs: [steps.load-core-assets.output, steps.configure-extract.output]
 ---
 
-# Workflow: Onboard an agent onto akm
+# Onboard an agent onto AKM
 
 Bootstraps a coding agent (named by the `host` parameter) from zero to a
 working akm installation with the official onboarding bundle loaded, so
@@ -74,7 +74,7 @@ Verify:
 
 ## learn-lifecycle
 
-Review how 0.9.0 handles feedback, improvement, and the proposal queue,
+Review how 0.9.2 handles feedback, improvement, and the proposal queue,
 using the bundle assets attached to this unit as context. Inspect
 `knowledge/akm-proposals-and-lessons` and `knowledge/akm-improve-and-extract`,
 then verify the proposal queue commands exist with `akm proposal list`.
@@ -97,7 +97,7 @@ do a dry-run pass:
 
 ```bash
 # For Claude Code sessions:
-akm proposal extract --type claude-code --dry-run
+akm proposal extract --type claude --dry-run
 
 # For OpenCode sessions:
 akm proposal extract --type opencode --dry-run

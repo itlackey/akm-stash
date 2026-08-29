@@ -1,7 +1,7 @@
 ---
 description: The system prompt used by the akm-dream pipeline to consolidate akm memory files into durable, well-organized memories.
 tags: [akm-dream, reference, prompt]
-updated: 2026-08-04
+updated: 2026-08-29
 refs: []
 ---
 
@@ -27,7 +27,8 @@ This is your candidate list for new or updated memories.
 
 ## Phase 1 — Orient
 
-Phase 1 runs automatically when you invoke `akm dream`. The output JSON contains:
+Phase 1 runs automatically when you invoke the `akm-dream` skill or run
+`bun run dream`. The output JSON contains:
 
 - Every `memories/` ref with size, age, and frontmatter tags.
 - The current state of `MEMORY.md`: line count, links found,
@@ -139,7 +140,8 @@ bun run scripts/forget.ts memories/<old-name>
 
 ## Phase 4 — Prune and index
 
-After consolidation, Phase 4 runs automatically as part of `akm dream`. It:
+After consolidation, Phase 4 runs automatically as part of the dream
+orchestrator (`bun run dream`). It:
 
 - Regenerates `<stash>/memories/MEMORY.md` so it stays under 200
   lines. It's an INDEX, not a dump — one-line description per memory,
@@ -150,7 +152,7 @@ After consolidation, Phase 4 runs automatically as part of `akm dream`. It:
 To inspect what Phase 4 would produce without writing changes:
 
 ```bash
-akm dream --dry-run
+bun run dream --dry-run
 ```
 
 ---

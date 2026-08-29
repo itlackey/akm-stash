@@ -1,7 +1,7 @@
 ---
 description: Decision tree and fix playbook for common akm improve pipeline issues. Use when a health report shows anomalies and you need to identify root causes and apply fixes.
 tags: [akm-health, troubleshooting, tuning, improve]
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Health Troubleshooting Playbook
@@ -17,9 +17,9 @@ later ones.
 
 | Check | Fix |
 |---|---|
-| `state-db-schema` | Run `akm migrate status` to inspect config/database state (there is no `akm db` command). If it reports `blocked`, resolve the named artifact first; restore a pre-migration backup with the standalone `akm-migrate restore --for <version> --run <backup-run-id> --confirm`. |
+| `state-db-schema` | Do not attempt ad hoc database edits. Read `akm help migrate 0.9.2`; when it names an exceptional pre-release ledger, follow its `akm upgrade --force` recovery procedure. |
 | `state-db-round-trip` | Disk full or permissions issue. Check `df -h` and the path in evidence. |
-| `agent-profile` | Run `akm setup` to configure an engine, or `akm config set defaults.engine <name>` after defining it under `engines`. |
+| `default-engine` / `default-llm-engine` / `configured-engines` | Run `akm setup` to configure an engine, then correct the named engine, model map, or credential binding from the check evidence. |
 | `task-log-backing` | Log files were deleted. Safe to ignore if intentional; otherwise check backup. |
 | `active-runs` | A run is stuck. Kill the process, then clean the stale run: `akm task doctor`. |
 
@@ -42,7 +42,7 @@ jump of > 10 pp between windows.
 akm health --since 8h --window-compare 8h --format json
 
 # Step 2 — per-run to find spread vs concentrated
-akm health --since 48h --detail per-run --format json
+akm health --since 48h --group-by run --format json
 ```
 
 **If JNA is elevated uniformly across all recent runs with no specific inflection:**
@@ -53,7 +53,7 @@ akm health --since 48h --detail per-run --format json
 Do NOT reduce pool size yet.
 
 **If JNA rose but guard skips stayed flat and wall time didn't drop:**
-→ LLM degradation (Hypothesis C). Check agent profile, API health, `reflect.failed`.
+→ LLM degradation (Hypothesis C). Check engine configuration, API health, `reflect.failed`.
 
 ### The key discriminating signal
 
@@ -84,7 +84,7 @@ akm improve memory --task "add concise one-line descriptions to memories missing
 
 **Hypothesis C (LLM degradation):**
 ```bash
-akm health --since 1h --format json   # check hardChecks.agent-profile
+akm health --since 1h --format json   # check engine-related hard checks
 akm improve memories/<known-ref> --dry-run  # targeted test on known-good memory
 ```
 
@@ -129,8 +129,8 @@ many memories that shouldn't be in scope.
 **Fix:**
 ```bash
 # Check which runs had failures
-akm health --since 7d --detail per-run --format json | \
-  jq '.runs[] | select(.consolidation.failedChunks > 0) | {runId, completedAt, failedChunks: .consolidation.failedChunks}'
+akm health --since 7d --group-by run --format json | \
+  jq '.runs[] | select(.consolidation.failedChunks > 0) | {id, completedAt, failedChunks: .consolidation.failedChunks}'
 ```
 If failures cluster around a time window, correlate with API rate limits or
 model availability. Consider reducing chunk size in config.
@@ -177,8 +177,8 @@ The extraction LLM hit its context window on one or more files.
 
 **Identify:**
 ```bash
-akm health --since 24h --detail per-run --format json | \
-  jq '.runs[] | select(.graphExtraction.truncations > 0) | {runId, truncations: .graphExtraction.truncations}'
+akm health --since 24h --group-by run --format json | \
+  jq '.runs[] | select(.graphExtraction.truncations > 0) | {id, truncations: .graphExtraction.truncations}'
 ```
 
 **Fix:** Find the large files and split them. Knowledge documents and memories
@@ -186,8 +186,8 @@ over ~50 KB are candidates. Run `akm lint` to identify unusually large assets.
 
 ### 6b. API failures
 **Check:** `graphExtraction.failures > 0`.
-**Fix:** Check agent profile is configured correctly (`akm health` hard checks).
-If the agent profile is fine, check API rate limits or model availability in the
+**Fix:** Check engine configuration (`akm health` hard checks). If the engine
+is healthy, check API rate limits or model availability in the
 configured LLM provider. A single transient failure is acceptable; persistent
 failures need investigation.
 
@@ -240,7 +240,7 @@ akm config get improve.strategies.default.processes.reflect.assetTypes
 
 2. **Sessions already processed:**
    ```bash
-   akm proposal extract --type claude-code --force --dry-run
+   akm proposal extract --type claude --force --dry-run
    ```
    `--force` re-processes already-seen sessions. If candidates appear, they were
    previously extracted. No action needed.
@@ -248,12 +248,12 @@ akm config get improve.strategies.default.processes.reflect.assetTypes
 3. **Wrong harness:**
    ```bash
    akm proposal extract --type opencode --dry-run   # if using OpenCode
-   akm proposal extract --type claude-code --dry-run  # if using Claude Code
+   akm proposal extract --type claude --dry-run  # if using Claude Code
    ```
 
 4. **Session location override:**
    ```bash
-   akm proposal extract --type claude-code --location <path> --dry-run
+   akm proposal extract --type claude --location <path> --dry-run
    ```
    Use if session files are not in the default location.
 
@@ -261,14 +261,15 @@ akm config get improve.strategies.default.processes.reflect.assetTypes
 
 ## 10. Periodic health degradation (trend regression)
 
-**Symptom:** `--window-compare` shows `pctChange < -0.1` on key metrics.
+**Symptom:** `--window-compare` shows `pctChange < -10` on key metrics (a
+regression greater than 10%; `pctChange` uses percent units, not a 0–1 ratio).
 
 Run a targeted investigation:
 
 ```bash
 # Find the run where it went wrong
-akm health --since 7d --detail per-run --format json | \
-  jq '[.runs[] | {runId, completedAt, wallTimeMs, promoted: .consolidation.promoted}] | sort_by(.completedAt)'
+akm health --since 7d --group-by run --format json | \
+  jq '[.runs[] | {id, completedAt, wallTimeMs, promoted: .consolidation.promoted}] | sort_by(.completedAt)'
 
 # Compare explicit windows across the regression boundary
 akm health \
@@ -292,12 +293,12 @@ Common regression causes:
 | `judgedNoAction` jumps > 10 pp in one window | Cohort shift (B) or LLM degradation (C) — diagnose first | Run `jna-diagnosis.md` steps before acting |
 | `judgedNoAction` > 70%, rising gradually over weeks | Pool saturation (A) | Reduce `poolSize` only after ruling out B |
 | `judgedNoAction` high, guard skips also dropped | Cohort shift (B) — LLM correct | Clear proposal backlog, fix missing descriptions |
-| `judgedNoAction` high, guard skips flat, wall time flat | LLM degradation (C) | Check agent profile + API health |
+| `judgedNoAction` high, guard skips flat, wall time flat | LLM degradation (C) | Check engine configuration + API health |
 | `merge_missing_description` large | Memories lack frontmatter | `akm improve memory --task "add descriptions"` |
-| `consolidation.failedChunks` > 5% | API errors or oversized chunks | Check agent profile, reduce chunk size |
+| `consolidation.failedChunks` > 5% | API errors or oversized chunks | Check engine configuration, reduce chunk size |
 | `memoryInference.yieldRate` < 0.1 | Pool saturated or no fresh memories | Run `akm proposal extract --auto` |
 | `graphExtraction.truncations` > 0 | Oversized files | Find and split large assets |
-| `graphExtraction.failures` > 1 | API / model issue | Check agent profile + LLM provider |
+| `graphExtraction.failures` > 1 | API / model issue | Check engine configuration + LLM provider |
 | `distill.queued == 0` for weeks | Distill disabled or no signal | Enable distill; run `akm proposal extract` |
 | `reflect.cooldown` always high | Cooldown too long for cadence | Reduce cooldown in config |
 | `wallTime.p95` >> `median` | Outlier chunks or API latency | Check `failedChunks`; inspect large memories |

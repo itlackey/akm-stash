@@ -1,18 +1,18 @@
 ---
-description: Use when an agent needs the current registry index schema and install metadata fields for published stashes.
+description: Use when an agent needs the current registry index schema and install metadata fields for published bundles.
 tags: [akm, registry, schema]
 quality: curated
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 # akm Registry Index Schema
 
-> **Version target:** akm registry schema v3, used by akm-cli 0.9.0
+> **Version target:** akm-cli 0.9.2 accepts registry index versions 2 and 3.
 
 The official registry publishes a static `index.json`. akm fetches and caches
 that file, then searches it for matching stashes with `akm search --from
 registry`. Registries discover *stashes* (installable source bundles); the
-schema's own field names (`stashes[]`) are unchanged in 0.9.0 even though the
+schema's own field names (`stashes[]`) remain legacy terminology even though the
 CLI noun for an installed source is now "bundle."
 
 ## Top-level shape
@@ -27,7 +27,7 @@ CLI noun for an installed source is now "bundle."
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `version` | `3` | yes | Consumers reject unknown versions. |
+| `version` | `2` or `3` | yes | Consumers accept these two wire versions only. |
 | `updatedAt` | ISO 8601 string | yes | Registry build timestamp. |
 | `stashes` | array | yes | Published stash entries. |
 
@@ -53,7 +53,7 @@ CLI noun for an installed source is now "bundle."
 | `id` | string | yes | Canonical form `<source>:<ref>`. |
 | `name` | string | yes | Display name. |
 | `ref` | string | yes | Install reference. |
-| `source` | enum | yes | `github` \| `npm` \| `git` \| `url` \| `local`. |
+| `source` | enum | yes | `github` \| `npm` \| `git` \| `local`. Registry-provided `git` entries are discoverable but not installable. |
 | `description` | string | recommended | Primary search/rerank signal. |
 | `homepage` | URL | recommended | Human-readable docs. |
 | `tags` | string[] | recommended | Lowercase search keywords. |
@@ -61,7 +61,7 @@ CLI noun for an installed source is now "bundle."
 | `author` | string | optional | User or org. |
 | `license` | SPDX string | recommended | Surfaced before install. |
 
-## Notes for 0.9.0 users
+## Notes for 0.9.2 users
 
 - The old `kits[]` top-level array is long gone; use `stashes[]` only.
 - The legacy registry boolean `curated` is no longer part of the current

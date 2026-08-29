@@ -2,7 +2,7 @@
 name: akm-find
 type: command
 description: Use when you need a compact ranked shortlist of akm assets for a task. The first argument is the need; the optional second argument is an asset type filter.
-updated: 2026-08-04
+updated: 2026-08-29
 ---
 
 You are helping choose the best akm asset for this need.
@@ -18,7 +18,11 @@ Optional asset type filter: $2
    - how specifically the description matches the need,
    - whether the asset looks official, well-maintained, or high quality,
    - how actionable the next step is for the caller.
-4. Output a shortlist in this format:
+4. Keep the response arrays distinct. Local `hits[]` entries have canonical
+   refs that can be passed to `akm show`; registry `registryHits[]` entries are
+   discovery records and must retain their returned name, source/homepage, and
+   offered install action. Never invent a generic ref for a registry hit.
+5. Output local matches in this format:
 
 ```text
 1. <ref> — <one-line why it fits>
@@ -26,7 +30,17 @@ Optional asset type filter: $2
 3. <ref> — <one-line why it fits>
 ```
 
-5. End with exactly one suggested next command, usually `akm show <ref>`,
-   `akm bundle add <source>`, or `akm clone <ref>`.
+Output registry candidates separately:
+
+```text
+Registry candidates:
+- <returned name> — <one-line why>; install: <offered action>
+```
+
+6. End with exactly one suggested next step: `akm show <local-ref>` for a local
+   hit, or ask the user to approve the registry hit's offered `akm bundle add
+   <install-ref>` action. Only suggest `akm clone <ref>` for a valid local ref
+   (or an explicit source-locator clone ref returned by AKM), never for a
+   synthesized registry ref.
 
 Do not install anything without confirmation.
