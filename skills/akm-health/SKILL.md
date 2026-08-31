@@ -1,7 +1,7 @@
 ---
 name: akm-health
 description: Produce well-formatted markdown health reports for the akm improve pipeline, interpret metrics, troubleshoot issues, and tune pipeline behavior. Use when the user asks for a health report, wants to understand improve metrics, diagnose slow/silent/failing runs, or tune consolidation and distillation.
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # akm Health Reporting
@@ -34,6 +34,11 @@ akm health \
 The result envelope is `schemaVersion: 3`. Task/engine telemetry lives under
 `.metrics`; pipeline metrics live under `.improve`. Optional `.runs`, `.windows`,
 `.deltas`, and `.report` appear only for their corresponding request modes.
+The `advisories` array can also contain `plugin-version` entries. Report the
+installed/available Claude plugin versions and treat `stale: true` or
+`admitted: false` as actionable warnings; the latter means the installed
+plugin has disabled itself because its AKM compatibility range excludes the
+running CLI.
 
 ## Report sections
 
@@ -66,6 +71,7 @@ List hard checks. Surface any non-passing checks as **blocking issues**.
 | state-db-round-trip | ✅ pass | 9 ms |
 | default-engine | ✅ pass | configured engine available |
 | task-history-read | ✅ pass | 96 rows |
+| plugin-version | ✅ pass | installed plugin admits this CLI |
 ```
 
 ### 3. Improve pipeline

@@ -1,7 +1,7 @@
 ---
 description: Repository README for the akm-dream skill. The active asset entrypoint is SKILL.md; this file documents the package layout, phase scripts, and CLI usage.
 tags: [akm-dream, readme]
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # akm-dream
@@ -64,7 +64,7 @@ bun run dream
 
 ## Relationship to `akm improve memory`
 
-In AKM 0.9.2, `akm improve memory` natively performs merge/delete/
+In AKM 0.9.6, `akm improve memory` natively performs merge/delete/
 promote/contradict ops, relative-date resolution, and contradiction-edge
 writing. Reach for `akm improve memory --dry-run` first — it covers the
 common case without dream's staged review overhead.
@@ -182,7 +182,7 @@ and `akm config path --all`.
 
 ## Compatibility
 
-- akm `>= 0.9.2` (uses the 0.9.2 command surface: `akm proposal extract`,
+- akm `>= 0.9.6` (uses the 0.9.6 command surface: `akm proposal extract`,
   `akm bundle add`, `[bundle//]conceptId` refs — see `references/breaking-changes.md`
   in the `akm-migrate` skill if you're consolidating memories on an older install)
 - Bun `>= 1.1.0` (uses `Bun.spawn`)

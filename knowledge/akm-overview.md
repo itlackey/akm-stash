@@ -1,14 +1,14 @@
 ---
-description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.9.2 surfaces.
+description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.9.6 surfaces.
 tags: [akm, overview, concepts]
 quality: curated
-updated: 2026-08-29
+updated: 2026-08-31
 refs: []
 ---
 
 # akm Overview for Agents
 
-> **Version target:** akm-cli 0.9.2
+> **Version target:** akm-cli 0.9.6
 
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
@@ -93,12 +93,13 @@ only `akm clone` accepts a source locator plus `//conceptId`. Use `akm show
 Use `akm workflow run <ref>` for workflow runs and `akm task run <id>` for
 scheduled task assets.
 
-## 0.9.2 execution and authoring rules
+## 0.9.6 execution and authoring rules
 
 - **Task source v4 only.** A task is `tasks/<id>.yml` with `version: 4`,
   exactly one `uses:` or `run:` target, optional `schedule:`, and per-binding
-  `enabled`. Migrate v2/v3 sources with `akm migrate apply --dry-run` then
-  `akm migrate apply`.
+  `enabled`. Deterministically convertible v2/v3 sources are read through an
+  in-memory v4 shim with a warning; migrate them on disk with `akm migrate
+  apply --dry-run` then `akm migrate apply`.
 - **Durable workflow plan v5.** Workflow runs freeze `irVersion: 5` and
   `hashVersion: 7`. Older plans remain inspectable but must be abandoned and
   restarted from current source; `akm workflow plan <ref>` validates a fresh
@@ -111,7 +112,15 @@ scheduled task assets.
   index, so a registry hit is inspected at its source/homepage until installed.
 - **Health schema v3.** `akm health` returns task/engine telemetry in
   `metrics` and improve telemetry in `improve`; per-run output uses
-  `--group-by run`.
+  `--group-by run`. It also reports installed Claude plugin versions and warns
+  when the plugin is stale or its declared AKM range excludes the running CLI.
+- **Search match provenance.** Normal/full and agent-shaped local hits may
+  include `matchStage` (`exact`, `prefix`, or `relaxed`). A `searchMode` of
+  `fts-fallback` means semantic search failed live for that query and AKM used
+  lexical results instead.
+- **Scheduler recovery.** `akm task sync --dry-run` previews reconciliation;
+  `akm task prune` previews entries whose descriptor or bundle disappeared,
+  and `akm task prune --yes` removes only those computed orphans.
 
 ## Essential commands at a glance
 
@@ -138,7 +147,7 @@ akm search --type task
 - Drain the pending backlog (automated) → `akm proposal drain --policy
   personal-stash` or the `processes.triage` improve strategy pre-pass
 - Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
-  feedback into lesson proposals natively in akm-cli 0.9.2)
+  feedback into lesson proposals natively in akm-cli 0.9.6)
 - Harvest session knowledge → `akm proposal extract --auto` then `akm
   proposal list`
 - Tune the improve pipeline → `knowledge/akm-improve-and-extract`

@@ -1,7 +1,7 @@
 ---
 name: akm-quickstart
 description: "Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations."
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # akm Quickstart
@@ -26,6 +26,9 @@ command -v akm && akm --version && akm info || true
 If `akm` is present and `akm info` succeeds, skip to step 4.
 
 ### 2. Install the CLI
+
+AKM 0.9.6 requires Node.js 22 or newer for npm-compatible installs. Bun and
+the standalone binary remain supported alternatives.
 
 Prefer the package manager already used in the environment:
 
@@ -75,7 +78,8 @@ akm help migrate 0.9.2
 akm proposal list
 ```
 
-Only proceed once `akm info` succeeds. On 0.9.2:
+Only proceed once `akm info` succeeds. On 0.9.6 (the built-in migration page
+remains named `0.9.2` because that was the durable source/plan cutover):
 - `akm proposal list` and `akm proposal extract --auto --dry-run` should both work.
 - The old `reflect` / `distill` / `extract` / `propose` / `vault` / `wiki`
   commands are removed with no compatibility alias — do not use them in new

@@ -1,13 +1,13 @@
 ---
-description: Use when an agent is authoring or reorganizing a bundle and needs the 0.9.2 directory, command, workflow, task, and lesson conventions.
+description: Use when an agent is authoring or reorganizing a bundle and needs the 0.9.6 directory, command, workflow, task, and lesson conventions.
 tags: [akm, stash, structure]
 quality: curated
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # AKM Bundle Structure
 
-> **Version target:** akm-cli 0.9.2
+> **Version target:** akm-cli 0.9.6
 
 akm classifies assets by **file extension and content**, not by directory name.
 Conventional directories are still the best default because they improve search
@@ -58,7 +58,7 @@ The `description` is a trigger sentence. Write “Use when …”, not a title.
 
 ### Commands
 
-akm 0.9.2 command assets follow the OpenCode-style prompt-template convention:
+akm 0.9.6 command assets follow the OpenCode-style prompt-template convention:
 
 ```markdown
 ---
@@ -86,7 +86,7 @@ tools: [Read, Grep, Glob, Bash]
 
 ### Workflows
 
-akm 0.9.2 workflows are unified markdown with the orchestration graph in
+akm 0.9.6 workflows are unified markdown with the orchestration graph in
 frontmatter and step instructions in the body — the retired 0.8.0
 `## Step: <title>` / `Step ID:` / `### Instructions` / `### Completion
 Criteria` heading contract fails `akm lint --type workflows` with
@@ -126,7 +126,7 @@ running. See `knowledge/akm-cli-reference` for the full contract.
 ### LLM Wiki bundles
 
 A Karpathy-style LLM wiki (`schema.md` rulebook + agent-authored `pages/`)
-is a first-class **bundle format** in 0.9.2, not an AKM-native asset type or
+is a first-class **bundle format** in 0.9.6, not an AKM-native asset type or
 directory. Install one with `akm bundle add <source>` like any other
 source; akm's LLM Wiki adapter recognizes it automatically and its pages
 resolve to `bundle//pages/<slug>` refs. There is no `akm wiki` command
@@ -152,9 +152,10 @@ quality: curated
 
 Task assets are first-class assets stored under `tasks/` as pure YAML
 (`tasks/<id>.yml`) — no markdown frontmatter delimiters or body section.
-Only **task source v4** is executable: the file must begin with `version: 4`.
-A v2 or v3 file is rejected until converted with `akm migrate apply --dry-run`
-followed by `akm migrate apply`.
+Only **task source v4** should be authored: the file must begin with `version: 4`.
+AKM 0.9.6 can read a deterministically convertible v2/v3 file through an
+in-memory v4 shim, but warns without rewriting it. Convert it durably with
+`akm migrate apply --dry-run` followed by `akm migrate apply`.
 
 ```yaml
 # tasks/<id>.yml
@@ -176,15 +177,17 @@ Pick exactly one of `uses:` or `run:`. `uses:` accepts `akm/command` or a
 canonical `commands/`, `scripts/`, or `workflows/` ref; `with:` is legal only
 with `akm/command`. Scheduling is optional; enablement belongs to an individual
 `schedule:` entry, not the document. Manage tasks with
-`akm task add|run|explain|history|sync|doctor` (singular `task`, not `tasks`) —
+`akm task add|run|explain|history|sync|doctor|prune` (singular `task`, not `tasks`) —
 there is no task list/show/remove/enable/disable/init command. Use `akm search
 --type task` / `akm show tasks/<id>` to inspect a locally indexed task, and edit
-the YAML plus `akm task sync` to reconcile schedules.
+the YAML plus `akm task sync` to reconcile schedules. Use `akm task sync
+--dry-run` for a zero-write preview; use `akm task prune` to preview unreachable
+scheduler entries whose descriptor or owning bundle no longer resolves.
 
 ### Metadata guidance
 
 Prefer inline metadata in frontmatter and file-local headers. Older curated
-bundles may still carry `.stash.json` during migration, but 0.9.2-facing
+bundles may still carry `.stash.json` during migration, but 0.9.6-facing
 assets should not rely on it as the primary authoring contract.
 
 ## Asset quality rules

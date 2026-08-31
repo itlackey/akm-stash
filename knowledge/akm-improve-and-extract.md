@@ -2,12 +2,12 @@
 description: Use when an agent needs to run, configure, or tune the akm self-improvement pipeline — including akm improve, akm proposal extract, and akm health.
 tags: [akm, improve, extract, health, pipeline]
 quality: curated
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # akm Improve and Extract Pipeline
 
-> **Version target:** akm-cli 0.9.2
+> **Version target:** akm-cli 0.9.6
 
 akm's self-improvement loop is built on three commands: **proposal extract**
 (harvest durable insights from session logs), **improve** (analyze and
@@ -66,7 +66,7 @@ akm improve skill
 akm improve
 
 # Add a specific task directive:
-akm improve --task "Update CLI flag references for 0.9.2"
+akm improve --task "Update CLI flag references for 0.9.6"
 
 # Dry run — show planned actions without writing:
 akm improve --dry-run
