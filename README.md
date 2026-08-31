@@ -2,7 +2,7 @@
 
 The official akm stash: a curated collection of assets that teach coding
 agents how to use [akm](https://github.com/itlackey/akm) effectively on
-**akm-cli 0.9.2**.
+**akm-cli 0.9.6**.
 
 If akm is the package manager for agent assets, this is the starter stash:
 install it once and an akm-aware agent gains practical skills, commands,
@@ -65,7 +65,7 @@ No akm yet? Install the CLI first — see
   `knowledge/akm-improve-and-extract`.
 - **Scheduling recurring stash maintenance or harvest runs** → use `akm task`
   and model the task file after the examples in `tasks/`.
-- **After upgrading akm to 0.9.2** → run the `akm-migrate` skill to read the release notes, migrate any v2/v3 task sources, update stale assets, and verify system health.
+- **After upgrading akm to 0.9.6** → run the `akm-migrate` skill to rebuild stored search scores, preview scheduler reconciliation and pruning, migrate any v2/v3 task sources, and verify system/plugin health.
 - **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
 - **Improve runs are slow, silent, or producing odd numbers** → run the
   `akm-health` skill to turn `akm health` output into a readable report and
@@ -75,7 +75,7 @@ No akm yet? Install the CLI first — see
 
 ## Conventions
 
-- Assets target **akm-cli 0.9.2** and call out version-sensitive behavior.
+- Assets target **akm-cli 0.9.6** and call out version-sensitive behavior.
 - Descriptions are written as trigger sentences so host agents can decide when
   to load an asset without reading the whole body.
 - For reusable guidance, teach **how**, not one benchmark answer or verifier

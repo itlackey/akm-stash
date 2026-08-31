@@ -1,143 +1,159 @@
 ---
 name: akm-migrate
-description: Use when upgrading to akm-cli 0.9.2 and you need to preserve active-workflow state, convert retired task-v2/v3 sources to task source v4, update stale bundle guidance, and verify the result.
-updated: 2026-08-29
+description: Use when upgrading to akm-cli 0.9.6 and you need to rebuild search scores, reconcile scheduler state, convert legacy task sources, preserve workflow state, or update machine consumers.
+updated: 2026-08-31
 ---
 
-# AKM 0.9.2 Migration Guide
+# AKM 0.9.6 Migration Guide
 
-Use this guide after upgrading the executable to 0.9.2. It concentrates on
-the migrations this release actually exposes: task sources, durable workflow
-plans, and task-history consumers. \`akm migrate\` is **not** a general config
-or database migration command.
+Use this guide after upgrading the executable to 0.9.6. The only required
+0.9.2-to-0.9.6 data action is a full index rebuild; scheduler reconciliation
+and task-source migration are explicit, reviewable follow-ups. `akm migrate`
+is task-source specific — it is not a general config or database migrator.
 
-## 1. Read the release guidance and secure work in progress
+## 1. Confirm the release and protect active work
 
-\`\`\`bash
+```bash
 akm --version
-akm help migrate 0.9.2
+akm info
 akm workflow list --active
-\`\`\`
+```
 
-Before changing task source, commit or otherwise snapshot the authored bundle.
-Complete active workflows where practical. A plan frozen before 0.9.2 uses an
-older IR and cannot resume, advance, complete, or run under 0.9.2; it remains
-readable and can be abandoned:
+If the previous install predates 0.9.2, also read `akm help migrate 0.9.2`.
+That is the built-in durable-plan/task-source cutover note; no separate
+`akm help migrate 0.9.6` page is shipped.
 
-\`\`\`bash
+Workflow plans remain at `irVersion: 5` and `hashVersion: 7` in 0.9.6. A plan
+frozen before the 0.9.2 cutover is readable but cannot resume or advance.
+Inspect and restart it from current authored source:
+
+```bash
 akm workflow status <run-id>
 akm workflow abandon <run-id>
 akm workflow run <workflow-ref>
-\`\`\`
+```
 
-Do not downgrade below 0.9.2 after this version has written task history to a
-given \`state.db\`: new history metadata is intentionally unreadable by older
-versions. A normal 0.9.1-to-0.9.2 state-database upgrade is additive and
-automatic. Follow \`akm help migrate 0.9.2\` if the executable reports an
-exceptional pre-release ledger that requires \`akm upgrade --force\`.
+Do not downgrade below 0.9.2 after the state database has received current
+task-history rows. The 0.9.6 upgrade adds no new task-history vocabulary.
 
-## 2. Preview and apply task-source migration
+## 2. Rebuild the search index once
 
-Task source v4 is the only executable grammar in 0.9.2. The wrapped
-\`akm migrate\` command runs task-v2 → v3 and v3 → v4 in sequence, backing up
-and validating each replacement atomically.
+0.9.5 stopped counting search impressions as utility wins. Scores already
+stored by an older install retain that ranking bias until rebuilt, so run:
 
-\`\`\`bash
-# Read-only plan: inspect changed, skipped, and blocked files.
+```bash
+akm index --full
+```
+
+Search ordering may change; that is expected. The rebuild also repopulates
+embeddings using 0.9.6's token-budgeted batches, which skip and report an
+oversized document without discarding every other batch.
+
+## 3. Migrate task sources and reconcile scheduler state
+
+Task source v4 remains the authored grammar. AKM 0.9.6 auto-reads a
+deterministically convertible v2/v3 source as v4 in memory, emits a one-line
+deprecation warning, and does not rewrite it. Use the migrator to make the
+upgrade durable and silence that warning:
+
+```bash
 akm migrate status
 akm migrate apply --dry-run
-
-# After resolving every blocked source, apply the same plan.
 akm migrate apply
-\`\`\`
+```
 
-Do not add obsolete \`--config\`, \`--diff\`, storage, or restore flags: they are
-not part of the 0.9.2 \`akm migrate\` interface. A \`blocked\` entry is deliberate;
-read its reason, repair the authored source, and preview again rather than
-forcing a partial conversion.
+Each source is reported as `changed`, `skipped`, or `blocked`. A blocked file
+does not stop convertible siblings from migrating; repair it instead of
+inventing a force flag. The command has no `--config`, `--diff`, storage, or
+restore interface.
 
-## 3. Repair or author task source v4 deliberately
+Preview scheduler reconciliation before applying it. The first sync after an
+upgrade may show many updates because 0.9.5 began reconciling entries that
+older ownership checks silently refused:
 
-Every task lives at \`tasks/<id>.yml\`, begins with \`version: 4\`, selects exactly
-one target (\`uses:\` or \`run:\`), and may omit \`schedule:\` for a manual-only
-task. \`with:\` is valid only for \`uses: akm/command\`; other executable refs use
-typed \`inputs:\` when needed. \`enabled\` is per schedule binding, while execution
-controls such as \`timeout\`, \`engine\`, and \`redact\` are top-level keys.
-
-\`\`\`yaml
-version: 4
-name: Nightly review
-uses: akm/command
-with:
-  content: Review the bundle and queue improvement proposals only.
-schedule:
-  - cron: "0 4 * * *"
-    enabled: true
-timeout: 30m
-\`\`\`
-
-For ambiguous v2/v3 sources, use \`references/breaking-changes.md\`. Typical
-manual fixes are an old argv array with no safe shell equivalent, a removed
-GitHub Action-shaped \`uses:\` locator, a \`with:\` block on a non-command target,
-or two competing legacy schedule forms. Validate resolution without running:
-
-\`\`\`bash
-akm task explain tasks/nightly-review
+```bash
+akm task sync --dry-run
 akm task sync
 akm task doctor
-\`\`\`
+```
 
-## 4. Update authored workflows and task-history consumers
+Then inspect unreachable scheduler entries. `prune` defaults to a zero-write
+preview and never targets an entry that still resolves to a live bundle:
 
-0.9.2 workflow runs freeze \`irVersion: 5\` and \`hashVersion: 7\`. Markdown and
-single-job GitHub-shaped YAML workflows are peer source forms; a YAML workflow
-must be \`.yml\`, and \`inherit_env\` is rejected in favor of explicit named
-environment bindings and \`pass_env\`. Use the read-only planner before a run:
+```bash
+akm task prune
+akm task prune --id <binding-id>     # optional narrowed preview
+akm task prune --yes                 # remove the printed orphan candidates
+```
 
-\`\`\`bash
-akm workflow plan workflows/release
+## 4. Normalize config and machine consumers
+
+Known older `configVersion` documents are upgraded in memory with a warning;
+the next `akm config set` or other config write persists the current version.
+The 0.9.1-era `extraParams.reasoning_effort`, `temperature`, `maxTokens`, and
+`enableThinking` workarounds are likewise lifted to their first-class engine
+fields when unambiguous. Conflicting old/new values still fail closed — choose
+one value explicitly rather than relying on precedence.
+
+Search consumers may now see additive `matchStage: "exact" | "prefix" |
+"relaxed"` on normal/full and agent-shaped local hits. It is absent for
+pure-semantic contributions and registry hits. A `searchMode` of
+`fts-fallback` means semantic search was attempted live and lexical results
+were returned with a sanitized warning.
+
+Task-history `target.kind` is unchanged from 0.9.2: `command`, `shell`,
+`script`, `workflow`, or `unknown`. Consumers must not branch on the retired
+`prompt` value.
+
+## 5. Verify authored workflows and tasks
+
+Every task lives at `tasks/<id>.yml`, begins with `version: 4`, selects exactly
+one target (`uses:` or `run:`), and may omit `schedule:` for manual-only use.
+`with:` is valid only for `uses: akm/command`; `enabled` belongs to each
+schedule binding. Validate resolution without executing:
+
+```bash
+akm task explain tasks/<id>
+akm workflow plan workflows/<name>
 akm lint --type workflows
-\`\`\`
+```
 
-Update API consumers of \`akm task history\` or \`akm task run --format json\`:
-\`target.kind\` now uses \`command\`, \`shell\`, \`script\`, \`workflow\`, or \`unknown\`.
-The retired agent/LLM value \`prompt\` maps to \`command\`; the old shared native
-\`command\` value split into \`shell\` and \`script\`. Existing rows are projected
-through the new vocabulary by 0.9.2.
+The workflow source contract and durable plan versions did not change between
+0.9.2 and 0.9.6. The 0.9.6 implementation removes unused authoring caps, but
+that does not add new syntax to authored files.
 
-## 5. Scan and verify the bundle
+## 6. Scan and complete the upgrade
 
-\`\`\`bash
+```bash
 BUNDLE_DIR="$(akm info --format json | jq -r .bundleDir)"
 
-# Review potentially retired command/ref forms; refine the list for your source.
 rg -n --glob '*.md' --glob '*.yml' \
   'akm (vault|reflect|distill|extract|tasks|add|list|remove|update|save|events|wiki|propose|proposals|accept|reject|diff|revert)\b|--auto-accept|--profile |\b(?:skill|knowledge|memory|workflow|command|agent|script|env|secret|lesson|task|vault|wiki):[A-Za-z0-9_/-]+' \
   "$BUNDLE_DIR"
 
-# Task sources must be .yml and v4; inspect any matches before changing them.
 find "$BUNDLE_DIR/tasks" -name '*.md' -print
 rg -L '^version: 4$' "$BUNDLE_DIR/tasks" -g '*.yml'
 
-akm index --full
 akm lint
-akm task sync
+akm task sync --dry-run
 akm task doctor
 akm health --format json
-\`\`\`
+```
 
-\`akm show\` is for locally indexed assets. Search registry candidates with
-\`akm search <query> --from registry\`; inspect their returned source/homepage
-read-only until you intentionally install a source.
+Treat a `plugin-version` advisory as actionable: update a stale Claude plugin,
+or install one whose declared range admits 0.9.6 if `admitted` is false.
 
 ## Completion checklist
 
-- \`akm migrate apply --dry-run\` reports no unresolved legacy task sources.
-- Every executable task passes \`akm task explain\`; scheduler bindings reconcile
-  with \`akm task sync\`.
-- Each workflow passes \`akm workflow plan\` and \`akm lint --type workflows\`.
-- \`akm lint\` and \`akm health --format json\` have no unexplained failures.
-- Any downstream task-history parser accepts the 0.9.2 target vocabulary.
+- `akm index --full` completed once after the upgrade.
+- `akm migrate apply --dry-run` reports no unexplained legacy task sources.
+- Every executable task passes `akm task explain`; scheduler reconciliation
+  and prune previews contain only understood changes.
+- Each workflow passes `akm workflow plan` and `akm lint --type workflows`.
+- `akm lint` and `akm health --format json` have no unexplained failures or
+  plugin compatibility warnings.
+- Search and task-history consumers tolerate the 0.9.6 additive fields and
+  current target vocabulary.
 
-See \`references/breaking-changes.md\` for a concise current contract and a
-clearly marked historical 0.9.0 rename table.
+See `references/breaking-changes.md` for a compact release delta plus the
+historical 0.9.2 and 0.9.0 translation tables.

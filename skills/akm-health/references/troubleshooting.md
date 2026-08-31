@@ -1,7 +1,7 @@
 ---
 description: Decision tree and fix playbook for common akm improve pipeline issues. Use when a health report shows anomalies and you need to identify root causes and apply fixes.
 tags: [akm-health, troubleshooting, tuning, improve]
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # akm Health Troubleshooting Playbook
@@ -17,11 +17,17 @@ later ones.
 
 | Check | Fix |
 |---|---|
-| `state-db-schema` | Do not attempt ad hoc database edits. Read `akm help migrate 0.9.2`; when it names an exceptional pre-release ledger, follow its `akm upgrade --force` recovery procedure. |
+| `state-db-schema` | Do not attempt ad hoc database edits. Read the built-in `akm help migrate 0.9.2` cutover note; when it names an exceptional pre-release ledger, follow its `akm upgrade --force` recovery procedure. |
 | `state-db-round-trip` | Disk full or permissions issue. Check `df -h` and the path in evidence. |
 | `default-engine` / `default-llm-engine` / `configured-engines` | Run `akm setup` to configure an engine, then correct the named engine, model map, or credential binding from the check evidence. |
 | `task-log-backing` | Log files were deleted. Safe to ignore if intentional; otherwise check backup. |
 | `active-runs` | A run is stuck. Kill the process, then clean the stale run: `akm task doctor`. |
+
+An advisory named `plugin-version` is not a state-database failure. If its
+evidence says `stale: true`, run the update command named in its message. If
+`admitted: false`, update the plugin to a release whose `versionRange` admits
+the running CLI; until then that plugin is inactive even though AKM itself is
+healthy. An unavailable remote tag lookup is treated as unknown, not stale.
 
 ---
 

@@ -1,10 +1,10 @@
 ---
 type: workflow
-description: Publish a local directory of agent assets as a searchable akm bundle and verify it with current 0.9.2 conventions.
+description: Publish a local directory of agent assets as a searchable akm bundle and verify it with current 0.9.6 conventions.
 tags: [publish, release]
 params:
   ref: { type: string, description: Install ref to verify after publishing }
-updated: 2026-08-29
+updated: 2026-08-31
 steps:
   - id: prepare-layout
   - id: add-metadata
