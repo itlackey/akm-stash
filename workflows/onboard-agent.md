@@ -74,7 +74,7 @@ Verify:
 
 ## learn-lifecycle
 
-Review how 0.9.6 handles feedback, improvement, and the proposal queue,
+Review how 0.9.7 handles feedback, improvement, and the proposal queue,
 using the bundle assets attached to this unit as context. Inspect
 `knowledge/akm-proposals-and-lessons` and `knowledge/akm-improve-and-extract`,
 then verify the proposal queue commands exist with `akm proposal list`.

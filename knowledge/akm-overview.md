@@ -1,5 +1,5 @@
 ---
-description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.9.6 surfaces.
+description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.9.7 surfaces.
 tags: [akm, overview, concepts]
 quality: curated
 updated: 2026-08-31
@@ -8,7 +8,7 @@ refs: []
 
 # akm Overview for Agents
 
-> **Version target:** akm-cli 0.9.6
+> **Version target:** akm-cli 0.9.7
 
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
@@ -93,7 +93,7 @@ only `akm clone` accepts a source locator plus `//conceptId`. Use `akm show
 Use `akm workflow run <ref>` for workflow runs and `akm task run <id>` for
 scheduled task assets.
 
-## 0.9.6 execution and authoring rules
+## 0.9.7 execution and authoring rules
 
 - **Task source v4 only.** A task is `tasks/<id>.yml` with `version: 4`,
   exactly one `uses:` or `run:` target, optional `schedule:`, and per-binding
@@ -118,15 +118,29 @@ scheduled task assets.
   include `matchStage` (`exact`, `prefix`, or `relaxed`). A `searchMode` of
   `fts-fallback` means semantic search failed live for that query and AKM used
   lexical results instead.
+- **Packed curation.** `akm curate <query> --pack <tokens>` returns ranked
+  local assets' content in one combined budget. It drops lower-ranked whole
+  assets first, resolves fragments like `akm show`, and never packs registry
+  hits.
+- **Website manifests.** Adding an origin-root website probes `/llms.txt`
+  and uses its same-origin links as the crawl frontier when present.
 - **Scheduler recovery.** `akm task sync --dry-run` previews reconciliation;
   `akm task prune` previews entries whose descriptor or bundle disappeared,
   and `akm task prune --yes` removes only those computed orphans.
+- **Reference repair.** Lint validates legacy `type:slug` xrefs and resolves
+  derived memories plus prune tombstones. After reviewing `akm lint`, use
+  `akm lint --prune-dangling-edges` only to drop genuinely missing belief
+  edges.
+- **Improve presets.** `frequent` and `memory-focus` are removed.
+  `thorough` and `catchup` can run judged, capped triage drains, with
+  promotion gated by `experimental.improveAutonomy`.
 
 ## Essential commands at a glance
 
 ```bash
 akm setup
 akm search "deploy"
+akm curate "plan a safe deployment" --pack 8000 --format json
 akm show skills/review-pr --shape agent
 akm bundle add github:owner/repo
 akm workflow run workflows/release
@@ -147,7 +161,7 @@ akm search --type task
 - Drain the pending backlog (automated) → `akm proposal drain --policy
   personal-stash` or the `processes.triage` improve strategy pre-pass
 - Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
-  feedback into lesson proposals natively in akm-cli 0.9.6)
+  feedback into lesson proposals natively in akm-cli 0.9.7)
 - Harvest session knowledge → `akm proposal extract --auto` then `akm
   proposal list`
 - Tune the improve pipeline → `knowledge/akm-improve-and-extract`

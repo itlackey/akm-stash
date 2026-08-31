@@ -8,9 +8,9 @@ an agent needs background, not when it needs to act.
 
 | # | Ref | Read when |
 | --- | --- | --- |
-| 1 | `knowledge/akm-overview` | First time meeting akm — asset types, the major 0.9.6 surfaces, and how the pieces fit together. |
+| 1 | `knowledge/akm-overview` | First time meeting akm — asset types, the major 0.9.7 surfaces, and how the pieces fit together. |
 | 2 | `knowledge/akm-cli-reference` | You know the concepts and need the main commands, flags, and proposal-review flow in one place. |
-| 3 | `knowledge/akm-stash-structure` | You're authoring or reorganizing a bundle and need the 0.9.6 directory/command/workflow/task/lesson conventions. |
+| 3 | `knowledge/akm-stash-structure` | You're authoring or reorganizing a bundle and need the 0.9.7 directory/command/workflow/task/lesson conventions. |
 | 4 | `knowledge/akm-proposals-and-lessons` | You're reviewing the proposal queue or distilling lessons and need quality values + lesson lifecycle. |
 | 5 | `knowledge/akm-improve-and-extract` | You're running or tuning the improve + extract pipeline and need flags, strategies, tuning tips, and the full operator loop. |
 | 6 | `knowledge/akm-registry-schema` | You're publishing a stash or building a private registry and need the index schema + install metadata fields. |
@@ -24,5 +24,5 @@ akm curate "publishing a new stash"   # let akm pick relevant ones for a task
 ```
 
 These six documents are the agent-facing reference set — short, structured,
-and version-pinned to akm-cli 0.9.6. They teach *how* rather than answer
+and version-pinned to akm-cli 0.9.7. They teach *how* rather than answer
 specific questions; pair them with `akm search` for task-specific lookups.

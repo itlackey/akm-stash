@@ -38,7 +38,7 @@ Add `--dry-run` when mode is `dry-run`. When a scope argument is provided,
 append it: `akm improve <scope>`.
 
 Add `--task "..."` when there is a specific area to target (e.g. "update CLI
-references for 0.9.6"). `akm improve` never auto-promotes — every generated
+references for 0.9.7"). `akm improve` never auto-promotes — every generated
 proposal lands `pending` regardless of mode; step 4 below is always required.
 
 ## 4. Review pending proposals
