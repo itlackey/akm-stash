@@ -7,7 +7,7 @@ updated: 2026-08-31
 
 # akm Improve and Extract Pipeline
 
-> **Version target:** akm-cli 0.9.6
+> **Version target:** akm-cli 0.9.7
 
 akm's self-improvement loop is built on three commands: **proposal extract**
 (harvest durable insights from session logs), **improve** (analyze and
@@ -66,7 +66,7 @@ akm improve skill
 akm improve
 
 # Add a specific task directive:
-akm improve --task "Update CLI flag references for 0.9.6"
+akm improve --task "Update CLI flag references for 0.9.7"
 
 # Dry run — show planned actions without writing:
 akm improve --dry-run
@@ -87,16 +87,25 @@ Built-in strategies control which sub-processes run (renamed from
 |---|---|
 | `default` | All processes for the asset's type; improve-stage extract and proactive maintenance off |
 | `quick` | Fast surface pass only |
-| `thorough` | Extended analysis pass |
-| `frequent` | Tuned for high-frequency scheduled runs; improve-stage extract off |
-| `memory-focus` | Memory consolidation + contradiction detection only |
+| `thorough` | Default's full process matrix plus a judged triage drain capped at 25 accepts |
+| `graph-refresh` | Refresh memory inference and graph relationships |
+| `consolidate` | Memory consolidation pass |
+| `catchup` | Consolidation plus a judged triage drain capped at 100 accepts |
 | `reflect-distill` | Reflect + distill only; proactive maintenance off |
 | `proactive-maintenance` | Opt-in dedicated preset for autonomous maintenance lanes |
 
 ```bash
-akm improve --strategy memory-focus
+akm improve --strategy reflect-distill
 akm improve --strategy thorough skill
 ```
+
+`frequent` and `memory-focus` were removed in 0.9.7. The shipped hourly
+learning task now uses `reflect-distill`. If config defines a custom strategy
+under either removed name, it now merges over `default` rather than a former
+built-in, so declare every process and sync value the strategy relies on.
+`thorough` and `catchup` request promotion, judgment, and
+`maxDiffLines: 200`, but the autonomy gate demotes them to queue mode unless
+`experimental.improveAutonomy` is enabled.
 
 Custom strategies live under `improve.strategies.<name>` in
 `~/.config/akm/config.json`. Selection order is `--strategy`,
@@ -161,8 +170,8 @@ akm improve --no-sync          # skip the end-of-run commit entirely
 akm improve --sync --no-push   # commit only, skip the push
 ```
 
-Strategy sync defaults: `catchup`, `consolidate`, `default`, `frequent`,
-`graph-refresh`, `memory-focus`, `quick`, and `thorough` auto-commit + push;
+Strategy sync defaults: `catchup`, `consolidate`, `default`,
+`graph-refresh`, `quick`, and `thorough` auto-commit + push;
 `proactive-maintenance` and `reflect-distill` skip sync entirely.
 
 ## akm health — pipeline diagnostics

@@ -60,6 +60,18 @@ akm curate "<angle>" --from all --limit 8 --format json
 This is the highest-signal pass: the curate ranker applies LLM reranking and
 surfaces the most relevant assets from both local bundles and registries.
 
+On akm 0.9.7, a separate local-only pass can load the ranked content in one
+combined token budget:
+
+```bash
+akm curate "<angle>" --from local --limit 8 --pack 12000 --format json
+```
+
+Packed JSON is a bare array of `{ ref, tokens, content }` items. Use it to
+compare installed candidates without one `show` call per ref. Do not replace
+the `--from all` discovery pass with it: registry hits are omitted from
+packed output and still need their ordinary install guidance.
+
 ### 2b. Broad search — local and registry
 
 For each search angle, follow up with a broader search to catch assets the

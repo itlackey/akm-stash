@@ -1,5 +1,5 @@
 ---
-description: Use when an agent needs the main akm-cli 0.9.6 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
+description: Use when an agent needs the main akm-cli 0.9.7 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
 tags: [akm, cli, reference]
 quality: curated
 updated: 2026-08-31
@@ -8,7 +8,7 @@ updated: 2026-08-31
 # akm CLI Reference
 
 Quick reference for the main `akm` surfaces an agent is likely to use.
-Current as of **0.9.6** (2026-08-31). For authoritative syntax, run
+Current as of **0.9.7** (2026-08-31). For authoritative syntax, run
 `akm <cmd> --help`.
 
 ## Global output controls
@@ -46,11 +46,12 @@ Current as of **0.9.6** (2026-08-31). For authoritative syntax, run
 | `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
 | `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
 | `akm curate <query>` | Return a compact shortlist plus suggested next commands. |
+| `akm curate <query> --pack <tokens>` | Return ranked local assets' full content in one combined token budget. Lower-ranked whole assets are dropped first; registry hits are omitted from packed output. |
 | `akm show <ref>` / `akm show <ref>#<fragment>` | Display a locally indexed asset; `#fragment` selects one markdown section by heading slug. |
 | `akm show <ref> --filter key=value` | Require a scope match when resolving the asset. |
 | `akm registry list` / `akm registry add <url> --name <alias>` / `akm registry remove <url-or-name>` | Manage discovery registries. Searching a registry is `akm search --from registry` — there is no `akm registry search`. |
 
-Generic asset refs use the 0.9.6 `[bundle-slug//]conceptId[#fragment]`
+Generic asset refs use the 0.9.7 `[bundle-slug//]conceptId[#fragment]`
 grammar — `skills/code-review`, `memories/vpn-note`, and a bundle-qualified
 knowledge ref written as `<bundle-slug>//knowledge/<asset>`. `github:owner/repo` and `npm:@scope/pkg` are
 source locators for `akm bundle add`, not generic `show` or search-result
@@ -75,6 +76,11 @@ that query and AKM returned lexical results with a sanitized warning.
 | `akm bundle remove <target>` | Remove a configured source and reindex. |
 | `akm clone <ref> [--dest <dir>] [--name <new-name>] [--bundle <name>]` | Copy a single asset into a writable bundle or a custom destination. For clone only, a GitHub/npm source locator plus `//conceptId` is also accepted. |
 
+For an origin-root website URL, 0.9.7 probes `/llms.txt` first and uses its
+same-origin links as the crawl frontier when present. Specific-page URLs and
+sites without that file retain the normal crawler. Off-origin manifest links
+are ignored, and `llms-full.txt` is not consumed.
+
 `akm add`/`akm list`/`akm remove`/`akm update` are retired 0.8 spellings —
 the whole group moved under `akm bundle`. To update akm itself, use `akm
 upgrade`, not `akm bundle update`.
@@ -91,6 +97,8 @@ upgrade`, not `akm bundle update`.
 | `akm task add <id> --schedule "..." --command "..."` | Register a scheduled shell command task. |
 | `akm task run <id>` / `akm task explain <ref>` / `akm task history` / `akm task doctor` / `akm task sync [--dry-run] [--rebind]` | Execute, explain read-only resolution, inspect, diagnose, or reconcile task assets. `--dry-run` previews without scheduler writes. |
 | `akm task prune [--id <id1,id2>] [--yes]` | Preview orphaned scheduler entries that no longer resolve to a live bundle; `--yes` removes the printed candidates. Live entries are never pruned. |
+| `akm lint [--fix] [--type <type>]` | Report bundle structure and reference findings. `--fix` applies ordinary repairs. |
+| `akm lint --prune-dangling-edges` | Opt-in removal of `supersededBy`/`contradictedBy` edges whose target has neither a live file nor a prune tombstone. It is not implied by `--fix`; review plain lint output first. |
 | `akm search --type task` / `akm show tasks/<id>` | Enumerate or inspect task assets — there is no `task list`/`task show`. |
 | `akm remember "<text>"` | Append a memory fragment to the working bundle. |
 | `akm import <file\|url\|->` | Ingest a knowledge document into the bundle. |
@@ -102,14 +110,14 @@ upgrade`, not `akm bundle update`.
 > one top-level target: `uses:` (an `akm/command`, `commands/`, `scripts/`, or
 > `workflows/` ref) or `run:` (one explicit shell string). `with:` is only for
 > `uses: akm/command`; task controls such as `timeout` are top-level. Scheduling
-> is optional and each list binding owns its `enabled:` state. AKM 0.9.6
+> is optional and each list binding owns its `enabled:` state. AKM 0.9.7
 > auto-reads deterministically convertible v2/v3 files as v4 with a deprecation
 > warning and no source write; use `akm migrate apply --dry-run` then `akm
 > migrate apply` to rewrite them and silence the warning. There is no task
 > enable/disable/remove/list/show command — edit the
 > YAML and run `akm task sync`, or use `akm search --type task`.
 
-## Proposal queue and self-improvement (0.9.6)
+## Proposal queue and self-improvement (0.9.7)
 
 | Command | Purpose |
 |---|---|
@@ -184,6 +192,14 @@ Triage also runs automatically as a **pre-pass inside `akm improve`** when
 flag anymore — improve always writes to the proposal queue, never directly
 to a live asset.
 
+The 0.9.7 built-ins are `default`, `quick`, `thorough`,
+`graph-refresh`, `consolidate`, `catchup`, `reflect-distill`, and
+`proactive-maintenance`. `frequent` and `memory-focus` were removed; a
+custom strategy with either name now merges over `default`, so make any
+relied-on process or sync behavior explicit. `thorough` and `catchup` use
+judged promotion with caps, but the autonomy gate demotes them to queue mode
+unless `experimental.improveAutonomy` is enabled.
+
 ## Wikis, env, and secrets
 
 | Command | Purpose |
@@ -204,9 +220,9 @@ The legacy `vault` type and `akm vault ...` command family are gone. There
 is also no `akm env set`/`akm env unset` — edit the `.env` file directly;
 akm loads it as-is.
 
-## Workflow authoring contract (0.9.6)
+## Workflow authoring contract (0.9.7)
 
-akm 0.9.6 workflows are unified markdown documents with:
+akm 0.9.7 workflows are unified markdown documents with:
 
 - frontmatter carrying the asset envelope plus the orchestration graph:
   `params` (JSON-Schema-typed), `steps` (an ordered list of `{ id, unit?,
@@ -234,6 +250,8 @@ findings and is skipped entirely by `akm index`. Run `akm workflow create
 - Prefer `akm show <ref> --shape agent` when you need execution-ready output.
 - Prefer `akm curate <query>` before raw `search` when the task is "find the
   best asset for this job."
+- Add `--pack <tokens>` when the task needs the chosen local content now;
+  keep ordinary curate output when refs and follow-up actions are enough.
 - Treat proposal content as draft material until it has been explicitly
   accepted.
 - Use `--from all` only when you intentionally want local + registry results

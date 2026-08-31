@@ -1,18 +1,85 @@
 ---
-description: Current AKM 0.9.6 upgrade contract, plus clearly historical 0.9.2 source/plan and 0.9.0 rename tables. Use when updating authored assets or machine consumers after an upgrade.
-tags: [akm, migration, 0.9.6, compatibility, tasks, workflows, search]
+description: Current AKM 0.9.7 upgrade contract, plus conditional pre-0.9.6 work and clearly historical 0.9.2 source/plan and 0.9.0 rename tables. Use when updating authored assets or machine consumers after an upgrade.
+tags: [akm, migration, 0.9.7, compatibility, tasks, workflows, search]
 updated: 2026-08-31
 ---
 
-# AKM 0.9.6 Migration Reference
+# AKM 0.9.7 Migration Reference
 
-This page starts with the 0.9.2-to-0.9.6 delta. The later 0.9.2 and 0.9.0
-tables are historical translation help for older installations, not alternate
-syntax for new assets.
+This page starts with the 0.9.6-to-0.9.7 delta. The 0.9.6 section is
+conditional work for installations that skipped that release; the later 0.9.2
+and 0.9.0 tables are historical translation help, not alternate syntax for new
+assets.
 
-## 0.9.6: required and recommended upgrade work
+## 0.9.7: required and recommended upgrade work
 
-| Area | 0.9.6 action |
+| Area | 0.9.7 action |
+|---|---|
+| Data and authored schemas | No required database migration, index rebuild, task rewrite, workflow rewrite, or plan-version change from 0.9.6. |
+| Improve strategies | Replace removed built-ins `frequent` and `memory-focus`. A custom strategy with either name now merges over `default`, so make inherited behavior explicit. |
+| Reference integrity | Run `akm lint`. Review newly validated `type:slug` xrefs and genuinely dangling belief edges. Use `--prune-dangling-edges` only after review; it is intentionally not part of `--fix`. |
+| Scheduler | Run `akm task sync --dry-run`. Pre-0.9.2 crontab rows without a scheduler marker can now be recognized and reconciled. |
+| Plugin integration | Install a plugin whose declared range admits 0.9.7; inspect `akm health` for a `plugin-version` advisory. |
+
+## 0.9.7: packed curation and website ingestion
+
+`akm curate --pack <tokens>` resolves ranked local hits through the same
+content path as `akm show` and returns:
+
+```json
+[
+  { "ref": "skills/release", "tokens": 2100, "content": "..." }
+]
+```
+
+The budget covers the combined content. Whole lower-ranked assets are dropped
+before truncation; only a highest-ranked asset that alone exceeds the budget
+is truncated. JSON mode is the bare array above; text mode concatenates
+`## <ref>` sections. A fragment ref packs only that section. Registry hits
+are omitted from packed output; use ordinary curate output for their install
+guidance.
+
+`akm bundle add https://example.com/` now probes the origin root's
+`llms.txt`. When present, its same-origin links become the crawl frontier.
+Off-origin entries are dropped. A specific-page URL, or an origin without the
+file, keeps the existing crawler behavior; `llms-full.txt` is not read.
+
+## 0.9.7: improve strategy changes
+
+The built-in set is:
+
+`default`, `quick`, `thorough`, `graph-refresh`, `consolidate`,
+`catchup`, `reflect-distill`, and `proactive-maintenance`.
+
+`frequent` and `memory-focus` were removed. The shipped hourly task now
+uses `reflect-distill`. `thorough` now explicitly carries default's process
+matrix and, like `catchup`, uses judged promotion to drain pending proposals.
+Their accept caps are 25 and 100 respectively; both use
+`maxDiffLines: 200`. Unless `experimental.improveAutonomy` is enabled, the
+autonomy gate demotes promotion to queue mode, so the default behavior remains
+review-only.
+
+## 0.9.7: lint, index, and task recovery
+
+- A memory archived by AKM's prune flow leaves a tombstone under
+  `.akm/memory-cleanup/archive/`; `supersededBy` and `contradictedBy`
+  references to it now resolve as existing.
+- `akm lint --prune-dangling-edges` drops only belief edges whose target has
+  neither a live file nor a tombstone. It does not remove ordinary `xrefs`.
+  If the final edge is removed, review any now-unsupported `beliefState`.
+- Legacy `type:slug` xrefs are now validated, and refs to
+  `<name>.derived.md` memories resolve.
+- A corrupt derived `index.db` is removed with its WAL/SHM sidecars and
+  rebuilt automatically. `state.db` is never removed by this recovery.
+- `akm task sync` accepts truly immutable package-local launchers and
+  reconciles pre-0.9.2 cron rows. Writable project/`npx` installs remain
+  ineligible.
+- A blocked v2/v3 task conversion now reports the actual blocking reason
+  instead of pointing back to a migration command that cannot resolve it.
+
+## Conditional pre-0.9.6 upgrade work
+
+| Area | Action when upgrading from before 0.9.6 |
 |---|---|
 | Runtime | npm-compatible installs require Node.js 22 or newer. Bun and the standalone binary remain supported. |
 | Search scores | Run `akm index --full` once. Pre-0.9.5 search impressions inflated utility scores; only a full rebuild removes that stored bias. |
@@ -26,7 +93,7 @@ AKM 0.9.6 also fixes lint exclusions for bundle directories literally named
 to the same content root, and preserves native PowerShell exit-code fidelity.
 Those fixes require no authored syntax change.
 
-## 0.9.6: additive machine-readable output
+### 0.9.6 additive machine-readable output
 
 Local search hits at `--detail normal`, `--detail full`, and `--shape agent`
 may carry:
@@ -46,7 +113,7 @@ sanitized warning. A failed semantic probe is no longer cached as a 24-hour
 block, so consumers should evaluate each response rather than persisting a
 failure verdict of their own.
 
-## 0.9.6: task read shim and scheduler recovery
+### 0.9.6 task read shim and scheduler recovery
 
 Task source v4 remains the authored grammar. A deterministically convertible
 v2/v3 document is now planned to v4 in memory, with a deprecation warning and
@@ -64,7 +131,7 @@ entries whose scheduler context is corrupt/missing or whose owning bundle no
 longer exists. Default mode is a preview; `--yes` applies the printed plan;
 `--id a,b` narrows it and refuses any id that is not a current orphan.
 
-## 0.9.6: config compatibility
+### 0.9.6 config compatibility
 
 Known older `configVersion` shapes are upgraded in memory with a one-line
 warning; the next config-mutating command persists the current version. An

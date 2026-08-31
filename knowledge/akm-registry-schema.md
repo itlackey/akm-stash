@@ -7,7 +7,7 @@ updated: 2026-08-31
 
 # akm Registry Index Schema
 
-> **Version target:** akm-cli 0.9.6 accepts registry index versions 2 and 3.
+> **Version target:** akm-cli 0.9.7 accepts registry index versions 2 and 3.
 
 The official registry publishes a static `index.json`. akm fetches and caches
 that file, then searches it for matching stashes with `akm search --from
@@ -61,7 +61,7 @@ CLI noun for an installed source is now "bundle."
 | `author` | string | optional | User or org. |
 | `license` | SPDX string | recommended | Surfaced before install. |
 
-## Notes for 0.9.6 users
+## Notes for 0.9.7 users
 
 - The old `kits[]` top-level array is long gone; use `stashes[]` only.
 - The legacy registry boolean `curated` is no longer part of the current

@@ -1,6 +1,6 @@
 ---
 type: workflow
-description: Improve an existing bundle by collecting feedback, generating reviewed proposals, and promoting the best results in akm-cli 0.9.6.
+description: Improve an existing bundle by collecting feedback, generating reviewed proposals, and promoting the best results in akm-cli 0.9.7.
 tags: [improvement, proposals, lessons]
 params:
   ref: { type: string, description: Asset ref to improve }

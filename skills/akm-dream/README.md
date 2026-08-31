@@ -64,7 +64,7 @@ bun run dream
 
 ## Relationship to `akm improve memory`
 
-In AKM 0.9.6, `akm improve memory` natively performs merge/delete/
+In AKM 0.9.7, `akm improve memory` natively performs merge/delete/
 promote/contradict ops, relative-date resolution, and contradiction-edge
 writing. Reach for `akm improve memory --dry-run` first — it covers the
 common case without dream's staged review overhead.
@@ -182,7 +182,7 @@ and `akm config path --all`.
 
 ## Compatibility
 
-- akm `>= 0.9.6` (uses the 0.9.6 command surface: `akm proposal extract`,
+- akm `>= 0.9.7` (uses the 0.9.7 command surface: `akm proposal extract`,
   `akm bundle add`, `[bundle//]conceptId` refs — see `references/breaking-changes.md`
   in the `akm-migrate` skill if you're consolidating memories on an older install)
 - Bun `>= 1.1.0` (uses `Bun.spawn`)

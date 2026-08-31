@@ -1,6 +1,6 @@
 ---
 name: publish-akm-stash
-description: Use when the user wants to publish a new akm bundle so it appears in the official registry and remains useful to agents using akm-cli 0.9.6.
+description: Use when the user wants to publish a new akm bundle so it appears in the official registry and remains useful to agents using akm-cli 0.9.7.
 updated: 2026-08-31
 ---
 
@@ -34,7 +34,7 @@ my-stash/
 
 An LLM wiki (`schema.md` + `pages/`) publishes as its own bundle, not a
 `wikis/` directory inside this layout — there is no dedicated `wiki` asset
-type in 0.9.6.
+type in 0.9.7.
 
 ## 2. Write search-friendly metadata
 
@@ -46,7 +46,7 @@ type in 0.9.6.
 
 Prefer inline metadata in frontmatter and file-local comments. Treat
 `.stash.json` as legacy compatibility content rather than the default authoring
-path on 0.9.6.
+path on 0.9.7.
 
 ## 3. Pick a publish path
 
@@ -79,7 +79,7 @@ akm show <ref-from-your-stash>
 - Ship `.env.example` files instead of real secrets.
 - Review proposal-generated changes before release; do not publish draft
   `quality: "proposed"` content as if it were final.
-- If you ship `workflows/`, verify each one uses the 0.9.6 frontmatter
+- If you ship `workflows/`, verify each one uses the 0.9.7 frontmatter
   `steps:` contract (`akm lint --type workflows` must be clean) — the retired
   0.8.0 `## Step: <title>` / `Step ID:` heading format fails to index.
 - If you ship `tasks/`, verify they use strict task source v4
