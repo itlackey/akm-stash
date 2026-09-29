@@ -1,7 +1,7 @@
 ---
 name: akm-dream
 description: Consolidate, prune, and reorganize akm memories with explicit staged review gates. Use when the user says "dream", "/dream", "auto dream", "consolidate memories", "clean up my memories", "prune stale memories", or "my memory files are a mess". For routine consolidation without staged review, prefer `akm improve memory` + `akm proposal extract --auto` directly.
-updated: 2026-08-29
+updated: 2026-09-29
 ---
 
 # akm Dream — Reviewed Memory Consolidation
@@ -16,8 +16,8 @@ file that `akm improve` does not own.
 | Responsibility | Native CLI | This skill |
 |---|---|---|
 | Harvest recent session knowledge | `akm proposal extract --auto` | calls it in Phase 2 |
-| Surface contradictions + relative-date fixes | `akm improve memory --dry-run` | calls it before Phase 3 |
-| Merge/delete/promote/contradict proposals | `akm improve memory` | review gate on top |
+| Preview promotion + retire candidates | `akm improve memory --dry-run` | calls it before Phase 3 |
+| Promote a memory to `knowledge/`; flag duplicate/superseding memory pairs for retirement (both as reviewable proposals — no merge, delete, or contradiction edges) | `akm improve memory` | review gate on top |
 | Single-file memory deletion | — (no native verb) | bundled forget helper |
 | MEMORY.md index management (200-line cap) | — | Phase 4 index rebuild |
 | Lock file, backup, audit artifacts | — | bundled dream orchestrator |
@@ -79,9 +79,10 @@ as proposals. Run `akm proposal list --status pending` to see what it found.
 akm improve memory --dry-run
 ```
 
-This shows what `akm improve` would do: merges, deletes, relative-date
-fixes, contradiction edges. Review the dry-run output — it is your Phase 2
-signal.
+This previews what `akm improve` would propose: memories it would promote to
+`knowledge/`, and near-duplicate/superseding memory pairs it would flag for
+retirement. It does not merge, delete, resolve relative dates, or write
+contradiction edges. Review the dry-run output — it is your Phase 2 signal.
 
 **Step 3 — supplement (optional):**
 
@@ -105,8 +106,9 @@ bun run scripts/phase3-plan.ts   # emits plan.json + review-checklist.md
 bun run scripts/dream.ts --continue  # executes approved plan
 ```
 
-The plan includes operations that `akm improve` proposed plus any direct edits
-from Phase 2 supplemental signals.
+The plan is built from Phase 1 inventory and Phase 2 supplemental signals.
+`akm improve`'s own promote/retire proposals are reviewed separately with
+`akm proposal accept`/`reject` — not folded into this plan.
 
 **For each approved operation:**
 
@@ -130,8 +132,8 @@ bun run scripts/forget.ts memories/<name>
 **Consolidation rules:**
 
 - Merge near-duplicates. Three notes about the same build quirk → one clean entry.
-- Delete contradicted facts at the source — `akm improve memory` surfaces these as contradiction edges; resolve them here.
-- Relative-date resolution ("yesterday" → ISO date) is handled by `akm improve memory`; if you see unresolved phrases it means `akm improve` was skipped or was not run against that memory.
+- Delete contradicted facts at the source. `akm improve` does not detect or flag contradictions between these memories — spot them yourself and resolve here (fix, or supersede with `akm remember --supersedes`).
+- Relative-date resolution ("yesterday" → ISO date) is not applied to these memories by `akm improve` — that pass only rewrites machine-inferred `.derived` memory twins, and only when `experimental.improveAutonomy` is on (off by default). Resolve unresolved phrases here.
 - Never rewrite untouched memories. Dream is surgical.
 - Never store secrets in memories — use `akm env` or `akm secret`.
 - Never write content directly into `MEMORY.md` — it is an index, not a dump.

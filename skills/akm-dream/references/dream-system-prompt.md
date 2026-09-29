@@ -1,7 +1,7 @@
 ---
 description: The system prompt used by the akm-dream pipeline to consolidate akm memory files into durable, well-organized memories.
 tags: [akm-dream, reference, prompt]
-updated: 2026-08-29
+updated: 2026-09-29
 refs: []
 ---
 
@@ -66,10 +66,12 @@ primary signals.
 akm improve memory --dry-run
 ```
 
-This surfaces what `akm improve` would propose: merges, deletes, relative-date
-fixes, and contradiction edges. Review the output — it tells you what the CLI
-already knows needs fixing. You do not need to redo this work manually in Phase 3;
-use it as input to the review gate.
+This previews what `akm improve` would propose: memories it would promote to
+`knowledge/`, and near-duplicate/superseding memory pairs it would flag for
+retirement (both become reviewable proposals — `akm proposal accept`/`reject`
+— never applied directly). It does not merge, delete, resolve relative dates,
+or write contradiction edges for these memories. Review the output as input
+to the review gate; relative dates and contradictions are still Phase 3's job.
 
 **Supplemental (optional): direct-source signals**
 
@@ -89,16 +91,16 @@ suspect matter.
 Phase 3 reviews the consolidation plan built from Phase 2 signals. Your job is
 to review the plan, approve it, and then apply only the approved operations.
 
-**What the CLI already handled before this phase:**
+**What the CLI already surfaced before this phase (not applied):**
 
-- Relative-date resolution ("yesterday" → ISO date) is done by `akm improve memory`.
-  If you see unresolved phrases, it means `akm improve` was skipped or the memory
-  predates that pass.
-- Contradiction detection: `akm improve memory` writes `contradictedBy` edges.
-  Use these as input to the plan — resolve them here by fixing or deleting the
-  contradicted side.
-- Merge and delete proposals from `akm improve memory --dry-run` are already
-  surfaced. Treat them as strong candidates; approve what makes sense.
+- `akm improve memory --dry-run` previewed candidate promotions to
+  `knowledge/` and near-duplicate/superseding memory pairs worth retiring.
+  Treat these as strong candidates; approve what makes sense, using
+  `akm proposal accept`/`reject` for anything you act on outside this
+  skill's own plan.
+- Relative-date resolution and contradiction detection are NOT done by
+  `akm improve` for these memories — it never touches hand-written memories
+  for either. Do both directly in this phase.
 
 **Focus during Phase 3 review on:**
 
