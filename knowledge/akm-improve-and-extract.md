@@ -3,6 +3,13 @@ description: Use when an agent needs to run, configure, or tune the akm self-imp
 tags: [akm, improve, extract, health, pipeline]
 quality: curated
 updated: 2026-08-31
+type: knowledge
+generated:
+  by: human:founder3
+  at: 2026-10-06T20:08:06.321Z
+verified:
+  - by: human:founder3
+    at: 2026-10-06T20:08:06.321Z
 ---
 
 # akm Improve and Extract Pipeline
@@ -88,7 +95,6 @@ Built-in strategies control which sub-processes run (renamed from
 | `default` | All processes for the asset's type; improve-stage extract and proactive maintenance off |
 | `quick` | Fast surface pass only |
 | `thorough` | Default's full process matrix plus a judged triage drain capped at 25 accepts |
-| `graph-refresh` | Refresh memory inference and graph relationships |
 | `consolidate` | Memory consolidation pass |
 | `catchup` | Consolidation plus a judged triage drain capped at 100 accepts |
 | `reflect-distill` | Reflect + distill only; proactive maintenance off |
@@ -111,7 +117,7 @@ Custom strategies live under `improve.strategies.<name>` in
 `~/.config/akm/config.json`. Selection order is `--strategy`,
 `defaults.improveStrategy`, then built-in `default`. Each strategy can
 enable or disable individual processes: `consolidate`, `distill`, `reflect`,
-`graphExtraction`, `memoryInference`, `triage`, `proactiveMaintenance`.
+`memoryInference`, `triage`, `proactiveMaintenance`.
 User-defined strategies inherit omitted fields from the built-in `default`
 strategy before applying their own overrides.
 
@@ -121,7 +127,7 @@ strategy before applying their own overrides.
 proposal backlog before** the reflect/distill pass runs (it is a pre-pass,
 not a tail step). It is the built-in, automated replacement for running a
 manual proposal-management session — see `akm proposal drain` in
-`knowledge/akm-cli-reference` for the standalone verb and policy presets.
+`knowledge/akm-cli-reference` for the standalone verb.
 
 It is **opt-in** (defaults off) and only fires on whole-bundle or
 type-scoped runs — a single-ref `akm improve skills/x` never drains the
@@ -136,10 +142,7 @@ queue.
           "triage": {
             "enabled": false,          // opt-in
             "applyMode": "queue",      // queue (safe default, stage-only) | promote
-            "policy": "personal-stash", // personal-stash | conservative | manual | <path>
             "maxAcceptsPerRun": 25,      // hard per-run accept ceiling
-            "maxDiffLines": 200,         // defer accepts larger than this
-            "rejectEmpty": true,
             "judgment": {                // OPTIONAL judgment tier for deferred items
               "enabled": true,
               "timeoutMs": 600000
@@ -171,7 +174,7 @@ akm improve --sync --no-push   # commit only, skip the push
 ```
 
 Strategy sync defaults: `catchup`, `consolidate`, `default`,
-`graph-refresh`, `quick`, and `thorough` auto-commit + push;
+`quick`, and `thorough` auto-commit + push;
 `proactive-maintenance` and `reflect-distill` skip sync entirely.
 
 ## akm health — pipeline diagnostics
@@ -224,8 +227,8 @@ automatically, or run the standalone verb:
 
 ```bash
 # Deterministically drain the pending backlog (preview, then promote):
-akm proposal drain --policy personal-stash --dry-run
-akm proposal drain --policy personal-stash --promote --yes
+akm proposal drain --dry-run
+akm proposal drain --promote --yes
 ```
 
 Automate this as a scheduled task — see `tasks/nightly-improve-cycle.yml` in
@@ -236,7 +239,7 @@ this bundle for a ready-to-install example.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `improve` produces no proposals | No feedback signal, no retrieval history | Add `akm feedback <ref> --positive/--negative` then re-run |
-| Backlog growing unattended | No drain policy running | Enable `processes.triage` in the strategy, or schedule `akm proposal drain --policy personal-stash --promote --yes` |
+| Backlog growing unattended | No drain policy running | Enable `processes.triage` in the strategy, or schedule `akm proposal drain --promote --yes` |
 | Memory consolidation not running | `consolidate` disabled in strategy | Check `improve.strategies.default.processes.consolidate.enabled` in config |
 | Extract finds nothing new | Sessions already processed | Pass `--force` to re-process; or extend `--since` window |
 | Distill cooldown blocking | Distill ran too recently | Check cooldown in config (`improve.strategies.default.processes.distill.cooldownDays`) |
