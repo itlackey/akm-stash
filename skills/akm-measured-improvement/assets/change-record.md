@@ -11,10 +11,13 @@ Scope: [feature or cohesive change set; AKM and/or akm-eval]
 - Smallest fix/deletion considered: [restriction, stage, duplication to remove]
 - Added machinery and justification: [or none]
 - Non-goals: [rename preservation/stable identity remain deferred unless scoped]
-- Primary outcome and acceptance criterion: [choose before tuning]
-- Integrity/regression/cost criteria: [include negative and historical jobs]
+- Primary outcome and worthwhile benefit: [choose before tuning; user impact]
+- Blocking tests/invariants and limits: [include negative and historical jobs]
+- Tolerable regression/cost tradeoffs: [bounds and rationale; not every metric must rise]
 - Intended treatment: [code isolation, default change, or named combined change]
 - Cases reserved for final validation: [independently authored; not tuning data]
+- Iteration checkpoint: [first candidate plus up to two focused follow-ups by default;
+  stop earlier on acceptance; extend only for a named blocker/missing evidence]
 
 ## Reproduction and run recipe
 
@@ -39,6 +42,9 @@ Affected behaviors in a change set: [criterion and fixture for each]
 | Baseline | [summary, samples, tests] | [result] | [reference] |
 | Candidate | [summary, samples, tests] | [result] | [keep/revise/discard] |
 
+Best acceptable candidate: [code/build and evidence, or none yet]
+Next experiment, if needed: [specific unresolved acceptance question, not score chasing]
+
 | Measure | Baseline | Candidate | Interpretation |
 |---|---|---|---|
 | Primary outcome | [value, denominator] | [value, denominator] | [delta/uncertainty] |
@@ -46,13 +52,20 @@ Affected behaviors in a change set: [criterion and fixture for each]
 | Completion, errors, timeouts, excluded judgments | [value] | [value] | [coverage limits] |
 | Relevant tokens, latency, indexing, memory, cost | [value or unknown] | [value] | [conditions] |
 
-Per-case regression review: [cases, reasons, accepted tradeoffs]
+| Regression or possible risk | Evidence and affected cases | Impact/severity | Classification and disposition |
+|---|---|---|---|
+| [negative signal, or none] | [baseline/candidate; confirmed vs uncertain] | [magnitude/frequency] | [blocker / bounded tradeoff / uncertainty; action or rationale] |
+
 Labels/rescoring and measurement changes: [or none; keep original artifacts]
 Final validation / repeats: [results, variation, and held-out limitations]
 
 ## Acceptance decision
 
 - Decision and evidence: [accept, iterate, or discard; why]
+- Why iteration stopped or must continue: [criteria met / specific blocker;
+  do not require a perfect score or zero soft regressions]
+- Submission summary: [what improved; before/after; tests; remaining regression/risk
+  and significance; rollout status]
 - Removed code/options/stages and documentation updates: [links]
 - Breaking/default changes and supported alternatives: [or none]
 - Relevant repository checks and integrated final-build check: [results]

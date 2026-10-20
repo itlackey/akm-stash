@@ -9,20 +9,26 @@ to the change. Mark a non-applicable item with a reason.
 
 - [ ] The intended user job and behavior are explicit, supported by a source
   trace or reproduction; hypotheses are distinguished from findings.
-- [ ] Acceptance criteria were chosen before final tuning. Each behavior in a
-  change set has evidence, and the combined path has an integrated check.
+- [ ] Acceptance criteria were chosen before final tuning: worthwhile benefit,
+  blocking tests/invariants, tolerable tradeoffs, and final validation. Each
+  behavior has evidence, and a change set has an integrated check. Criteria
+  were not weakened after seeing results just to accept a losing variant.
 - [ ] The smallest effective implementation is used. Unneeded limits,
   duplicate stages, obsolete options/branches, and dead documentation are
   removed or updated. Added machinery has a concrete benefit.
-- [ ] Relevant regression fixtures, repository checks, and affected akm-eval
-  collections pass; raw failures and per-case regressions were inspected.
+- [ ] Required regression fixtures and repository checks pass. Affected akm-eval
+  collections completed with enough valid coverage for the claim; raw failures
+  and per-case changes were inspected. A successful run need not improve every
+  metric, and passing unit tests alone does not establish product improvement.
 - [ ] Baseline and candidate evidence identify builds, effective settings,
   cases/scoring, completion/denominators, and relevant runtime/cache conditions.
   Intentional treatment differences and partial coverage are explained.
 - [ ] The primary outcome improves or the reproduced correctness defect is
-  fixed. Integrity and important existing jobs hold; regressions and resource
-  tradeoffs are explicitly accepted with reasons. There is no universal nDCG
-  or accuracy threshold substituted for representative cases.
+  fixed, or useful behavior holds with a justified simplification. Integrity
+  and important existing jobs hold; each negative signal is classified as a
+  blocker, bounded tradeoff, or uncertainty with evidence. No blocker remains;
+  tolerated regressions/risks have their impact and rationale recorded. There
+  is no universal nDCG or accuracy threshold substituted for representative cases.
 - [ ] Where applicable, no defined fixture loses a distinct claim, publishes
   an unsupported assertion unnoticed, crosses scopes, or retires content based
   on incomplete assessment. Verify proposals, staging, acceptance, and recovery
@@ -33,6 +39,14 @@ to the change. Mark a non-applicable item with a reason.
 - [ ] Label/scoring changes have the appropriate existing version/changelog
   updates, both saved runs are explicitly rescored where needed, and the
   reported gain is attributed to the right change.
+- [ ] The best acceptable candidate is selected and its final validation is
+  complete. Tuning stopped once the intended benefit and required checks were
+  satisfied; optional optimization did not expand the task. See the
+  [iteration/submission rules](evaluation-guide.md#decide-whether-to-iterate-or-submit).
+- [ ] The submission leads with the improvement, before/after measurements,
+  tests, remaining regressions/risks and their significance, why iteration
+  stopped, and rollout status. A known bounded tradeoff is disclosed rather
+  than hidden or treated as a demand for perfect scores.
 
 Acceptance means **ready for rollout**. Passing code tests or committing a
 change alone does not establish that its operational rollout succeeded.

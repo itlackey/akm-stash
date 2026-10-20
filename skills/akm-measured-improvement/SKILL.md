@@ -27,6 +27,9 @@ examples are recipes to verify, not a frozen CLI contract.
   execution. Reuse akm-eval's runners, fixtures, scoring, and reports.
 - A new guard, abstraction, suite, or service needs a demonstrated benefit
   exceeding its implementation, operational, and maintenance costs.
+- Aim for a useful, validated improvement within the task's scope. Benchmark
+  scores inform that decision; neither the first working patch nor the highest
+  attainable score is the acceptance rule.
 - Keep protections against data loss and corruption. Removing an arbitrary
   prompt cap means assessing complete evidence, not accepting a partial read.
 - Rename preservation and stable document identity remain deferred in the
@@ -57,8 +60,11 @@ and include an integrated end-to-end check.
 
 Use [evaluation selection and recipes](references/evaluation-guide.md).
 Choose a primary outcome and relevant integrity, regression, and cost measures
-before tuning. Match verification to impact: a documentation-only change does
-not require an expensive agent benchmark.
+before tuning. Define what counts as a worthwhile gain, which failures block
+acceptance, which bounded tradeoffs are tolerable, and the final checks that
+will end tuning. Use the issue's requirements; do not invent universal score
+thresholds. Match verification to impact: a documentation-only change does not
+require an expensive agent benchmark.
 
 Capture the baseline with existing akm-eval artifacts. Record the actual AKM
 build, harness revision, cases, labels/scorer, effective configuration, models,
@@ -81,7 +87,22 @@ modes without evidence that the user job requires them.
 Run the relevant tests and pilot before a full expensive collection. Inspect
 raw failures and per-case changes, then alter one factor or one explicitly
 defined treatment at a time. Keep a short variant/result/decision table in
-the change record and discard ineffective variants.
+the change record. Preserve the best candidate that meets the acceptance
+criteria, with its code/build and evidence, so a later experiment cannot erase
+a useful gain.
+
+A lower score or noted regression requires investigation before acceptance.
+If the first candidate misses the intended outcome or introduces a material
+regression, use the failed cases to choose the next smallest justified change;
+do not accept it merely because the new regression test passes. Equally, do
+not change the implementation just to make every metric increase. Classify
+the result using [the decision rules](references/evaluation-guide.md#decide-whether-to-iterate-or-submit).
+
+Keep experiments bounded: start with the first candidate and, if needed, up
+to two focused follow-ups. This is an effort checkpoint, not a minimum number
+of variants or permission to ship a failing change. Stop earlier when accepted.
+Extend only for a named acceptance blocker or missing evidence; otherwise
+submit the best acceptable candidate or report the precise unresolved blocker.
 
 Reserve independently authored cases for the final check. Generated rewrites
 of public cases do not establish a held-out set. Repeat model-backed runs
@@ -94,6 +115,18 @@ Use existing comparison reports, raw outputs, and
 [the definition of done](references/definition-of-done.md). Explain the
 benefit, regressions, uncertainty, and operational cost. Judge new retrieval
 results where needed and explicitly rescore both saved runs after label changes.
+
+Accept when the intended benefit is demonstrated, required tests/invariants
+hold, and remaining regressions are bounded tradeoffs within the agreed
+criteria. A better aggregate cannot excuse claim loss or another blocking
+failure. A small secondary-score decrease does not automatically outweigh a
+demonstrated correctness, utility, or simplicity gain. Explain that decision.
+
+Once the candidate meets those conditions, complete the planned final checks
+and **stop tuning**. Submit the selected solution with the measured gain and
+remaining regression or risk. Do not keep searching for a perfect score or
+zero soft regressions. Resume only if final validation reveals a blocker or
+evidence that overturns acceptance; keep optional optimization as a follow-up.
 
 An improved default can change existing output. Test current and historical
 jobs and explicit overrides; update obsolete contracts, documentation, and
@@ -118,5 +151,9 @@ applicable rollout; mark irrelevant migration steps not applicable with a reason
 
 Leave one reviewable change record linking the implementation, regression
 fixtures, baseline/candidate artifacts, iteration decisions, acceptance result,
-and rollout status. Keep sensitive logs, model keys, private corpora, and
-generated private seeds out of published artifacts.
+and rollout status. Lead the handoff with what improved, the relevant before/
+after measurements, tests and their limits, each remaining regression or risk,
+why it does or does not block submission, and why iteration stopped. Do not
+present submission for review as proof of completed rollout. Keep sensitive
+logs, model keys, private corpora, and generated private seeds out of published
+artifacts.

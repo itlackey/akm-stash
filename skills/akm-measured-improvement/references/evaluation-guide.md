@@ -164,6 +164,82 @@ Prefer independently validated critical cases over a universal score threshold.
 Agent A/B measures its particular task/control design; comparative claims about
 KiwiFS or plain files require equivalent access and tasks actually tested.
 
+## Decide whether to iterate or submit
+
+Before tuning, use the change record to define a worthwhile improvement in the
+user job, blocking invariants/tests, tolerable tradeoffs, and a small final
+validation set. A defect fix can succeed through demonstrated correctness; a
+simplification can succeed through maintained behavior with less machinery.
+Neither needs an unrelated score increase. Do not loosen criteria after seeing
+a disappointing result just to accept the first patch.
+
+### Classify a regression before reacting
+
+Inspect the affected cases, their baseline behavior, the final content/output,
+and the comparison's settings, labels, errors, and denominators. Classify each
+negative signal in the existing change record:
+
+- **Blocker:** a required test/invariant fails, a critical existing job breaks,
+  an agreed limit is exceeded, or a material degradation defeats the intended
+  benefit. Claim loss, cross-scope writes, and retirement from incomplete
+  evidence cannot be traded for a higher average score.
+- **Bounded tradeoff:** a real, understood regression with limited impact,
+  outweighed by the demonstrated benefit and permitted by the task's criteria.
+  Record affected cases, magnitude/frequency, severity, and why it is tolerable.
+- **Uncertain signal:** a possible regression, variance, incomplete judging, or
+  measurement mismatch. Perform the smallest check that can change the
+  decision: inspect/rescore the saved case, add a targeted test, or repeat a
+  model-backed comparison when variation matters. A comparable baseline failure
+  is not a newly introduced regression. Do not call an unconfirmed suspicion a
+  fact, or use uncertainty to dismiss a credible integrity failure.
+
+A material unexplained negative signal blocks acceptance. A bounded possible
+soft regression may remain as a disclosed risk when the available evidence is
+enough to judge the net benefit; it does not require endless full reruns. Do
+not hide a regression in an aggregate or classify it as noise without evidence.
+
+### Use the result to choose the next action
+
+| Observation | Action |
+|---|---|
+| First candidate meets the intended benefit, required checks, and tradeoff criteria | Complete the remaining final checks and submit; alternatives are not mandatory. |
+| First patch passes its new test, but the relevant primary outcome worsens and a material regression remains | Investigate failed cases and try the next smallest justified variant; do not accept on unit tests alone. |
+| Aggregate score rises, but a defined claim-preservation or scope test fails | Fix the blocker or discard the variant; the average does not compensate. |
+| Intended benefit is worthwhile, required checks pass, and one bounded secondary regression remains | Record the tradeoff, complete final validation, and submit. Do not optimize indefinitely to remove every soft regression. |
+| A correctness fix lowers a secondary ranking metric slightly | Review the affected cases and task criteria; submit if the net benefit is supported and no blocker remains. |
+| A metric changes slightly and model variation could reverse the decision | Perform a targeted comparable repeat; if evidence remains insufficient, report that limit rather than claiming a win. |
+| Equal useful behavior is achieved with less code and no blocking regression | Accept the simplification when that is the intended benefit. |
+| A later experiment is worse than the saved acceptable candidate | Discard it and restore the saved candidate; validate the actual selected build. |
+
+### Stop when the decision is supported
+
+Use a small initial round: the first candidate plus up to two evidence-led
+follow-ups if needed. This is a checkpoint for effort, not a requirement to try
+three variants or a reason to accept a failing one. Name the hypothesis and
+acceptance question before each further experiment. If no variant qualifies,
+report the blocker and the next justified step; extend the round only to resolve
+that blocker or missing acceptance evidence, not to chase speculative gains.
+
+As soon as a candidate demonstrates the intended worthwhile benefit, satisfies
+blocking criteria, and has understood tolerable tradeoffs, stop searching for
+variants. Run only the remaining planned final checks on the selected build.
+Reuse completed evidence for that same build when valid. Reopen tuning if those
+checks reveal a blocker or overturn the claimed benefit, not merely because
+another parameter value or a higher possible score exists.
+
+Choose among variants already evaluated; prefer the simpler implementation
+when their useful outcomes are equivalent. The best acceptable candidate means
+the best supported choice so far, not a requirement to find the global optimum.
+
+If final cases guide another change, they become development cases; use fresh
+independent final cases where that generalization claim matters. Once final
+validation supports acceptance, submit the best acceptable candidate and state
+why it is good enough to ship within scope. Record optional optimization as a
+bounded follow-up when worthwhile, rather than expanding the current task.
+Proceed through the existing rollout checklist separately; submission is not
+completed deployment. No additional scoring service, configuration knobs,
+experiment scheduler, or approval gate is needed for these decisions.
+
 ## Starting hypotheses from the 0.10 review
 
 Reproduce these on the selected build before treating them as open defects:
