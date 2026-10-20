@@ -16,6 +16,9 @@ Start here:
   a searchable, installable stash.
 - [`akm-health/`](./akm-health) — report on improve-pipeline metrics and
   troubleshoot slow, silent, or failing runs.
+- [`akm-measured-improvement/`](./akm-measured-improvement) — evaluate and improve
+  AKM or akm-eval through baseline measurement, small changes, tuning, and an
+  acceptance-and-rollout definition of done; targets the AKM 0.10 approach.
 - [`akm-dream/`](./akm-dream) — consolidate and prune memories through staged
   review gates.
 

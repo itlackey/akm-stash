@@ -1,8 +1,8 @@
 # akm-stash
 
 The official akm stash: a curated collection of assets that teach coding
-agents how to use [akm](https://github.com/itlackey/akm) effectively on
-**akm-cli 0.9.7**.
+agents how to use [akm](https://github.com/itlackey/akm) effectively, primarily on
+**akm-cli 0.9.7**, with version-specific additions noted below.
 
 If akm is the package manager for agent assets, this is the starter stash:
 install it once and an akm-aware agent gains practical skills, commands,
@@ -72,10 +72,16 @@ No akm yet? Install the CLI first — see
   work through the troubleshooting tree.
 - **Memories have drifted or grown messy** → run the `akm-dream` skill for a
   staged, reviewable consolidation and prune pass.
+- **Changing or tuning AKM or akm-eval itself** → use
+  [`akm-measured-improvement`](./skills/akm-measured-improvement/SKILL.md) for
+  the AKM 0.10 measurement-and-tuning process, evaluation recipes, a change
+  record template, and acceptance plus rollout as the definition of done.
 
 ## Conventions
 
-- Assets target **akm-cli 0.9.7** and call out version-sensitive behavior.
+- Existing onboarding assets target **akm-cli 0.9.7** and call out
+  version-sensitive behavior. `akm-measured-improvement` targets the AKM 0.10
+  improvement approach and verifies commands against the selected checkouts.
 - Descriptions are written as trigger sentences so host agents can decide when
   to load an asset without reading the whole body.
 - For reusable guidance, teach **how**, not one benchmark answer or verifier

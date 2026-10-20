@@ -1,0 +1,179 @@
+# Evaluation selection and recipes
+
+Use the checked-out [akm-eval README](https://github.com/itlackey/akm-eval),
+[compatibility notes](https://github.com/itlackey/akm-eval/blob/main/COMPATIBILITY.md),
+and each runner's `--help` as the current interface. The recipes here were
+checked against akm-eval `99ca952abe92e41b46f028db00956affea089868` on
+2026-10-20; they are not evidence that a later AKM build has the same behavior.
+
+## Select by behavior
+
+| Change | Existing measurements | Important failure cases |
+|---|---|---|
+| Search, filters, ranking, recall defaults | `evals/retrieval`; `benchmarks/skillret` when capability ranking is affected | Eligible hits beyond candidate cutoffs; negative/unanswerable queries; current/historical evidence; all-required-evidence recall |
+| Session extraction and source evidence | `evals/extract` and AKM integration tests | Evidence after acceptance, indexing, and retrieval; missing sources; incorrect claims |
+| Consolidation and retirement | `evals/consolidate`, pair and pool modes | Unique claims throughout long notes; cross-scope notes; queued decisions; failed judgments; proposed/staged/accepted retirements |
+| Reflection, distillation, promotion, autonomous maintenance | Relevant `evals/reflect`, `distill`, `promotion`, `judge-gate`, `nightly`, or `bakeoff` | Correct repairs; unchanged valid content; unsupported additions; rejected/failed operations |
+| Long-term memory retrieval and answers | `benchmarks/longmemeval` | All evidence sessions, current facts, abstention, answer quality, tokens and timing |
+| Agent task usefulness | `evals/agent-ab`; `benchmarks/terminal-bench` when representative | Actual AKM use, task success, equal treatment where intended, errors, tokens and timing |
+| Links, persistence, scope, authoring, recovery | Existing AKM unit/integration tests, plus affected eval cases | Supported syntax; code examples; incremental/full logical equivalence; evidence/scope preservation; interruptions |
+
+Extend existing cases and shared helpers before creating a suite or orchestrator.
+For lifecycle gaps, exercise capture, proposal acceptance, improvement, and
+retrieval in sequence. Add only the missing integration coverage. LongMemEval's
+raw-session retrieval does not establish the complete memory lifecycle.
+
+## Prepare a run
+
+1. Read repository instructions and the current AKM stability/architecture docs.
+2. Identify baseline and candidate builds; separate checkouts are convenient
+   when both must remain available. Use committed or recorded working-tree
+   fingerprints so an edited build is distinguishable from its base commit.
+3. Choose cases and scoring before tuning; retain relevant negative cases.
+4. Start with a small pilot. Confirm effective settings and errors in its banner
+   and saved summary before a larger collection. Select concurrency and timeouts
+   for the actual endpoint instead of copying another machine's values.
+
+Prefer the existing [Docker guide](https://github.com/itlackey/akm-eval/blob/main/docker/README.md)
+for repeatable environments. A source build must be mounted with matching
+runtime dependencies; Git worktrees also need their referenced Git directory
+available. Use a dedicated runner work folder. Record the image digest and
+checkout revision when they matter. Native development needs Bun and the
+selected AKM checkout's dependencies.
+
+The commands below run from an akm-eval checkout with the required dependencies.
+Set these paths to actual checkouts:
+
+```bash
+cd /absolute/path/to/akm-eval
+AKM_BASE=/absolute/path/to/akm-baseline
+AKM_CANDIDATE=/absolute/path/to/akm-candidate
+
+scripts/smoke/run --contract --only retrieval \
+  --akm "bun '$AKM_CANDIDATE/src/cli.ts'"
+
+evals/retrieval/run --akm "bun '$AKM_BASE/src/cli.ts'" \
+  --label change-name-baseline
+evals/retrieval/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --label change-name-candidate
+
+evals/retrieval/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --semantic --limit 5 --label change-name-semantic-pilot
+```
+
+The inner single quotes preserve spaces in ordinary checkout paths for the
+runner's command parser; for paths containing a single quote, follow its documented
+quoting rules or use a checkout path without that character. Do not use shell
+`eval` to execute an AKM command string.
+
+Run smoke for other affected process runners using `--only`, or the complete
+contract smoke when appropriate. It uses stub replies to test compatibility,
+not model quality. It skips agent A/B, Terminal-Bench, LongMemEval, and SkillRet.
+Dataset/agent benchmarks need their own pilots.
+
+For full hybrid comparisons, run both builds with `--semantic` and remove the
+pilot limit. Retrieval `--semantic` collects keyword and semantic columns; it
+does not mean semantic-only. A limit restricts questions, not the size of the
+library that must be embedded. `--cases DIR` selects an independently authored
+retrieval collection with `queries.jsonl`, `qrels.jsonl`, and `library/`; consult
+the retrieval README for bundle mappings and formats.
+
+Model-backed examples, after configuring an endpoint and model:
+
+```bash
+evals/extract/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --model configured-model --limit 5 --label change-name-extract-pilot
+evals/consolidate/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --model configured-model --label change-name-pairs
+evals/consolidate/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --model configured-model --pool --label change-name-pool
+benchmarks/longmemeval/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --retrieval-only --limit 5 --label change-name-memory-pilot
+```
+
+Run the same affected collection on the baseline when no usable baseline
+artifact exists. Consolidation's default deterministic embedder and `--semantic`
+exercise different pairing conditions: compare like modes and test real
+embedding behavior when relevant. Pool mode has different supported flags from
+pair mode; check help rather than appending every shared option.
+
+Agent A/B and Terminal-Bench take `--akm` as a **checkout directory or package
+specification**, not the CLI command above. They require Docker/Harbor and a
+reachable tool-calling model endpoint; consult their own guides. Agent A/B's
+documented OpenAI provider setup requires the Responses API. Never substitute
+a CLI command string for its checkout argument.
+
+## Understand what actually ran
+
+- `.env` nonempty settings can override shell settings. Inspect effective
+  settings rather than assuming the shell selected the endpoint or model.
+- Evals create isolated AKM configurations. Running without `--semantic` does
+  not by itself test the product's shipped defaults. For default changes,
+  inspect the sandbox setup and deliberately exercise the real defaults through
+  an existing config override or a small relevant scenario.
+- Semantic quality runs can use longer embedding timeouts than normal AKM
+  queries. Check actual search mode and fallback; measure production-default
+  latency separately. Local embedding inference still consumes time/resources
+  even when no answer/judge model is called.
+- Separate cold indexing/model setup, warm querying, answer time, and total
+  elapsed time. Report tokens/cost where available; do not infer a dollar saving
+  from tokens alone.
+- Inspect completion, errors, timeouts, excluded judgments, and denominators.
+  Partial runs remain useful observations, but do not establish full acceptance.
+- Metadata confidence and an automated `verified` stamp are not calibrated
+  factual truth. Judge supported claims and preservation of source evidence.
+
+## Compare and tune with existing tools
+
+Find actual result folders in each run's output. Retrieval writes separate
+`-library` and `-books` folders; compare corresponding collections:
+
+```bash
+scripts/compare/run /absolute/path/to/baseline-library \
+  /absolute/path/to/candidate-library
+```
+
+The report shows metrics, settings changes, and incomplete-run warnings. Inspect
+them; do not add a mandatory matching-hash or manifest-enforcement layer. AKM
+builds should differ. Model/config differences can be the intended treatment;
+state whether the result isolates code or evaluates the whole new experience.
+
+When an algorithm surfaces unjudged hits, pool results from both variants,
+review them under one relevance rubric without favoring either ranking, and
+update labels. The existing `evals/retrieval/label --from RESULTS_DIR` can invoke
+a judge endpoint; use it with the intended endpoint and data-sharing scope.
+Then explicitly rescore saved outputs on both sides:
+
+```bash
+scripts/rescore/run /absolute/path/to/baseline-library \
+  /absolute/path/to/candidate-library
+scripts/compare/run /absolute/path/to/baseline-library-rescored \
+  /absolute/path/to/candidate-library-rescored
+```
+
+Use `--cases DIR` for a custom corpus when required. Comparison never updates
+labels or rescores. Keep original raw outputs. If changing akm-eval itself,
+test collection and scoring separately: update that eval's measurement/scoring
+version and `MEASUREMENT_CHANGELOG.md` when appropriate under its existing rules.
+Do not report a rescoring change as an AKM quality improvement.
+
+Use per-case failures to choose the next smallest change. Keep the final
+held-out cases out of parameter selection; once used for tuning, they are no
+longer held out. Do not adjust labels to reward a favored implementation.
+Prefer independently validated critical cases over a universal score threshold.
+Agent A/B measures its particular task/control design; comparative claims about
+KiwiFS or plain files require equivalent access and tasks actually tested.
+
+## Starting hypotheses from the 0.10 review
+
+Reproduce these on the selected build before treating them as open defects:
+full-body retirement assessment instead of a fixed 12,000-character cutoff;
+evidence surviving extraction acceptance; scope-preserving consolidation;
+eligibility before search candidate limits; improved current/historical recall
+defaults; correct link parsing; and useful abstention/evidence coverage.
+
+The historical inspection used AKM
+[`bf072cd`](https://github.com/itlackey/akm/tree/bf072cd5c56fce0dc93d25f79a3b465ba911ee22).
+It is a reproducibility reference, not a requirement to keep that implementation
+or freeze today's defects into the skill. Rename preservation, stable identity,
+broad wiki authoring, and hosted team architecture remain deferred for this plan.
