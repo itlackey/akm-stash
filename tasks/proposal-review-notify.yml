@@ -17,9 +17,9 @@ with:
     3. If one or more proposals are pending, send a local OS notification using
        whichever notifier is available on the host. Try platform defaults first,
        then a cross-platform fallback:
-       - Linux: `notify-send "AKM proposals pending" "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run"`
-       - macOS: `osascript -e 'display notification "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run" with title "AKM proposals pending"'`
-       - Cross-platform (if installed): `apprise -t "AKM proposals pending" -b "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --policy personal-stash --dry-run"`
+       - Linux: `notify-send "AKM proposals pending" "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --dry-run"`
+       - macOS: `osascript -e 'display notification "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --dry-run" with title "AKM proposals pending"'`
+       - Cross-platform (if installed): `apprise -t "AKM proposals pending" -b "<count> proposal(s) need review in $(pwd). Run: akm proposal drain --dry-run"`
          (apprise reads its own config from `$APPRISE_CONFIG`, `~/.config/apprise/`, or `~/.apprise` — do not hardcode a path.)
        Agents may adapt this list to the host's available notifiers (e.g. Windows
        `BurntToast`, custom webhooks via apprise).
@@ -31,5 +31,4 @@ with:
     notification method was used, if any.
 schedule:
   - cron: "*/15 * * * *"
-    enabled: true
 timeout: 5m

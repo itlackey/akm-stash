@@ -34,5 +34,4 @@ with:
     environment is on an older AKM version.
 schedule:
   - cron: "0 2 * * *"
-    enabled: true
 timeout: 30m
