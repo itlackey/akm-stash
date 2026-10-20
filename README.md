@@ -66,7 +66,7 @@ No akm yet? Install the CLI first — see
 - **Scheduling recurring stash maintenance or harvest runs** → use `akm task`
   and model the task file after the examples in `tasks/`.
 - **After upgrading akm to 0.9.7** → run the `akm-migrate` skill to replace removed improve strategies, review newly validated references, reconcile legacy scheduler rows, and carry forward any pre-0.9.6 migration work.
-- **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
+- **Need a new bundle focused on one problem or domain** → run the `akm-curate-stash` skill: describe the goal, and the agent creates and registers a new bundle, searches your bundles and the registry, security-reviews the candidates, clones the best into the new bundle (with provenance), and fills gaps with proposals you review.
 - **Improve runs are slow, silent, or producing odd numbers** → run the
   `akm-health` skill to turn `akm health` output into a readable report and
   work through the troubleshooting tree.
