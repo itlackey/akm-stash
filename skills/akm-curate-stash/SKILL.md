@@ -118,9 +118,6 @@ akm clone <ref> --bundle <slug>
   or website lands in `knowledge/<name>.md`; each clone records its origin in
   `sources:` frontmatter. Add `--name <new-name>` to rename; `--force` only to
   overwrite your own earlier clone.
-- **Refs under `knowledge/`:** add `--name <path-after-knowledge/>.md`. Without
-  it a plain `knowledge/...` ref can land with no extension and stay out of the
-  index (seen on 0.10.261006). Check `ls <dir>/knowledge`.
 - A usage error pointing to `akm import` means the asset cannot be placed
   (not markdown, no home in a bundle). Import a file or page instead:
   `akm import <path-or-url> --bundle <slug> [--name <name>]`. A URL import
