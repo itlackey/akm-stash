@@ -1,110 +1,97 @@
 # Acceptance, rollout, and definition of done
 
-Use this for one feature or a coherent set of changes. Maintain one
-[change record](../assets/change-record.md); link existing test/eval/release
-artifacts instead of creating a parallel reporting system. Scale the evidence
-to the change. Mark a non-applicable item with a reason.
+Use one issue/PR or the [change record](../assets/change-record.md). Apply the
+[validation selection](evaluation-guide.md#choose-validation-by-the-changed-boundary),
+[process guidance](process-guidance.md), and
+[experiment rules](evaluation-guide.md#experiment-budget); do not duplicate their
+instructions in another report. Mark inapplicable items with a reason.
 
 ## Acceptance
 
-- [ ] The intended user job and behavior are explicit, supported by a source
-  trace or reproduction; hypotheses are distinguished from findings.
-- [ ] The affected processes, input/output contracts, and actual state/external
-  effects were identified. The relevant [process guidance](process-guidance.md)
-  or discovery steps supplied suitable measurements and failure cases; unrelated
-  process metrics were not imposed on the change.
-- [ ] Ordered acceptance criteria were chosen before the first candidate:
-  worthwhile benefit, process-specific blocking tests/invariants, secondary effects,
-  tolerable tradeoffs/cost limits, and final validation. Each behavior has
-  evidence, and a change set has an integrated check. Criteria were not reordered
-  or weakened after seeing results just to accept a losing variant.
-- [ ] The smallest effective implementation is used. Unneeded limits,
-  duplicate stages, obsolete options/branches, and dead documentation are
-  removed or updated. Added machinery has a concrete benefit.
-- [ ] Required regression fixtures and repository checks pass. Applicable
-  akm-eval collections completed with enough valid coverage for the claim;
-  otherwise relevant tests/operation measurements and any remaining coverage
-  gap are recorded. Raw failures and per-case changes were inspected. A successful
-  run need not improve every metric; tests alone do not prove an unmeasured benefit.
-- [ ] Baseline and candidate evidence identify builds, effective settings,
-  cases/scoring, completion/denominators, and relevant runtime/cache conditions.
-  Intentional treatment differences and partial coverage are explained.
-- [ ] Applicable runner/configuration preflight confirmed effective settings,
-  mode/flags, actual outputs/effects, errors, and applicable engines/models.
-  Before further tuning based on stochastic scores, unchanged comparable pilot
-  observations checked variation; any exception has a concrete reason. Repeats
-  and candidate variants stayed within the recorded experiment budget.
-- [ ] The primary outcome improves or the reproduced correctness defect is
-  fixed, or useful behavior holds with a justified simplification. Integrity
-  and important existing jobs hold; each negative signal is classified as a
-  blocker, bounded tradeoff, or uncertainty with evidence. No blocker remains;
-  tolerated regressions/risks have their impact and rationale recorded. There
-  is no universal nDCG or accuracy threshold substituted for representative cases.
-- [ ] Process-specific integrity and failure/recovery fixtures pass. Verify the
-  actual affected stages separately; an intermediate result does not establish
-  successful publication, execution, or recovery. State the finite coverage.
-- [ ] New defaults are judged on better outcomes, including representative existing
-  uses and explicit alternatives. Breaking behavior, examples, contracts, and
-  fixtures agree; a legacy mode is retained only for an actual need.
-- [ ] Label/scoring changes have the appropriate existing version/changelog
-  updates, both saved runs are explicitly rescored where needed, and the
-  reported gain is attributed to the right change.
-- [ ] The best acceptable candidate is selected and its final validation is
-  complete. Tuning stopped once the intended benefit and required checks were
-  satisfied. The default maximum was three total candidate variants unless the
-  task explicitly set another budget; optional optimization did not expand it.
-  At the candidate cap, only reserved final checks remained; the run/time/cost
-  cap was also respected. See the
-  [iteration/submission rules](evaluation-guide.md#decide-whether-to-iterate-or-submit).
-- [ ] The submission leads with the improvement, before/after measurements,
-  tests, remaining regressions/risks and their significance, why iteration
-  stopped, and rollout status. A known bounded tradeoff is disclosed rather
-  than hidden or treated as a demand for perfect scores.
+- [ ] The observed failure, affected contracts/boundaries, intended benefit,
+  ordered criteria, and non-goals are explicit. Requirements were not weakened
+  after seeing disappointing results.
+- [ ] The smallest justified implementation is selected; unsuccessful approaches
+  and unnecessary machinery are removed. Required regression/contract/integrity
+  checks pass, including relevant persistence, consumer, and recovery boundaries.
+- [ ] Focused and broader measurements answer named questions. Raw failures,
+  coverage/errors, per-case changes, and resource costs were inspected. The
+  primary benefit is demonstrated, or useful behavior holds with a justified
+  simplification; no unrelated score increase is required.
+- [ ] Each negative signal has an evidence-based disposition from the table below.
+  No blocker remains; tolerated regressions/uncertainty are bounded and disclosed.
+- [ ] The [preflight](evaluation-guide.md#runner-and-execution-preflight),
+  [evidence reuse](evaluation-guide.md#reuse-evidence-after-edits), and applicable
+  [shared verification](evaluation-guide.md#shared-verification) rules are met.
+  Required final-build validation is complete and the experiment budget holds.
+- [ ] Intentional default/contract changes have current help, types, examples,
+  and working explicit alternatives. Usefulness, not identical old output, is
+  the criterion. Measurement/version changes are attributed to the correct cause.
+- [ ] The selected result meets acceptance: tuning stops. Submit the gain,
+  remaining regression/risk, rationale, and why further optimization is outside
+  this task. Final-validation failures reopen the affected work within budget.
 
-Acceptance means **ready for rollout**. Passing code tests or committing a
-change alone does not establish that its operational rollout succeeded.
-If a budget is exhausted with a blocker or incomplete required validation,
-record **needs iteration**; this acceptance checklist has not passed.
+| Negative signal | Disposition |
+|---|---|
+| Failed integrity/authorization/required-contract test, critical job broken, or agreed operational bound exceeded | Block acceptance; a better aggregate cannot compensate. |
+| Real limited secondary regression outweighed by the intended benefit and permitted by the criteria | Record affected cases, magnitude/severity, rationale, and any useful follow-up; submit once final checks pass. |
+| Possible regression, incomplete judging, setup mismatch, or variation | Use the smallest decision-changing replay/test/repeat; do not call it noise without evidence or a fact without confirmation. A credible unresolved integrity risk blocks. |
+| Bounded uncertain soft regression with enough evidence for the net-benefit decision | Disclose the uncertainty and coverage limit; do not run indefinitely to eliminate every possible risk. |
+
+A completed run is not a graded quality pass; tests alone do not prove an
+unmeasured benefit. Acceptance does not require perfect model accuracy or every
+metric increasing. Avoid universal nDCG/accuracy thresholds and universal
+zero-data-loss claims from finite fixtures. Distinguish introduced regressions
+from documented baseline defects, without hiding either or waiving required
+integrity checks. An exhausted budget is not acceptance.
 
 ## Rollout
 
-- [ ] Identify the target version/commit, owner, rollout scope, and evidence
-  location. Perform only the publication/operations already authorized by the
-  task; list an outstanding authorized action plainly if it cannot be completed.
-- [ ] If persisted formats or writes change, follow AKM's current persisted-data
-  compatibility contract and relevant upgrade/recovery tests. Use existing
-  backup/restore mechanisms. Do not invent a migration for a code-only fix.
-- [ ] Inspect affected queued decisions, in-flight work, scheduled execution,
-  or cached state. Earlier decisions are not automatically valid under a changed
-  policy; review, reassess, or invalidate them through existing mechanisms when
-  needed. Do not introduce a parallel queue or state service.
-- [ ] Verify the candidate in an isolated, representative setting first when
-  the change affects data or autonomous actions. Test failures/interruption
-  when relevant; never use production destruction to demonstrate a benchmark.
-- [ ] Record a practical rollback or recovery action and its limits. A binary
-  downgrade is not sufficient when formats, content, or external effects changed.
-- [ ] Verify the actual published/installed target and one representative user
-  path. Observe relevant existing health, error, latency, recall, or proposal
-  signals after rollout; record the observation and any remaining limitations.
+- [ ] Record target build, owner, authorized actions, and evidence location.
+- [ ] Follow existing persisted-data compatibility/backup/recovery requirements
+  if affected. Do not invent migrations for code-only changes.
+- [ ] Review affected queued decisions, in-flight/scheduled work, and caches;
+  old decisions are not automatically valid under changed policies. Use existing
+  review/invalidation mechanisms, not a parallel queue or state service.
+- [ ] Perform a representative isolated installed-path/failure check when
+  relevant. Record recovery and its limits; a binary downgrade alone may not
+  reverse written content or external effects.
+- [ ] Verify actual publication/installation and the representative user path;
+  observe relevant existing error, quality, or resource signals after rollout.
 
-Use existing monitoring and release procedures. Add rollout automation only
-when repeated work or measured mistakes justify it. For documentation/skill
-changes, remote commit verification and appropriate content/installability
-checks can satisfy rollout; migration and production observation may be not
-applicable. Do not require an expensive model benchmark for a wording edit.
+Use existing release/monitoring tools. Documentation/skill publication can be
+verified by commit/push, remote contents, and content/installability checks;
+production migration/model-quality testing may be inapplicable with a reason.
+
+## Compact evidence package
+
+The issue/PR is the acceptance narrative. Link minimal reproducing fixtures,
+focused test/replay results, and the baseline/candidate summary with decisive
+failures and tradeoffs. Keep additional raw outputs in the existing durable,
+access-appropriate result location when needed to reproduce/review the claim;
+do not require committing every pilot log, duplicate report, or full raw run.
+Do not remove source identities necessary for comparison when redacting secrets.
+
+Illustrative record shape, not measured results:
+
+> Boundary: serializer after an unchanged model request/response contract.
+> Evidence: deterministic before/after publication fixture and exact-response
+> replay; focused tests and independent final case linked here.
+> Earlier model run: identifies its build; no final-build model-quality claim.
+> Final changes/checks: optional-field repair; replay and persistence checks rerun.
+> Tradeoff/limit: remaining model error disclosed; this fixes persistence only.
+> State: accepted/ready for rollout; named publication action and owner.
+
+A ranking change instead needs relevant judged retrieval/cost evidence; select
+that through the [boundary table](evaluation-guide.md#choose-validation-by-the-changed-boundary).
 
 ## Closing state
 
-Choose a truthful state in the record:
+- **Done:** acceptance and all applicable rollout/verification are complete.
+- **Ready for rollout:** accepted; list the remaining action and owner.
+- **Needs iteration:** a blocker or required evidence remains; state it precisely.
+- **Discarded:** benefit does not justify the complexity/tradeoffs; remove the
+  experiment and retain useful evidence.
 
-- **Done:** acceptance and all applicable rollout/verification work are complete.
-- **Ready for rollout:** accepted; specify the remaining action and owner.
-- **Needs iteration:** benefit, correctness, or rollout verification is inadequate.
-- **Discarded:** the change did not justify its complexity or tradeoffs; remove
-  experimental code and keep the useful evidence.
-
-For a release group, verify the final combined build; do not combine separate
-green runs of different intermediate builds into a claim that the final group
-passed. A deferred measurement needs a reason and a bounded claim, not a check
-mark. Track a real follow-up in the project's existing system; no extra status
-service is needed.
+Submission for review is not deployment. For combined work, the final-build
+claim must follow the [shared verification plan](evaluation-guide.md#shared-verification).

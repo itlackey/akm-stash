@@ -1,10 +1,10 @@
 # Select guidance for the affected process
 
-Choose by the behavior being changed, not just its command name. Read only the
-relevant sections, then use the shared [preflight and decision rules](evaluation-guide.md).
-These are starting measurements and failure cases, not new release requirements
-or one priority order for every process. The task and current contracts decide
-which outcomes block acceptance and which tradeoffs are tolerable.
+Choose by changed behavior, not just command name. Read only relevant sections
+and use the [boundary table](evaluation-guide.md#choose-validation-by-the-changed-boundary),
+[preflight](evaluation-guide.md#runner-and-execution-preflight), and
+[acceptance rules](definition-of-done.md#acceptance). These are process-specific
+starting points; the task/contracts determine priorities and tolerable tradeoffs.
 
 Runner notes were checked against akm-eval `99ca952` on 2026-10-21. Read the
 selected checkout's help/README and compatibility notes before using its flags,
@@ -30,17 +30,14 @@ persisted or external effects. Identify its current tests, contracts, relevant
 configuration, and one representative user job. State the primary benefit,
 hard invariants, secondary outcomes, and resource limits in the existing record.
 
-Choose the nearest relevant AKM tests and akm-eval runner/helper. If no runner
-observes the changed behavior, use a focused fixture or operation measurement
-through existing tools; do not substitute an unrelated quality score or create
-a suite automatically. Add a runner only when the missing repeated measurement
-justifies its maintenance cost. Record what remains unmeasured.
+Choose the nearest relevant tests/runner and use the
+[validation selection rules](evaluation-guide.md#choose-validation-by-the-changed-boundary)
+for uncovered behavior. Record limits rather than creating a suite automatically.
 
-For a cross-process change, verify each affected boundary and one combined
-user path on the final build. Scope the existing three-variant/run budgets to
-the task as a whole; selecting another section does not reset them. Product
-features deferred in a historical plan remain decisions of that task, not
-permanent restrictions on what this skill can evaluate.
+For cross-process changes, check affected boundaries and one combined path.
+Apply the shared [experiment budget](evaluation-guide.md#experiment-budget)
+and [verification plan](evaluation-guide.md#shared-verification). Historical
+feature deferrals belong to their task, not this reusable skill.
 
 ## Retrieval and answers
 
@@ -52,9 +49,9 @@ permanent restrictions on what this skill can evaluate.
   answer accuracy, abstention/negative transfer, then relevant cost. Include
   answerable/unanswerable, current/historical, scope/source, ambiguous terminology,
   and multi-evidence cases. Filters are not an authentication system.
-- **Setup:** verify keyword/hybrid/fallback and shipped defaults separately;
-  judge new pooled results and rescore both saved runs when labels change.
-  Separate cold indexing from warm queries and answer-model time/tokens.
+- **Setup:** distinguish keyword/hybrid/fallback and actual defaults. Use the
+  [comparison and rescoring guidance](evaluation-guide.md#existing-command-patterns)
+  and [same-index control](evaluation-guide.md#variation-and-comparison) where relevant.
 - **Boundary:** retrieval hit rate does not prove answer support or all-evidence
   recall. Raw-session LongMemEval does not establish extraction/consolidation
   integrity; test that lifecycle separately when affected.
@@ -75,7 +72,9 @@ permanent restrictions on what this skill can evaluate.
 - **Boundary:** extraction proposal quality does not prove publication fidelity.
   If acceptance/indexing/recall is affected, check evidence and source identity
   after those stages too. Confidence and automated verification stamps are not
-  factual-truth measurements.
+  factual-truth measurements. For post-model changes, prefer
+  [identical-response replay](evaluation-guide.md#choose-validation-by-the-changed-boundary)
+  before collecting more sessions.
 
 ## Reflection and repair
 
@@ -120,7 +119,7 @@ permanent restrictions on what this skill can evaluate.
   as well as the new fixtures. The pair scorer observes retirement proposals;
   acceptance/archive/revert need their own existing isolated tests.
 
-Apply the shared preflight, then check the following runner-specific details.
+Apply the [shared preflight](evaluation-guide.md#runner-and-execution-preflight), then check these mode details.
 The table describes the checked runner, not an interface promised forever:
 
 | Pair mode | Pool mode |
@@ -164,7 +163,7 @@ judgments deterministic. A never-paired/all-error run establishes no safety gain
   The checked bakeoff uses `--process` and per-process strategies; it does not
   accept a shared `--strategy`. Verify feature switches and all actual calls.
 - **Boundary:** aggregate success cannot hide a skipped process or outside change.
-  Confirm the final combined build; separate green component runs are insufficient.
+  Follow the [combined verification plan](evaluation-guide.md#shared-verification).
 
 ## Execution and agent usefulness
 
@@ -208,10 +207,9 @@ judgments deterministic. A never-paired/all-error run establishes no safety gain
 - **Priorities/cases:** truthful collection/scoring, error/coverage accounting,
   reproducible interpretation, then setup/runtime cost. Ensure malformed or
   missing output and deliberately bad cases cannot become silent successes.
-- **Setup:** distinguish collector changes, label/scoring changes, and product
-  changes. Follow existing measurement versions/changelog; rescore both saved
-  runs when required. Do not turn intentional treatment differences into a new
-  mandatory hash/configuration-equality gate.
+- **Setup:** verify recording/version requirements in
+  [preflight](evaluation-guide.md#runner-and-execution-preflight); follow the
+  [comparison/rescoring rules](evaluation-guide.md#existing-command-patterns).
 - **Boundary:** fake-AKM tests alone do not establish live compatibility; a
   scorer improvement is not an AKM quality improvement. Documentation-only
   changes need content/link/packaging checks, not expensive model collections.
