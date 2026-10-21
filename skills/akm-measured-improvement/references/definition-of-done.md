@@ -9,10 +9,11 @@ to the change. Mark a non-applicable item with a reason.
 
 - [ ] The intended user job and behavior are explicit, supported by a source
   trace or reproduction; hypotheses are distinguished from findings.
-- [ ] Acceptance criteria were chosen before final tuning: worthwhile benefit,
-  blocking tests/invariants, tolerable tradeoffs, and final validation. Each
-  behavior has evidence, and a change set has an integrated check. Criteria
-  were not weakened after seeing results just to accept a losing variant.
+- [ ] Ordered acceptance criteria were chosen before the first candidate:
+  worthwhile benefit, blocking tests/invariants, recall/coverage, safe automation,
+  tolerable tradeoffs/cost limits, and final validation. Each behavior has
+  evidence, and a change set has an integrated check. Criteria were not reordered
+  or weakened after seeing results just to accept a losing variant.
 - [ ] The smallest effective implementation is used. Unneeded limits,
   duplicate stages, obsolete options/branches, and dead documentation are
   removed or updated. Added machinery has a concrete benefit.
@@ -23,6 +24,11 @@ to the change. Mark a non-applicable item with a reason.
 - [ ] Baseline and candidate evidence identify builds, effective settings,
   cases/scoring, completion/denominators, and relevant runtime/cache conditions.
   Intentional treatment differences and partial coverage are explained.
+- [ ] Applicable runner/configuration preflight confirmed the actual strategy,
+  engine/model, embedder, mode/flags, errors, and scored lifecycle state. Before
+  further prompt tuning based on model scores, unchanged comparable pilot
+  observations checked variation; any exception has a concrete reason. Repeats
+  and candidate variants stayed within the recorded experiment budget.
 - [ ] The primary outcome improves or the reproduced correctness defect is
   fixed, or useful behavior holds with a justified simplification. Integrity
   and important existing jobs hold; each negative signal is classified as a
@@ -41,7 +47,10 @@ to the change. Mark a non-applicable item with a reason.
   reported gain is attributed to the right change.
 - [ ] The best acceptable candidate is selected and its final validation is
   complete. Tuning stopped once the intended benefit and required checks were
-  satisfied; optional optimization did not expand the task. See the
+  satisfied. The default maximum was three total candidate variants unless the
+  task explicitly set another budget; optional optimization did not expand it.
+  At the candidate cap, only reserved final checks remained; the run/time/cost
+  cap was also respected. See the
   [iteration/submission rules](evaluation-guide.md#decide-whether-to-iterate-or-submit).
 - [ ] The submission leads with the improvement, before/after measurements,
   tests, remaining regressions/risks and their significance, why iteration
@@ -50,6 +59,8 @@ to the change. Mark a non-applicable item with a reason.
 
 Acceptance means **ready for rollout**. Passing code tests or committing a
 change alone does not establish that its operational rollout succeeded.
+If a budget is exhausted with a blocker or incomplete required validation,
+record **needs iteration**; this acceptance checklist has not passed.
 
 ## Rollout
 

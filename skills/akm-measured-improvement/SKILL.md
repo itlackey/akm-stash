@@ -1,7 +1,7 @@
 ---
 name: akm-measured-improvement
 description: "Use when evaluating, tuning, simplifying, or developing akm or akm-eval: reproduce a problem, establish a baseline, make the smallest effective change, measure it with akm-eval, and complete acceptance and rollout as the definition of done."
-updated: 2026-10-20
+updated: 2026-10-21
 ---
 
 # Measured AKM Improvement
@@ -59,12 +59,24 @@ and include an integrated end-to-end check.
 ## 2. Choose the minimum useful measurements
 
 Use [evaluation selection and recipes](references/evaluation-guide.md).
-Choose a primary outcome and relevant integrity, regression, and cost measures
-before tuning. Define what counts as a worthwhile gain, which failures block
-acceptance, which bounded tradeoffs are tolerable, and the final checks that
-will end tuning. Use the issue's requirements; do not invent universal score
-thresholds. Match verification to impact: a documentation-only change does not
-require an expensive agent benchmark.
+Rank the intended outcome, integrity constraints, useful recall/coverage, safe
+automation, and cost **before tuning**; use the issue's priorities and record
+which are blockers versus tolerable tradeoffs. For consolidation, start with
+claim/scope preservation, then useful safe recall, then safe automatic staging,
+then cost; operational limits can also be blockers. Do not collapse these into
+one score. Define a worthwhile gain and the final checks that will end tuning.
+
+For graded model outcomes, a completed evaluation is not an acceptance pass,
+and acceptance does not require every score to rise. Use the ordered criteria,
+raw failures, and explicit tradeoffs. Deterministic integrity tests must pass;
+their success alone does not establish behavioral improvement. Do not invent
+universal score thresholds or require expensive agent benchmarks for wording.
+
+Set the experiment budget now: **three candidate variants in total by default**
+(first solution plus at most two alternatives), unless the task explicitly sets
+another budget. Also bound model runs/time or cost, including calibration and
+final validation. Keep the count in the existing change record. See the
+[budget and stopping rules](references/evaluation-guide.md#stop-when-the-decision-is-supported).
 
 Capture the baseline with existing akm-eval artifacts. Record the actual AKM
 build, harness revision, cases, labels/scorer, effective configuration, models,
@@ -91,6 +103,13 @@ the change record. Preserve the best candidate that meets the acceptance
 criteria, with its code/build and evidence, so a later experiment cannot erase
 a useful gain.
 
+Before consolidation runs, complete the compact
+[runner/configuration preflight](references/evaluation-guide.md#consolidation-preflight).
+Before further prompt tuning driven by model-score changes, check run-to-run
+variation on unchanged, comparable baseline/candidate pilots; temperature zero
+does not guarantee identical judgments. Reuse existing observations and repeats
+as described in the [variation check](references/evaluation-guide.md#check-variation-before-further-prompt-tuning).
+
 A lower score or noted regression requires investigation before acceptance.
 If the first candidate misses the intended outcome or introduces a material
 regression, use the failed cases to choose the next smallest justified change;
@@ -98,11 +117,12 @@ do not accept it merely because the new regression test passes. Equally, do
 not change the implementation just to make every metric increase. Classify
 the result using [the decision rules](references/evaluation-guide.md#decide-whether-to-iterate-or-submit).
 
-Keep experiments bounded: start with the first candidate and, if needed, up
-to two focused follow-ups. This is an effort checkpoint, not a minimum number
-of variants or permission to ship a failing change. Stop earlier when accepted.
-Extend only for a named acceptance blocker or missing evidence; otherwise
-submit the best acceptable candidate or report the precise unresolved blocker.
+Stop earlier when accepted. At the candidate cap, stop creating variants and use
+the reserved final checks on the best acceptable result. At the run/time/cost
+cap, stop runs; report any missing validation or blocker without claiming
+acceptance. A blocker does not automatically extend either budget. Do not reset
+it for each prompt, model, hypothesis, or resumed session. Never skip required
+checks or ship a failing change because the budget ran out.
 
 Reserve independently authored cases for the final check. Generated rewrites
 of public cases do not establish a held-out set. Repeat model-backed runs

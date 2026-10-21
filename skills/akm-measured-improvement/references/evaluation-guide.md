@@ -34,6 +34,49 @@ raw-session retrieval does not establish the complete memory lifecycle.
    and saved summary before a larger collection. Select concurrency and timeouts
    for the actual endpoint instead of copying another machine's values.
 
+### Consolidation preflight
+
+Do this once per selected runner/build/configuration; update the existing change
+record when the treatment changes. The mode details below were checked against
+akm-eval `99ca952` on 2026-10-21; the checked-out runner remains authoritative.
+
+1. From that akm-eval checkout, inspect `evals/consolidate/run --help` and
+   `evals/consolidate/run --pool --help`, its README, and compatibility notes.
+   Confirm the AKM command/version, runtime/dependencies, selected model route,
+   and actual result directories. Source examples use a CLI command for `--akm`.
+2. Choose the correct mode before copying flags:
+
+   | Pair mode | Pool mode in the checked runner |
+   |---|---|
+   | Supports `--cases DIR`, `--limit N`, and `--concurrency N`; each pair has its own sandbox. | One shared public pool; rejects custom/all corpora, `--cases`, and `--limit`; no concurrency option. |
+   | `--timeout-ms` limits commands, with shorter index/list caps. | `--timeout-ms` is AKM's improve budget; the harness has additional kill slack. |
+
+3. Verify effective configuration from the pilot summary and, when necessary,
+   the existing collector's config builder: strategy, selected process/engine,
+   model/provider, sampling/thinking, config patch, embedder, and timeouts.
+   Nonempty `.env` values can override shell settings. Patches must target the
+   selected strategy; relative patch paths are from the harness root in this
+   runner. Do not assume a copied config key or product default takes effect.
+4. Match embedding conditions: the checked runner uses deterministic word-hash
+   pairing by default and the real embedder with `--semantic`. Run these as
+   separate treatments; deterministic pairing does not make LLM judgments
+   deterministic. Verify the reported embedder and cases actually paired/judged.
+5. Run the appropriate existing contract smoke, then a small model-backed
+   pair pilot containing short/long notes, safe duplicates, and unique claims.
+   Use `--cases` for a small explicit mixed set when public `--limit` cannot
+   select it. Confirm model calls, usable verdicts, errors, denominators, and
+   expected scoring fields before a full run. A never-paired or all-error run
+   does not establish safety. Contract smoke tests compatibility, not quality.
+6. Verify what is measured: the pair scorer counts retirement **proposals**;
+   staging is separate. It does not by itself exercise accepted deletion or
+   restoration. Use existing isolated AKM acceptance/archive/revert tests for
+   those paths and retain separate results. Then compare the affected full
+   short-note collection and relevant long-note fixtures; a tail-claim fix must
+   not be accepted solely on the newly added cases.
+
+Use existing help, pilots, summaries, and tests; do not add a preflight service
+or another config schema. Do not print credentials or raw private session data.
+
 Prefer the existing [Docker guide](https://github.com/itlackey/akm-eval/blob/main/docker/README.md)
 for repeatable environments. A source build must be mounted with matching
 runtime dependencies; Git worktrees also need their referenced Git directory
@@ -173,6 +216,54 @@ simplification can succeed through maintained behavior with less machinery.
 Neither needs an unrelated score increase. Do not loosen criteria after seeing
 a disappointing result just to accept the first patch.
 
+### Order competing outcomes
+
+Write an ordered scorecard before the first candidate, including acceptable
+regressions and relevant absolute cost limits. For consolidation, use this
+starting order unless the task gives a different priority:
+
+1. **Claim/evidence preservation and scope integrity.** Apply the defined hard
+   tests and safety limits first. Record unsafe proposals, unsafe staged
+   retirements, accepted changes, and successful recovery separately; restoration
+   does not excuse an unsafe action. A higher average cannot offset a blocker.
+2. **Useful safe recall.** Measure safe-retirement opportunities retained or
+   missed, including existing short notes and new long-note cases. Retiring
+   nothing is not a useful win. Report per-case/length/relation regressions.
+3. **Safe automatic staging.** Assess safe staged coverage separately from
+   proposal recall, with unsafe staging constrained by the integrity criteria.
+   Do not increase unattended acceptance simply to improve this number.
+4. **Cost and operational fit.** Compare calls/tokens, latency, context failures,
+   and runtime/memory where relevant. Cost breaks ties among useful candidates;
+   a required operational ceiling is a blocker regardless of this default order.
+
+State how a correctness gain can justify a bounded recall loss, or why that loss
+would defeat this task. Choose using the ordered criteria, not whichever metric
+looks best afterward. "Evaluations pass" means the required deterministic
+checks and graded acceptance criteria are met; it does not mean exit code zero,
+perfect model accuracy, or improvement in every metric.
+
+### Check variation before further prompt tuning
+
+Before changing a prompt because of a model-score gain/loss, compare unchanged
+baseline and candidate behavior on the same small, decision-relevant pilot.
+Use at least two observations of each (existing comparable runs count); the
+usual first check is one additional run per build with the existing `--repeat`
+or separate labels. Inspect per-case flips and the range, not only a mean.
+Keep cases, model route, sampling, embedder, and other non-treatment settings
+fixed; check served-model identity and errors. Temperature zero is not proof of
+repeatability. Do not repeat deterministic tests or a full collection when the
+small pilot answers the variation question.
+
+If the apparent difference is within the observed variation or changes sign,
+do not edit wording to chase it. Resolve a concrete failing case/test, prefer
+the simpler candidate when the intended outcomes are equivalent, or report
+inconclusive quality within the bounded claim. Two observations are a diagnostic,
+not a statistical guarantee. A clear input/path defect or deterministic failure
+can justify the next fix without waiting for repeats; variation never excuses
+an integrity blocker. Further repeats need a specific decision question and
+must fit the recorded run budget. This check does not require new statistics
+or experiment infrastructure.
+
 ### Classify a regression before reacting
 
 Inspect the affected cases, their baseline behavior, the final content/output,
@@ -213,12 +304,24 @@ not hide a regression in an aggregate or classify it as noise without evidence.
 
 ### Stop when the decision is supported
 
-Use a small initial round: the first candidate plus up to two evidence-led
-follow-ups if needed. This is a checkpoint for effort, not a requirement to try
-three variants or a reason to accept a failing one. Name the hypothesis and
-acceptance question before each further experiment. If no variant qualifies,
-report the blocker and the next justified step; extend the round only to resolve
-that blocker or missing acceptance evidence, not to chase speculative gains.
+Use a maximum of **three candidate variants total by default**, including the
+first solution, unless the task explicitly sets another budget. Count material
+prompt/code/config/model treatment changes even if they are reverted, called
+small tweaks, or pursued under a different hypothesis. Baseline collection,
+unchanged-build repeats, and harness repairs are not new product variants, but
+their runs/time/cost still consume the separate evaluation budget. Record those
+limits and reserve enough for calibration and final validation before tuning;
+do not use repeats as an unbounded alternative to new variants.
+
+Name the hypothesis and acceptance question before each candidate. Stop as soon
+as one qualifies; three attempts are not mandatory. At the candidate cap, stop
+creating variants and use the reserved validation runs on the best acceptable
+candidate. At the run/time/cost cap, stop running evaluations; any still-missing
+validation or unresolved blocker means **needs iteration**, with the exact gap
+and next justified step. An unresolved blocker does not authorize a fourth
+variant or a reset of either budget. Record any explicitly authorized larger
+budget; do not create an approval workflow or silently extend the task. Missing
+validation is not a waived requirement or a claim that the change is ready.
 
 As soon as a candidate demonstrates the intended worthwhile benefit, satisfies
 blocking criteria, and has understood tolerable tradeoffs, stop searching for

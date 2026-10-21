@@ -14,10 +14,15 @@ Scope: [feature or cohesive change set; AKM and/or akm-eval]
 - Primary outcome and worthwhile benefit: [choose before tuning; user impact]
 - Blocking tests/invariants and limits: [include negative and historical jobs]
 - Tolerable regression/cost tradeoffs: [bounds and rationale; not every metric must rise]
+- Outcome priority, highest first: [rank constraints, useful recall/coverage,
+  safe automation, cost; for consolidation start with preservation, safe recall,
+  safe staging, then cost; operational ceilings can still block acceptance]
 - Intended treatment: [code isolation, default change, or named combined change]
 - Cases reserved for final validation: [independently authored; not tuning data]
-- Iteration checkpoint: [first candidate plus up to two focused follow-ups by default;
-  stop earlier on acceptance; extend only for a named blocker/missing evidence]
+- Candidate budget and count: [maximum 3 total by default, including first solution;
+  task-authorized override if any; no reset per prompt/model/hypothesis/session]
+- Evaluation run/time/cost budget: [include variation check and reserve final
+  validation; stop earlier on acceptance; no automatic extension for a blocker]
 
 ## Reproduction and run recipe
 
@@ -32,6 +37,8 @@ Scope: [feature or cohesive change set; AKM and/or akm-eval]
 | Relevant machine, cold/warm, timeouts/concurrency | [value] | [value] |
 
 Exact commands and setup: [commands or links; no credentials/private seeds]
+Runner/configuration preflight: [help/compatibility checked; mode/flags;
+  actual strategy/process/engine/model/embedder; pilot verdicts/errors/states]
 Regression fixtures and reproduction: [paths, expected failure and behavior]
 Affected behaviors in a change set: [criterion and fixture for each]
 
@@ -40,7 +47,7 @@ Affected behaviors in a change set: [criterion and fixture for each]
 | Variant/build | Artifacts and checks | Outcome / regressions / cost | Decision |
 |---|---|---|---|
 | Baseline | [summary, samples, tests] | [result] | [reference] |
-| Candidate | [summary, samples, tests] | [result] | [keep/revise/discard] |
+| Candidate 1 / budget | [summary, samples, tests] | [result] | [keep/revise/discard] |
 
 Best acceptable candidate: [code/build and evidence, or none yet]
 Next experiment, if needed: [specific unresolved acceptance question, not score chasing]
@@ -58,6 +65,8 @@ Next experiment, if needed: [specific unresolved acceptance question, not score 
 
 Labels/rescoring and measurement changes: [or none; keep original artifacts]
 Final validation / repeats: [results, variation, and held-out limitations]
+Pre-tuning variation check: [unchanged baseline/candidate observations and
+  per-case flips/range; enough to inform the decision, or concrete exception]
 
 ## Acceptance decision
 
