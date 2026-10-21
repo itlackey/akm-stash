@@ -8,20 +8,16 @@ checked against akm-eval `99ca952abe92e41b46f028db00956affea089868` on
 
 ## Select by behavior
 
-| Change | Existing measurements | Important failure cases |
-|---|---|---|
-| Search, filters, ranking, recall defaults | `evals/retrieval`; `benchmarks/skillret` when capability ranking is affected | Eligible hits beyond candidate cutoffs; negative/unanswerable queries; current/historical evidence; all-required-evidence recall |
-| Session extraction and source evidence | `evals/extract` and AKM integration tests | Evidence after acceptance, indexing, and retrieval; missing sources; incorrect claims |
-| Consolidation and retirement | `evals/consolidate`, pair and pool modes | Unique claims throughout long notes; cross-scope notes; queued decisions; failed judgments; proposed/staged/accepted retirements |
-| Reflection, distillation, promotion, autonomous maintenance | Relevant `evals/reflect`, `distill`, `promotion`, `judge-gate`, `nightly`, or `bakeoff` | Correct repairs; unchanged valid content; unsupported additions; rejected/failed operations |
-| Long-term memory retrieval and answers | `benchmarks/longmemeval` | All evidence sessions, current facts, abstention, answer quality, tokens and timing |
-| Agent task usefulness | `evals/agent-ab`; `benchmarks/terminal-bench` when representative | Actual AKM use, task success, equal treatment where intended, errors, tokens and timing |
-| Links, persistence, scope, authoring, recovery | Existing AKM unit/integration tests, plus affected eval cases | Supported syntax; code examples; incremental/full logical equivalence; evidence/scope preservation; interruptions |
+Use [process guidance](process-guidance.md) to select the relevant existing
+runner/tests, outcome priorities, setup checks, and failure cases. A change can
+affect multiple processes; choose measurements for each affected boundary and
+one representative integrated path. The command examples below illustrate
+invocation patterns, not evaluations required for every change.
 
 Extend existing cases and shared helpers before creating a suite or orchestrator.
-For lifecycle gaps, exercise capture, proposal acceptance, improvement, and
-retrieval in sequence. Add only the missing integration coverage. LongMemEval's
-raw-session retrieval does not establish the complete memory lifecycle.
+When no existing runner measures the behavior, use relevant AKM tests and a
+focused operation/integration measurement through existing helpers. Record the
+coverage gap and limits rather than claiming an unrelated score validates it.
 
 ## Prepare a run
 
@@ -34,48 +30,32 @@ raw-session retrieval does not establish the complete memory lifecycle.
    and saved summary before a larger collection. Select concurrency and timeouts
    for the actual endpoint instead of copying another machine's values.
 
-### Consolidation preflight
+### Runner and configuration preflight
 
-Do this once per selected runner/build/configuration; update the existing change
-record when the treatment changes. The mode details below were checked against
-akm-eval `99ca952` on 2026-10-21; the checked-out runner remains authoritative.
+Do this once per selected runner/build/configuration and apply the relevant
+[process setup checks](process-guidance.md). Update the existing record when
+the treatment changes; no preflight service or config schema is needed.
 
-1. From that akm-eval checkout, inspect `evals/consolidate/run --help` and
-   `evals/consolidate/run --pool --help`, its README, and compatibility notes.
-   Confirm the AKM command/version, runtime/dependencies, selected model route,
-   and actual result directories. Source examples use a CLI command for `--akm`.
-2. Choose the correct mode before copying flags:
+1. Read that runner/mode's `--help`, README, and compatibility notes. Confirm
+   the tested AKM build, runtime/dependencies, input/corpus format, supported
+   flags, timeout meaning, and result location. Check whether `--akm` expects
+   a CLI command, checkout directory, or package specification.
+2. Verify effective settings from the pilot output/summary and, when necessary,
+   the current collector's config builder. Check applicable strategy/process,
+   feature switches, models, sampling, embedding, scope/source, and config
+   patch. Nonempty `.env` settings may override shell values; confirm patch
+   paths and merge behavior rather than assuming copied keys take effect.
+3. Select a small pilot that reaches the changed behavior, with positive,
+   no-op/negative, and failure cases relevant to its contract. Run existing
+   contract smoke when it covers the runner, then verify actual useful work,
+   outputs, effects, errors, and denominators. Zero work or all errors is not
+   evidence of quality. Stub smoke checks compatibility, not model quality.
+4. Establish what each metric observes: intermediate decision, persisted
+   artifact, execution result, or downstream user outcome. Verify the other
+   affected boundaries with existing tests/measurements before claiming them.
+   Compare applicable existing cases as well as the new regression fixtures.
 
-   | Pair mode | Pool mode in the checked runner |
-   |---|---|
-   | Supports `--cases DIR`, `--limit N`, and `--concurrency N`; each pair has its own sandbox. | One shared public pool; rejects custom/all corpora, `--cases`, and `--limit`; no concurrency option. |
-   | `--timeout-ms` limits commands, with shorter index/list caps. | `--timeout-ms` is AKM's improve budget; the harness has additional kill slack. |
-
-3. Verify effective configuration from the pilot summary and, when necessary,
-   the existing collector's config builder: strategy, selected process/engine,
-   model/provider, sampling/thinking, config patch, embedder, and timeouts.
-   Nonempty `.env` values can override shell settings. Patches must target the
-   selected strategy; relative patch paths are from the harness root in this
-   runner. Do not assume a copied config key or product default takes effect.
-4. Match embedding conditions: the checked runner uses deterministic word-hash
-   pairing by default and the real embedder with `--semantic`. Run these as
-   separate treatments; deterministic pairing does not make LLM judgments
-   deterministic. Verify the reported embedder and cases actually paired/judged.
-5. Run the appropriate existing contract smoke, then a small model-backed
-   pair pilot containing short/long notes, safe duplicates, and unique claims.
-   Use `--cases` for a small explicit mixed set when public `--limit` cannot
-   select it. Confirm model calls, usable verdicts, errors, denominators, and
-   expected scoring fields before a full run. A never-paired or all-error run
-   does not establish safety. Contract smoke tests compatibility, not quality.
-6. Verify what is measured: the pair scorer counts retirement **proposals**;
-   staging is separate. It does not by itself exercise accepted deletion or
-   restoration. Use existing isolated AKM acceptance/archive/revert tests for
-   those paths and retain separate results. Then compare the affected full
-   short-note collection and relevant long-note fixtures; a tail-claim fix must
-   not be accepted solely on the newly added cases.
-
-Use existing help, pilots, summaries, and tests; do not add a preflight service
-or another config schema. Do not print credentials or raw private session data.
+Keep sensitive configuration and private inputs out of published artifacts.
 
 Prefer the existing [Docker guide](https://github.com/itlackey/akm-eval/blob/main/docker/README.md)
 for repeatable environments. A source build must be mounted with matching
@@ -126,19 +106,17 @@ Model-backed examples, after configuring an endpoint and model:
 ```bash
 evals/extract/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
   --model configured-model --limit 5 --label change-name-extract-pilot
-evals/consolidate/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
-  --model configured-model --label change-name-pairs
-evals/consolidate/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
-  --model configured-model --pool --label change-name-pool
+evals/reflect/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --model configured-model --label change-name-reflect
+evals/distill/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
+  --model configured-model --label change-name-distill
 benchmarks/longmemeval/run --akm "bun '$AKM_CANDIDATE/src/cli.ts'" \
   --retrieval-only --limit 5 --label change-name-memory-pilot
 ```
 
 Run the same affected collection on the baseline when no usable baseline
-artifact exists. Consolidation's default deterministic embedder and `--semantic`
-exercise different pairing conditions: compare like modes and test real
-embedding behavior when relevant. Pool mode has different supported flags from
-pair mode; check help rather than appending every shared option.
+artifact exists. Follow the selected process's mode/configuration checks;
+compare like conditions and test shipped behavior when the claim requires it.
 
 Agent A/B and Terminal-Bench take `--akm` as a **checkout directory or package
 specification**, not the CLI command above. They require Docker/Harbor and a
@@ -219,43 +197,34 @@ a disappointing result just to accept the first patch.
 ### Order competing outcomes
 
 Write an ordered scorecard before the first candidate, including acceptable
-regressions and relevant absolute cost limits. For consolidation, use this
-starting order unless the task gives a different priority:
+regressions and relevant absolute cost limits. Use the task's priorities and
+the applicable [process guidance](process-guidance.md), not a fixed scorecard
+for another feature. Required contracts/integrity and operational ceilings are
+blockers; rank the primary user benefit, secondary outcomes, and resource cost
+within those constraints. State why a secondary loss is tolerable or would
+defeat this task. Record each affected stage separately so a good intermediate
+score cannot conceal a bad downstream result.
 
-1. **Claim/evidence preservation and scope integrity.** Apply the defined hard
-   tests and safety limits first. Record unsafe proposals, unsafe staged
-   retirements, accepted changes, and successful recovery separately; restoration
-   does not excuse an unsafe action. A higher average cannot offset a blocker.
-2. **Useful safe recall.** Measure safe-retirement opportunities retained or
-   missed, including existing short notes and new long-note cases. Retiring
-   nothing is not a useful win. Report per-case/length/relation regressions.
-3. **Safe automatic staging.** Assess safe staged coverage separately from
-   proposal recall, with unsafe staging constrained by the integrity criteria.
-   Do not increase unattended acceptance simply to improve this number.
-4. **Cost and operational fit.** Compare calls/tokens, latency, context failures,
-   and runtime/memory where relevant. Cost breaks ties among useful candidates;
-   a required operational ceiling is a blocker regardless of this default order.
-
-State how a correctness gain can justify a bounded recall loss, or why that loss
-would defeat this task. Choose using the ordered criteria, not whichever metric
-looks best afterward. "Evaluations pass" means the required deterministic
-checks and graded acceptance criteria are met; it does not mean exit code zero,
+Choose using these criteria, not whichever metric looks best afterward.
+"Evaluations pass" means the required deterministic checks and graded
+acceptance criteria are met; it does not mean exit code zero,
 perfect model accuracy, or improvement in every metric.
 
-### Check variation before further prompt tuning
+### Check variation before further tuning
 
-Before changing a prompt because of a model-score gain/loss, compare unchanged
-baseline and candidate behavior on the same small, decision-relevant pilot.
+Before changing a stochastic treatment because of a score gain/loss, compare
+unchanged baseline and candidate behavior on the same decision-relevant pilot.
 Use at least two observations of each (existing comparable runs count); the
 usual first check is one additional run per build with the existing `--repeat`
 or separate labels. Inspect per-case flips and the range, not only a mean.
-Keep cases, model route, sampling, embedder, and other non-treatment settings
-fixed; check served-model identity and errors. Temperature zero is not proof of
-repeatability. Do not repeat deterministic tests or a full collection when the
-small pilot answers the variation question.
+Keep inputs, environment, and non-treatment settings fixed. For model-backed
+runs, check model route/served identity, sampling, embedder, and errors;
+temperature zero is not proof of repeatability. For timing measurements, hold
+the relevant load/cache conditions fixed. Do not repeat deterministic correctness
+tests or a full collection when the small pilot answers the variation question.
 
 If the apparent difference is within the observed variation or changes sign,
-do not edit wording to chase it. Resolve a concrete failing case/test, prefer
+do not tune parameters or prompts to chase it. Resolve a concrete failing case/test, prefer
 the simpler candidate when the intended outcomes are equivalent, or report
 inconclusive quality within the bounded claim. Two observations are a diagnostic,
 not a statistical guarantee. A clear input/path defect or deterministic failure
@@ -272,8 +241,8 @@ negative signal in the existing change record:
 
 - **Blocker:** a required test/invariant fails, a critical existing job breaks,
   an agreed limit is exceeded, or a material degradation defeats the intended
-  benefit. Claim loss, cross-scope writes, and retirement from incomplete
-  evidence cannot be traded for a higher average score.
+  benefit. A process's integrity or authorization failure cannot be traded for
+  a higher average score.
 - **Bounded tradeoff:** a real, understood regression with limited impact,
   outweighed by the demonstrated benefit and permitted by the task's criteria.
   Record affected cases, magnitude/frequency, severity, and why it is tolerable.
@@ -295,9 +264,9 @@ not hide a regression in an aggregate or classify it as noise without evidence.
 |---|---|
 | First candidate meets the intended benefit, required checks, and tradeoff criteria | Complete the remaining final checks and submit; alternatives are not mandatory. |
 | First patch passes its new test, but the relevant primary outcome worsens and a material regression remains | Investigate failed cases and try the next smallest justified variant; do not accept on unit tests alone. |
-| Aggregate score rises, but a defined claim-preservation or scope test fails | Fix the blocker or discard the variant; the average does not compensate. |
+| Aggregate score rises, but a required integrity/contract test fails | Fix the blocker or discard the variant; the average does not compensate. |
 | Intended benefit is worthwhile, required checks pass, and one bounded secondary regression remains | Record the tradeoff, complete final validation, and submit. Do not optimize indefinitely to remove every soft regression. |
-| A correctness fix lowers a secondary ranking metric slightly | Review the affected cases and task criteria; submit if the net benefit is supported and no blocker remains. |
+| A correctness fix lowers a secondary quality metric slightly | Review the affected cases and task criteria; submit if the net benefit is supported and no blocker remains. |
 | A metric changes slightly and model variation could reverse the decision | Perform a targeted comparable repeat; if evidence remains insufficient, report that limit rather than claiming a win. |
 | Equal useful behavior is achieved with less code and no blocking regression | Accept the simplification when that is the intended benefit. |
 | A later experiment is worse than the saved acceptable candidate | Discard it and restore the saved candidate; validate the actual selected build. |
@@ -342,17 +311,3 @@ bounded follow-up when worthwhile, rather than expanding the current task.
 Proceed through the existing rollout checklist separately; submission is not
 completed deployment. No additional scoring service, configuration knobs,
 experiment scheduler, or approval gate is needed for these decisions.
-
-## Starting hypotheses from the 0.10 review
-
-Reproduce these on the selected build before treating them as open defects:
-full-body retirement assessment instead of a fixed 12,000-character cutoff;
-evidence surviving extraction acceptance; scope-preserving consolidation;
-eligibility before search candidate limits; improved current/historical recall
-defaults; correct link parsing; and useful abstention/evidence coverage.
-
-The historical inspection used AKM
-[`bf072cd`](https://github.com/itlackey/akm/tree/bf072cd5c56fce0dc93d25f79a3b465ba911ee22).
-It is a reproducibility reference, not a requirement to keep that implementation
-or freeze today's defects into the skill. Rename preservation, stable identity,
-broad wiki authoring, and hosted team architecture remain deferred for this plan.

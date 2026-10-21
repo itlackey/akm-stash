@@ -3,6 +3,8 @@
 Status: draft
 Owner: [owner]
 Scope: [feature or cohesive change set; AKM and/or akm-eval]
+Affected process(es) and contract: [entry point, actual inputs/outputs, state or
+  external effects; selected process guidance or discovery findings]
 
 ## Goal and experiment
 
@@ -10,13 +12,12 @@ Scope: [feature or cohesive change set; AKM and/or akm-eval]
 - Hypothesis and intended behavior: [what should improve and why]
 - Smallest fix/deletion considered: [restriction, stage, duplication to remove]
 - Added machinery and justification: [or none]
-- Non-goals: [rename preservation/stable identity remain deferred unless scoped]
+- Non-goals and deferred work: [from this task; do not inherit unrelated examples]
 - Primary outcome and worthwhile benefit: [choose before tuning; user impact]
-- Blocking tests/invariants and limits: [include negative and historical jobs]
+- Blocking tests/invariants and limits: [process-specific contracts and failure cases]
 - Tolerable regression/cost tradeoffs: [bounds and rationale; not every metric must rise]
-- Outcome priority, highest first: [rank constraints, useful recall/coverage,
-  safe automation, cost; for consolidation start with preservation, safe recall,
-  safe staging, then cost; operational ceilings can still block acceptance]
+- Outcome priority, highest first: [rank this process's hard constraints,
+  primary benefit, secondary effects, and cost; include operational ceilings]
 - Intended treatment: [code isolation, default change, or named combined change]
 - Cases reserved for final validation: [independently authored; not tuning data]
 - Candidate budget and count: [maximum 3 total by default, including first solution;
@@ -32,13 +33,13 @@ Scope: [feature or cohesive change set; AKM and/or akm-eval]
 | akm-eval revision / runner image | [value] | [value] |
 | Cases and labels / scoring version | [value] | [value] |
 | Effective config and intentional differences | [value] | [value] |
-| Reader, judge, embedding model/settings | [or not applicable] | [value] |
-| Actual search mode / fallback | [value] | [value] |
+| Applicable engines/models/settings | [or not applicable] | [value] |
+| Applicable execution/search mode and fallback | [or not applicable] | [value] |
 | Relevant machine, cold/warm, timeouts/concurrency | [value] | [value] |
 
 Exact commands and setup: [commands or links; no credentials/private seeds]
 Runner/configuration preflight: [help/compatibility checked; mode/flags;
-  actual strategy/process/engine/model/embedder; pilot verdicts/errors/states]
+  effective settings and applicable engines; actual outputs/errors/effects]
 Regression fixtures and reproduction: [paths, expected failure and behavior]
 Affected behaviors in a change set: [criterion and fixture for each]
 
@@ -65,8 +66,8 @@ Next experiment, if needed: [specific unresolved acceptance question, not score 
 
 Labels/rescoring and measurement changes: [or none; keep original artifacts]
 Final validation / repeats: [results, variation, and held-out limitations]
-Pre-tuning variation check: [unchanged baseline/candidate observations and
-  per-case flips/range; enough to inform the decision, or concrete exception]
+Pre-tuning variation check: [stochastic baseline/candidate observations and
+  range; or not applicable for deterministic behavior, with reason]
 
 ## Acceptance decision
 

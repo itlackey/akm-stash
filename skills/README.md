@@ -17,8 +17,8 @@ Start here:
 - [`akm-health/`](./akm-health) — report on improve-pipeline metrics and
   troubleshoot slow, silent, or failing runs.
 - [`akm-measured-improvement/`](./akm-measured-improvement) — evaluate and improve
-  AKM or akm-eval through baseline measurement, small changes, tuning, and an
-  acceptance-and-rollout definition of done; targets the AKM 0.10 approach.
+  any AKM process or akm-eval through process-specific measurement, small changes,
+  bounded tuning, and an acceptance-and-rollout definition of done.
 - [`akm-dream/`](./akm-dream) — consolidate and prune memories through staged
   review gates.
 

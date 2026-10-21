@@ -9,24 +9,29 @@ to the change. Mark a non-applicable item with a reason.
 
 - [ ] The intended user job and behavior are explicit, supported by a source
   trace or reproduction; hypotheses are distinguished from findings.
+- [ ] The affected processes, input/output contracts, and actual state/external
+  effects were identified. The relevant [process guidance](process-guidance.md)
+  or discovery steps supplied suitable measurements and failure cases; unrelated
+  process metrics were not imposed on the change.
 - [ ] Ordered acceptance criteria were chosen before the first candidate:
-  worthwhile benefit, blocking tests/invariants, recall/coverage, safe automation,
+  worthwhile benefit, process-specific blocking tests/invariants, secondary effects,
   tolerable tradeoffs/cost limits, and final validation. Each behavior has
   evidence, and a change set has an integrated check. Criteria were not reordered
   or weakened after seeing results just to accept a losing variant.
 - [ ] The smallest effective implementation is used. Unneeded limits,
   duplicate stages, obsolete options/branches, and dead documentation are
   removed or updated. Added machinery has a concrete benefit.
-- [ ] Required regression fixtures and repository checks pass. Affected akm-eval
-  collections completed with enough valid coverage for the claim; raw failures
-  and per-case changes were inspected. A successful run need not improve every
-  metric, and passing unit tests alone does not establish product improvement.
+- [ ] Required regression fixtures and repository checks pass. Applicable
+  akm-eval collections completed with enough valid coverage for the claim;
+  otherwise relevant tests/operation measurements and any remaining coverage
+  gap are recorded. Raw failures and per-case changes were inspected. A successful
+  run need not improve every metric; tests alone do not prove an unmeasured benefit.
 - [ ] Baseline and candidate evidence identify builds, effective settings,
   cases/scoring, completion/denominators, and relevant runtime/cache conditions.
   Intentional treatment differences and partial coverage are explained.
-- [ ] Applicable runner/configuration preflight confirmed the actual strategy,
-  engine/model, embedder, mode/flags, errors, and scored lifecycle state. Before
-  further prompt tuning based on model scores, unchanged comparable pilot
+- [ ] Applicable runner/configuration preflight confirmed effective settings,
+  mode/flags, actual outputs/effects, errors, and applicable engines/models.
+  Before further tuning based on stochastic scores, unchanged comparable pilot
   observations checked variation; any exception has a concrete reason. Repeats
   and candidate variants stayed within the recorded experiment budget.
 - [ ] The primary outcome improves or the reproduced correctness defect is
@@ -35,11 +40,10 @@ to the change. Mark a non-applicable item with a reason.
   blocker, bounded tradeoff, or uncertainty with evidence. No blocker remains;
   tolerated regressions/risks have their impact and rationale recorded. There
   is no universal nDCG or accuracy threshold substituted for representative cases.
-- [ ] Where applicable, no defined fixture loses a distinct claim, publishes
-  an unsupported assertion unnoticed, crosses scopes, or retires content based
-  on incomplete assessment. Verify proposals, staging, acceptance, and recovery
-  separately. State the finite coverage of these claims.
-- [ ] New defaults are judged on better outcomes, including current/historical
+- [ ] Process-specific integrity and failure/recovery fixtures pass. Verify the
+  actual affected stages separately; an intermediate result does not establish
+  successful publication, execution, or recovery. State the finite coverage.
+- [ ] New defaults are judged on better outcomes, including representative existing
   uses and explicit alternatives. Breaking behavior, examples, contracts, and
   fixtures agree; a legacy mode is retained only for an actual need.
 - [ ] Label/scoring changes have the appropriate existing version/changelog
@@ -70,10 +74,10 @@ record **needs iteration**; this acceptance checklist has not passed.
 - [ ] If persisted formats or writes change, follow AKM's current persisted-data
   compatibility contract and relevant upgrade/recovery tests. Use existing
   backup/restore mechanisms. Do not invent a migration for a code-only fix.
-- [ ] Inspect affected queued proposals, retirements, in-flight work, or cached
-  state. A decision staged under incomplete old evidence is not automatically
-  valid under a new retirement policy; review or reassess it before unattended
-  acceptance. Use existing proposal tools rather than a second queue.
+- [ ] Inspect affected queued decisions, in-flight work, scheduled execution,
+  or cached state. Earlier decisions are not automatically valid under a changed
+  policy; review, reassess, or invalidate them through existing mechanisms when
+  needed. Do not introduce a parallel queue or state service.
 - [ ] Verify the candidate in an isolated, representative setting first when
   the change affects data or autonomous actions. Test failures/interruption
   when relevant; never use production destruction to demonstrate a benchmark.
