@@ -1,12 +1,18 @@
 ---
 name: akm-measured-improvement
-description: "Use when evaluating, tuning, simplifying, or developing akm or akm-eval: reproduce a problem, establish a baseline, make the smallest effective change, measure it with akm-eval, and complete acceptance and rollout as the definition of done."
+description: "Use when implementing and delivering a defined change to akm or akm-eval, often from a GitHub issue: reproduce the problem, make the smallest effective modification, validate it with akm-eval, and complete acceptance and applicable rollout."
 updated: 2026-10-21
 ---
 
 # Measured AKM Improvement
 
-Use this workflow to improve any AKM process/feature or akm-eval itself.
+Use this workflow to implement and deliver a defined change to any AKM
+process/feature or akm-eval itself. For developer-directed discovery and ongoing
+experiments, use [AKM autoresearch](../akm-autoresearch/SKILL.md); choose by the
+job, not whether an issue exists. Carry forward valid research evidence and
+identify remaining delivery gaps rather than repeating the exploration.
+If a standalone clone lacks that sibling skill, resolve it from the recorded
+source stash revision in [akm-stash](https://github.com/itlackey/akm-stash/tree/main/skills/akm-autoresearch).
 Running `akm improve` maintains assets; this skill evaluates implementation
 changes. Follow the selected checkouts' instructions and contracts, not a
 historical command example or benchmark score.

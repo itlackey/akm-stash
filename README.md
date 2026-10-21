@@ -72,16 +72,20 @@ No akm yet? Install the CLI first — see
   work through the troubleshooting tree.
 - **Memories have drifted or grown messy** → run the `akm-dream` skill for a
   staged, reviewable consolidation and prune pass.
-- **Changing or tuning AKM or akm-eval itself** → use
+- **Exploring ways to improve a specific AKM process** → use
+  [`akm-autoresearch`](./skills/akm-autoresearch/SKILL.md) for developer-directed
+  experiments with akm-eval and a reproducible research handoff.
+- **Implementing and delivering a defined AKM or akm-eval change** → use
   [`akm-measured-improvement`](./skills/akm-measured-improvement/SKILL.md) for
-  a shared measurement-and-tuning process, guidance for the affected AKM process,
-  evaluation recipes, and acceptance plus rollout as the definition of done.
+  process-specific measurement, bounded implementation tuning, and acceptance
+  plus applicable rollout as the definition of done. Valid research evidence
+  carries forward.
 
 ## Conventions
 
 - Existing onboarding assets target **akm-cli 0.9.7** and call out
-  version-sensitive behavior. `akm-measured-improvement` applies across AKM
-  processes and verifies commands against the selected checkouts.
+  version-sensitive behavior. The research and measured-improvement skills
+  apply across AKM processes and verify commands against selected checkouts.
 - Descriptions are written as trigger sentences so host agents can decide when
   to load an asset without reading the whole body.
 - For reusable guidance, teach **how**, not one benchmark answer or verifier

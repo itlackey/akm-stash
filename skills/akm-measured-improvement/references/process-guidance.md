@@ -35,9 +35,11 @@ Choose the nearest relevant tests/runner and use the
 for uncovered behavior. Record limits rather than creating a suite automatically.
 
 For cross-process changes, check affected boundaries and one combined path.
-Apply the shared [experiment budget](evaluation-guide.md#experiment-budget)
-and [verification plan](evaluation-guide.md#shared-verification). Historical
-feature deferrals belong to their task, not this reusable skill.
+Use the active workflow's budget and the shared
+[verification plan](evaluation-guide.md#shared-verification); the
+[experiment budget](evaluation-guide.md#experiment-budget) governs delivery
+through measured improvement, while autoresearch uses its research charter.
+Historical feature deferrals belong to their task, not this reusable skill.
 
 ## Retrieval and answers
 
