@@ -1,7 +1,10 @@
 version: 4
 name: nightly-improve-cycle
-description: "Nightly extract + improve pass: harvests session knowledge and queues improvement proposals without modifying live assets."
-when_to_use: "Use when the stash should run a nightly pass that harvests session knowledge and proposes reusable updates without directly modifying live assets."
+description: "Nightly extract + improve pass: harvests session knowledge and
+  queues improvement proposals without modifying live assets."
+when_to_use: "Use when the stash should run a nightly pass that harvests session
+  knowledge and proposes reusable updates without directly modifying live
+  assets."
 tags:
   - scheduled
   - improve
@@ -34,5 +37,4 @@ with:
     environment is on an older AKM version.
 schedule:
   - cron: "0 2 * * *"
-    enabled: true
 timeout: 30m

@@ -1,7 +1,9 @@
 version: 4
 name: proposal-review-notify
-description: "Every 15 minutes: check for pending proposals and send one OS notification when review is needed."
-when_to_use: "Use when the stash should check every 15 minutes for pending proposals and send one OS notification when review is needed."
+description: "Every 15 minutes: check for pending proposals and send one OS
+  notification when review is needed."
+when_to_use: "Use when the stash should check every 15 minutes for pending
+  proposals and send one OS notification when review is needed."
 tags:
   - scheduled
   - proposals
@@ -31,5 +33,4 @@ with:
     notification method was used, if any.
 schedule:
   - cron: "*/15 * * * *"
-    enabled: true
 timeout: 5m
