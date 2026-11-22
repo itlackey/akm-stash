@@ -79,7 +79,7 @@ prefix and an optional `#fragment`:
 Examples:
 
 - `skills/review-pr`
-- `workflows/publish-stash`
+- `tasks/publish-stash`
 - `official-stash//knowledge/akm-cli-reference`
 - `acme-stash//lessons/docker-healthchecks`
 

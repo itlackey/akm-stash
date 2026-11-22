@@ -50,7 +50,7 @@ No akm yet? Install the CLI first — see
 - **Brand-new environment** → run the `onboard-agent` task.
 - **Need to find the right stash or asset** → dispatch the `akm-librarian`
   subagent or use the `akm-find` command.
-- **Publishing a new stash** → follow the `publish-stash` workflow plus the
+- **Publishing a new stash** → run the `publish-stash` task plus the
   `publish-akm-stash` skill.
 - **Improving existing assets or distilling repeated feedback** → run
   `akm improve <ref>`.
