@@ -47,7 +47,7 @@ No akm yet? Install the CLI first — see
 
 ## Recommended entry points for agents
 
-- **Brand-new environment** → run the `onboard-agent` workflow.
+- **Brand-new environment** → run the `onboard-agent` task.
 - **Need to find the right stash or asset** → dispatch the `akm-librarian`
   subagent or use the `akm-find` command.
 - **Publishing a new stash** → follow the `publish-stash` workflow plus the
