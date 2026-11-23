@@ -1,23 +1,26 @@
 ---
 name: akm-improve-cycle
 type: command
-description: "Use when you need to run the full extract → improve → review cycle for the current stash. Arguments: mode (dry-run | live), scope (optional asset ref or type)."
-updated: 2026-08-31
+description: "Use when you need to run the full extract → improve → review cycle for the current stash. The argument is the mode (dry-run | live), optionally followed by a scope (an asset ref or type)."
+updated: 2026-11-23
 ---
 
 Run the full akm improvement cycle for the current stash.
 
-Mode: $1 (dry-run | live — default: live)
-Scope: $2 (optional asset ref or type — default: whole stash)
+Arguments: $ARGUMENTS
+
+The first word is the mode (dry-run | live — default: live). An optional
+second word is the scope (an asset ref or type — default: whole stash).
 
 ## 1. Check pipeline health
 
 ```bash
-akm health --format json
+akm doctor
 ```
 
 Report the last improve run times, pending proposal count, and any
-warnings. Stop if a critical error is reported.
+warnings. Stop if `akm doctor` exits 1 (a failure); exit 4 is a warning to
+report.
 
 ## 2. Extract knowledge from recent sessions
 
@@ -38,8 +41,8 @@ Add `--dry-run` when mode is `dry-run`. When a scope argument is provided,
 append it: `akm improve <scope>`.
 
 Add `--task "..."` when there is a specific area to target (e.g. "update CLI
-references for 0.9.7"). `akm improve` never auto-promotes — every generated
-proposal lands `pending` regardless of mode; step 4 below is always required.
+references"). `akm improve` accepts and commits the proposals whose quality
+check passed and leaves the rest `pending`; step 4 reviews what remains.
 
 ## 4. Review pending proposals
 
@@ -54,12 +57,12 @@ For a large backlog, drain the deterministic slice first instead of reviewing
 every entry by hand:
 
 ```bash
-akm proposal drain --policy personal-stash --dry-run            # preview
-akm proposal drain --policy personal-stash --promote --yes      # apply
+akm proposal drain --dry-run            # preview
+akm proposal drain --promote --yes      # apply
 ```
 
-Then review only what the policy left pending. (Enabling `processes.triage` in
-the improve strategy folds this drain into step 3 automatically.)
+Then review only what the drain left pending. (The `default` improve strategy
+already runs this drain as a pre-pass in step 3.)
 
 Skip this step when mode is `dry-run` — nothing was written to review yet.
 

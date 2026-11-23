@@ -1,5 +1,5 @@
 version: 5-beta.1
-description: Publish a local directory of agent assets as a searchable akm bundle and verify it with current 0.9.7 conventions.
+description: Publish a local directory of agent assets as a searchable akm bundle and verify it with current conventions.
 tags:
   - publish
   - release

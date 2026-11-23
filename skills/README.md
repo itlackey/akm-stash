@@ -10,11 +10,11 @@ Start here:
 - [`akm-quickstart/`](./akm-quickstart) — bootstrap akm in a new environment.
 - [`install-akm-stash/`](./install-akm-stash) — pull a stash into the working
   directory.
-- [`akm-migrate/`](./akm-migrate) — verify and complete an akm version upgrade.
-- [`akm-curate-stash/`](./akm-curate-stash) — build a goal-specific mini-stash by discovering and cloning the best assets from all sources.
+- [`akm-migrate/`](./akm-migrate) — upgrade to akm 0.10.261130, move callers off deprecated commands, convert workflows to tasks.
+- [`akm-curate-stash/`](./akm-curate-stash) — build a goal-specific mini-stash by discovering and importing the best assets from all sources.
 - [`publish-akm-stash/`](./publish-akm-stash) — turn a directory of assets into
   a searchable, installable stash.
-- [`akm-health/`](./akm-health) — report on improve-pipeline metrics and
+- [`akm-health/`](./akm-health) — report on improve-pipeline metrics (`akm doctor`) and
   troubleshoot slow, silent, or failing runs.
 - [`akm-autoresearch/`](./akm-autoresearch) — explore hypotheses for a selected
   AKM process with akm-eval, preserve promising candidates, and report findings

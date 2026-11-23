@@ -1,5 +1,5 @@
 version: 5-beta.1
-description: Improve an existing bundle by collecting feedback, generating reviewed proposals, and promoting the best results in akm-cli 0.9.7.
+description: Improve an existing bundle by collecting feedback, generating reviewed proposals, and promoting the best results.
 tags:
   - improvement
   - proposals

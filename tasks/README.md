@@ -1,17 +1,25 @@
 # tasks/
 
-Scheduled task definitions run directly or through the local akm scheduler.
-Each file uses strict task source v4 (`version: 4`), declares exactly one
-target (`uses:` or `run:`), and may declare one or more optional schedule
-bindings. Scheduler enablement is per binding (`schedule[].enabled`), not a
-document-level field.
+Task definitions run directly (`akm run <bundle>//tasks/<id>`) or on a schedule
+through the local akm scheduler. A task is a pure-YAML file with a `version:`
+first line:
+
+- `version: 5-beta.1` (task source v5, Experimental): a list of akm commands
+  (`run:`, `exec:`, `prompt:`) run in order, with `inputs:`, `${name}` results,
+  and `lock: true` for one run at a time. A failed run resumes with `akm run
+  <task> --resume`.
+- `version: 4`: one `uses:` or `run:` target plus optional `schedule:` entries.
+  Unchanged through 0.10.x; `akm migrate apply <task-file>` converts it to v5.
+
+Add a task with `akm import <file> --type task`, schedule it with `akm task
+enable <ref>`, and reconcile the OS scheduler with `akm doctor scheduler sync
+--dry-run` (then without `--dry-run`). Use `akm doctor scheduler sync --prune`
+only to preview installed entries whose owning bundle no longer resolves; it
+needs `--yes` to remove them.
 
 See [`knowledge/akm-stash-structure`](../knowledge/akm-stash-structure.md)
-for the task schema. Migrate v2/v3 task files with `akm migrate apply --dry-run`
-followed by `akm migrate apply`; to reconcile schedule bindings, see
-`akm task sync --dry-run` and `akm task --help`. Use `akm task prune` only for
-installed entries whose scheduler context or owning bundle no longer resolves;
-it previews by default and requires `--yes` to remove candidates.
+for the task schema. Check a file with `akm lint <file> --type tasks` and
+preview what it would run with `akm doctor explain <ref>`.
 
 Browse the full set with:
 

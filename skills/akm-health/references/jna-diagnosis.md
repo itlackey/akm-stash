@@ -1,7 +1,7 @@
 ---
 description: Step-by-step methodology for diagnosing judgedNoAction (JNA) rate changes in akm consolidation. Covers the three root-cause hypotheses, cross-signal discrimination, inflection-point detection, and resolution for each cause.
 tags: [akm-health, judgedNoAction, consolidation, diagnosis, tuning]
-updated: 2026-08-29
+updated: 2026-11-23
 ---
 
 # Diagnosing judgedNoAction (JNA) Changes
@@ -26,10 +26,10 @@ it is expected and correct. The diagnostic task is to determine *why* it changed
 
 ```bash
 # Current window vs prior (same duration)
-akm health --since 8h --window-compare 8h --format json
+akm doctor --since 8h --window-compare 8h --format json
 
 # Extract the key numbers
-akm health --since 8h --window-compare 8h --format json | python3 -c "
+akm doctor --since 8h --window-compare 8h --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for w in d['windows']:
@@ -52,7 +52,7 @@ This is the most important diagnostic step. It reveals whether the change is
 (transient or structural issue).
 
 ```bash
-akm health --since 48h --group-by run --format json | python3 -c "
+akm doctor --since 48h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 runs = sorted(d['runs'], key=lambda r: r.get('completedAt',''))
@@ -82,7 +82,7 @@ Sort the per-run output by `completedAt` and find where the rolling 4-run averag
 of JNA crossed the elevated threshold and stayed there.
 
 ```bash
-akm health --since 48h --group-by run --format json | python3 -c "
+akm doctor --since 48h --group-by run --format json | python3 -c "
 import sys, json
 from collections import deque
 d = json.load(sys.stdin)
@@ -125,7 +125,7 @@ These are mechanically independent. Their relationship at the inflection tells y
 
 ```bash
 # Extract guard skips per run around the inflection
-akm health --since 24h --group-by run --format json | python3 -c "
+akm doctor --since 24h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for r in sorted(d['runs'], key=lambda r: r.get('completedAt','')):
@@ -147,7 +147,7 @@ JNA and wall time should be inversely correlated. When JNA rises (LLM proposing
 less), the LLM spends less time generating proposals → wall time should drop.
 
 ```bash
-akm health --since 24h --group-by run --format json | python3 -c "
+akm doctor --since 24h --group-by run --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for r in sorted(d['runs'], key=lambda r: r.get('completedAt','')):
@@ -171,7 +171,7 @@ Did a burst of `.derived` files or a sudden pool growth cause the shift?
 
 ```bash
 # Check pool composition trend
-akm health --since 8h --window-compare 8h --format json | python3 -c "
+akm doctor --since 8h --window-compare 8h --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 for w in d['windows']:
@@ -239,15 +239,15 @@ cycles back to fresher memories.
 
 **Signals:** JNA rises but guard skips stay flat or rise, wall time stays the
 same or rises, `promoted` drops to near-zero, the inflection correlates with an
-engine configuration or model update.
+connection and harness configuration or model update.
 
 **Interpretation:** The LLM is making fewer valid proposals on the same pool. This
 could be a model change, API degradation, or prompt drift.
 
 **Actions:**
-1. Verify the selected engine and model are unchanged:
+1. Verify the selected connection or harness and model are unchanged:
    ```bash
-   akm health --since 1h --format json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['hardChecks'])"
+   akm doctor --since 1h --format json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['hardChecks'])"
    ```
 2. Check `reflect.failed` and `consolidation.failedChunks`. API errors would show here.
 3. Run a targeted test on a small set of known-good memories:
@@ -257,7 +257,7 @@ could be a model change, API degradation, or prompt drift.
 4. If model/API is fine, check whether akm was recently upgraded and whether a consolidation
    behavior change was noted in the changelog (`akm --version` to confirm your installed version,
    then review the release notes at https://github.com/itlackey/akm/releases). If the issue
-   persists across versions, open a bug report including your `akm health` JSON output.
+   persists across versions, open a bug report including your `akm doctor` JSON output.
 
 ---
 
@@ -266,7 +266,7 @@ could be a model change, API degradation, or prompt drift.
 After taking action, verify in the next 1–2h window:
 
 ```bash
-akm health --since 2h --format json | python3 -c "
+akm doctor --since 2h --format json | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 c = d['improve']['consolidation']

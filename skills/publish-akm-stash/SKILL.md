@@ -1,7 +1,7 @@
 ---
 name: publish-akm-stash
-description: Use when the user wants to publish a new akm bundle so it appears in the official registry and remains useful to agents using akm-cli 0.9.7.
-updated: 2026-08-31
+description: Use when the user wants to publish a new akm bundle so it appears in the official registry and remains useful to agents using akm-cli 0.10.261130.
+updated: 2026-11-23
 ---
 
 # Publish an AKM Bundle
@@ -24,7 +24,7 @@ my-stash/
   commands/
   agents/
   knowledge/
-  workflows/
+  rules/
   lessons/
   tasks/
   memories/
@@ -34,11 +34,11 @@ my-stash/
 
 An LLM wiki (`schema.md` + `pages/`) publishes as its own bundle, not a
 `wikis/` directory inside this layout — there is no dedicated `wiki` asset
-type in 0.9.7.
+type in 0.10.
 
 ## 2. Write search-friendly metadata
 
-- Give every skill, command, agent, workflow, and lesson a trigger-sentence
+- Give every skill, command, agent, task, and lesson a trigger-sentence
   `description`.
 - Add a root `akm.json` when you want stash-level metadata.
 - For benchmark or fixture content, teach **how** to do the work, not the exact
@@ -46,7 +46,7 @@ type in 0.9.7.
 
 Prefer inline metadata in frontmatter and file-local comments. Treat
 `.stash.json` as legacy compatibility content rather than the default authoring
-path on 0.9.7.
+path.
 
 ## 3. Pick a publish path
 
@@ -70,6 +70,7 @@ akm search <your-stash> --from registry
 akm bundle add <your-ref>
 akm index
 akm show <ref-from-your-stash>
+akm lint --dir <your-stash-dir>
 ```
 
 ## 5. Release hygiene
@@ -79,12 +80,10 @@ akm show <ref-from-your-stash>
 - Ship `.env.example` files instead of real secrets.
 - Review proposal-generated changes before release; do not publish draft
   `quality: "proposed"` content as if it were final.
-- If you ship `workflows/`, verify each one uses the 0.9.7 frontmatter
-  `steps:` contract (`akm lint --type workflows` must be clean) — the retired
-  0.8.0 `## Step: <title>` / `Step ID:` heading format fails to index.
-- If you ship `tasks/`, verify they use strict task source v4
-  (`tasks/<id>.yml`, `version: 4`) with exactly one of `uses:` or `run:`.
-  Scheduling is optional, and `enabled` belongs to each `schedule:` binding.
-  `with:` is only valid for `uses: akm/command`. Run `akm migrate apply
-  --dry-run` for any v2/v3 source, then `akm lint --type tasks`, `akm task
-  explain <ref>`, and `akm task sync` before release.
+- If you ship `tasks/`, write them as `tasks/<id>.yml` with `version: 4`
+  (exactly one of `uses:` or `run:`; scheduling is optional and `enabled`
+  belongs to each `schedule:` binding), or as `version: 5-beta.1` (Experimental).
+  Run `akm lint --type tasks` and `akm doctor explain <ref>` before release.
+- Do not ship new `workflows/`: workflows are deprecated and removed in 0.11.
+  Convert an existing one with `akm migrate apply workflows/<name>.md`
+  (check it first with `akm migrate status workflows/<name>.md`).

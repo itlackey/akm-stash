@@ -54,12 +54,12 @@ function main(): void {
     assert(result.status === 0, `search failed: ${result.stderr}`);
     const search = JSON.parse(result.stdout) as { hits: Array<Record<string, unknown>> };
     assert(search.hits.length === 1, "expected one memory hit from search");
-    assert(search.hits[0]?.ref === undefined, "detail=normal unexpectedly exposed ref");
+    assert(typeof search.hits[0]?.ref === "string", "detail=normal did not expose ref");
 
-    result = runCli(["config", "path", "--all", "--format", "json"], { stashDir });
-    assert(result.status === 0, `config path failed: ${result.stderr}`);
+    result = runCli(["doctor", "info", "--no-probe", "--format", "json"], { stashDir });
+    assert(result.status === 0, `doctor info failed: ${result.stderr}`);
     const paths = JSON.parse(result.stdout) as Record<string, unknown>;
-    assert(typeof paths.bundle === "string", "config path --all did not return the bundle key");
+    assert(typeof paths.bundleDir === "string", "doctor info did not return bundleDir");
 
     result = runCli(["remember", "--name", "stdin-probe", "--force"], {
       stashDir,
@@ -76,12 +76,12 @@ function main(): void {
     result = runCli(["feedback", "memories/release-process", "--negative", "--reason", "stale"], { stashDir });
     assert(result.status === 0, `feedback failed: ${result.stderr}`);
 
-    result = runCli(["log", "--type", "feedback", "--detail", "full", "--format", "json"], { stashDir });
+    result = runCli(["doctor", "log", "--type", "feedback", "--format", "json"], { stashDir });
     assert(result.status === 0, `events list failed: ${result.stderr}`);
     const events = JSON.parse(result.stdout) as { events?: Array<Record<string, unknown>> };
     assert(Array.isArray(events.events) && events.events.length > 0, "feedback event not found in events list");
 
-    result = runCli(["info", "--format", "json"], { stashDir });
+    result = runCli(["doctor", "info", "--no-probe", "--format", "json"], { stashDir });
     assert(result.status === 0, `info failed: ${result.stderr}`);
     const info = JSON.parse(result.stdout) as Record<string, unknown>;
     assert(!("commands" in info), "info unexpectedly exposed commands list");
@@ -93,7 +93,7 @@ function main(): void {
           auditedCli: akmCli,
           checks: [
             "search-normal-shape",
-            "config-path-shape",
+            "doctor-info-bundle-dir",
             "remember-stdin",
             "feedback-events",
             "info-shape",

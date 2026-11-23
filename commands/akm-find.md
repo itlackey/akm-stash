@@ -1,19 +1,21 @@
 ---
 name: akm-find
 type: command
-description: Use when you need a compact ranked shortlist of akm assets for a task. The first argument is the need; the optional second argument is an asset type filter.
-updated: 2026-08-29
+description: Use when you need a compact ranked shortlist of akm assets for a task. The argument is the need, optionally followed by `type=<asset type>`.
+updated: 2026-11-23
 ---
 
 You are helping choose the best akm asset for this need.
 
-Need: $1
-Optional asset type filter: $2
+Request: $ARGUMENTS
 
-1. Start with `akm curate "$1"`.
+The request is the need, optionally followed by `type=<asset type>`. Call the
+need `<need>` below.
+
+1. Start with `akm curate "<need>"`.
 2. If the first pass is weak or a type filter was supplied, use raw search to
-   deepen: `akm search "$1" --from all --limit 20` and add `--type "$2"`
-   when a second argument is available.
+   deepen: `akm search "<need>" --from all --limit 20` and add `--type
+   <asset type>` when a type was given.
 3. Rank the best candidates by:
    - how specifically the description matches the need,
    - whether the asset looks official, well-maintained, or high quality,
@@ -39,8 +41,8 @@ Registry candidates:
 
 6. End with exactly one suggested next step: `akm show <local-ref>` for a local
    hit, or ask the user to approve the registry hit's offered `akm bundle add
-   <install-ref>` action. Only suggest `akm clone <ref>` for a valid local ref
-   (or an explicit source-locator clone ref returned by AKM), never for a
-   synthesized registry ref.
+   <install-ref>` action. Only suggest `akm import <ref> --asset-ref` for a
+   valid local ref (or an explicit source-locator ref returned by AKM), never
+   for a synthesized registry ref.
 
 Do not install anything without confirmation.

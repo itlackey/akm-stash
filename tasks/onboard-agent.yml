@@ -15,11 +15,11 @@ steps:
       Install `akm-cli` with the package manager already in use (`bun add -g
       akm-cli`, `npm install -g akm-cli`, or `pnpm add -g akm-cli`), or use the
       standalone installer from the akm repository. Verify with `akm --version` and
-      `akm info`.
+      `akm doctor info`.
 
       Verify:
       - `akm --version` succeeds.
-      - `akm info` succeeds.
+      - `akm doctor info` succeeds.
 
       ## Run inputs
       - host: ${host}
@@ -75,7 +75,7 @@ steps:
       ${init-bundle}
   - name: learn-lifecycle
     prompt: |-
-      Review how 0.9.7 handles feedback, improvement, and the proposal queue,
+      Review how akm handles feedback, improvement, and the proposal queue,
       using the bundle assets attached to this unit as context. Inspect
       `knowledge/akm-proposals-and-lessons` and `knowledge/akm-improve-and-extract`,
       then verify the proposal queue commands exist with `akm proposal list`.
@@ -104,10 +104,10 @@ steps:
 
       ```bash
       # For Claude Code sessions:
-      akm proposal extract --type claude --dry-run
+      akm proposal extract --sessions claude --dry-run
 
       # For OpenCode sessions:
-      akm proposal extract --type opencode --dry-run
+      akm proposal extract --sessions opencode --dry-run
 
       # Auto-detect all available harnesses:
       akm proposal extract --auto --dry-run
@@ -132,14 +132,14 @@ steps:
       ```bash
       akm curate "code review"
       akm search "proposal queue" --type knowledge --from all
-      akm show knowledge/akm-proposals-and-lessons --shape agent
-      akm health
+      akm show knowledge/akm-proposals-and-lessons --outline
+      akm doctor
       ```
 
       Verify:
       - Search returns results.
       - `akm show` returns readable content.
-      - `akm health` reports no critical errors.
+      - `akm doctor` exits 0 or 4 (no failure).
 
       ## Run inputs
       - host: ${host}

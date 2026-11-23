@@ -1,11 +1,11 @@
 ---
 name: akm-review-stash
 type: command
-description: Use when you need to review a candidate akm stash before installing it. The first argument is the stash or asset ref to inspect.
-updated: 2026-08-29
+description: Use when you need to review a candidate akm stash before installing it. The argument is the stash or asset ref to inspect.
+updated: 2026-11-23
 ---
 
-Review the akm stash at `$1` before the user installs it. Do not run `akm
+Review the akm stash at `$ARGUMENTS` before the user installs it. Do not run `akm
 bundle add` as part of this review.
 
 ## Inspect
@@ -13,7 +13,7 @@ bundle add` as part of this review.
 Search the configured registries first:
 
 ```bash
-akm search "$1" --from registry
+akm search "$ARGUMENTS" --from registry
 ```
 
 `akm show` resolves only assets already indexed locally; do not pass an
@@ -40,6 +40,6 @@ Score each dimension with one short justification:
 
 End with exactly one of:
 
-- **Install** — safe to `akm bundle add $1`
+- **Install** — safe to `akm bundle add $ARGUMENTS`
 - **Install with caveats** — say what to audit next
 - **Skip** — state the blocking reason

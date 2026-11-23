@@ -1,12 +1,12 @@
 # akm-stash
 
 The official akm stash: a curated collection of assets that teach coding
-agents how to use [akm](https://github.com/itlackey/akm) effectively, primarily on
-**akm-cli 0.9.7**, with version-specific additions noted below.
+agents how to use [akm](https://github.com/itlackey/akm) effectively, for
+**akm-cli 0.10.261130**.
 
 If akm is the package manager for agent assets, this is the starter stash:
 install it once and an akm-aware agent gains practical skills, commands,
-knowledge, and workflows for discovery, installation, publishing,
+knowledge, and tasks for discovery, installation, publishing,
 self-improvement, proposal review, and scheduled task authoring.
 
 ## What's inside
@@ -17,8 +17,7 @@ self-improvement, proposal review, and scheduled task authoring.
 | [`commands/`](./commands) | Prompt templates for discovery, stash review, and proposal review. |
 | [`knowledge/`](./knowledge) | Reference docs for the CLI, stash structure, the improve+extract pipeline, proposal/lesson lifecycle, and registry schema. |
 | [`skills/`](./skills) | Progressive-disclosure skills for bootstrapping, installing, publishing, migrating, curating, health reporting, and memory consolidation. |
-| [`tasks/`](./tasks) | Task source v4 assets for recurring improve and proposal-review checks. |
-| [`workflows/`](./workflows) | Runnable playbooks for onboarding, publishing, and evolving assets. |
+| [`tasks/`](./tasks) | Runnable and schedulable tasks for onboarding, publishing, evolving assets, and recurring improve and proposal-review checks. |
 
 Every asset is authored for agent consumption: trigger-sentence descriptions,
 canonical placement, and content that teaches **how** to use akm without
@@ -54,21 +53,22 @@ No akm yet? Install the CLI first — see
   `publish-akm-stash` skill.
 - **Improving existing assets or distilling repeated feedback** → run
   `akm improve <ref>`.
-- **Draining the pending proposal backlog** → run `akm proposal drain --policy
-  personal-stash` (stage mode; add `--promote --yes` to accept), or enable the
-  `processes.triage` improve strategy pre-pass to drain the backlog inside
+- **Draining the pending proposal backlog** → run `akm proposal drain --dry-run`
+  to preview (a bare drain only stages; add `--promote --yes` to accept). The
+  `default` improve strategy already runs the same drain as a pre-pass inside
   `akm improve`. For case-by-case judgment on individual drafts, use `akm
   proposal show <id>` / `akm proposal diff <id>` then `akm proposal
   accept|reject`. See `knowledge/akm-improve-and-extract`.
 - **Harvesting knowledge from session logs** → run `akm proposal extract
   --auto` then review proposals with `akm proposal list`. See
   `knowledge/akm-improve-and-extract`.
-- **Scheduling recurring stash maintenance or harvest runs** → use `akm task`
-  and model the task file after the examples in `tasks/`.
-- **After upgrading akm to 0.9.7** → run the `akm-migrate` skill to replace removed improve strategies, review newly validated references, reconcile legacy scheduler rows, and carry forward any pre-0.9.6 migration work.
-- **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and clones the winners into a reviewable directory you can add as a stash or import piecemeal.
+- **Scheduling recurring stash maintenance or harvest runs** → model a task
+  file after the examples in `tasks/`, add it with `akm import <file> --type
+  task`, and schedule it with `akm task enable <ref>`.
+- **After upgrading akm** → run the `akm-migrate` skill to replace removed improve strategies, move deprecated commands to their replacements, and reconcile scheduler rows.
+- **Need a goal-specific toolkit from all available assets** → run the `akm-curate-stash` skill: describe your goal, and the agent searches every source and registry, compares overlapping assets, and imports the winners into a reviewable directory you can add as a stash or import piecemeal.
 - **Improve runs are slow, silent, or producing odd numbers** → run the
-  `akm-health` skill to turn `akm health` output into a readable report and
+  `akm-health` skill to turn `akm doctor` output into a readable report and
   work through the troubleshooting tree.
 - **Memories have drifted or grown messy** → run the `akm-dream` skill for a
   staged, reviewable consolidation and prune pass.
@@ -83,15 +83,17 @@ No akm yet? Install the CLI first — see
 
 ## Conventions
 
-- Existing onboarding assets target **akm-cli 0.9.7** and call out
-  version-sensitive behavior. The research and measured-improvement skills
-  apply across AKM processes and verify commands against selected checkouts.
+- Onboarding assets target **akm-cli 0.10.261130** and teach the current
+  commands (`akm run`, `akm doctor`, `akm import --asset-ref`); commands
+  Deprecated in 0.10 are named only as things to move off. The research and
+  measured-improvement skills apply across AKM processes and verify commands
+  against selected checkouts.
 - Descriptions are written as trigger sentences so host agents can decide when
   to load an asset without reading the whole body.
 - For reusable guidance, teach **how**, not one benchmark answer or verifier
   payload.
 - Prefer inline metadata in frontmatter or file-local headers; do not rely on
-  deprecated `.stash.json` sidecars for new authoring.
+  `.stash.json` sidecars.
 
 ## Feedback
 

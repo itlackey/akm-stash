@@ -1,7 +1,7 @@
 ---
 name: akm-dream
 description: Consolidate, prune, and reorganize akm memories with explicit staged review gates. Use when the user says "dream", "/dream", "auto dream", "consolidate memories", "clean up my memories", "prune stale memories", or "my memory files are a mess". For routine consolidation without staged review, prefer `akm improve memory` + `akm proposal extract --auto` directly.
-updated: 2026-09-29
+updated: 2026-11-23
 ---
 
 # akm Dream — Reviewed Memory Consolidation
@@ -17,7 +17,7 @@ file that `akm improve` does not own.
 |---|---|---|
 | Harvest recent session knowledge | `akm proposal extract --auto` | calls it in Phase 2 |
 | Preview promotion + retire candidates | `akm improve memory --dry-run` | calls it before Phase 3 |
-| Promote a memory to `knowledge/`; flag duplicate/superseding memory pairs for retirement (both as reviewable proposals — no merge, delete, or contradiction edges) | `akm improve memory` | review gate on top |
+| Promote a memory to `knowledge/`; flag duplicate/superseding memory pairs for retirement (both as proposals; a live run accepts those whose quality check passed — no merge, delete, or contradiction edges) | `akm improve memory` | review gate on top |
 | Single-file memory deletion | — (no native verb) | bundled forget helper |
 | MEMORY.md index management (200-line cap) | — | Phase 4 index rebuild |
 | Lock file, backup, audit artifacts | — | bundled dream orchestrator |
@@ -70,7 +70,7 @@ Use the native CLI first, then supplement with direct sources if needed.
 akm proposal extract --auto --since 7d
 ```
 
-This reads native Claude Code and OpenCode session files and queues candidates
+This reads native Claude Code, Codex and OpenCode session files and queues candidates
 as proposals. Run `akm proposal list --status pending` to see what it found.
 
 **Step 2 — surface improvement candidates:**
@@ -114,7 +114,7 @@ The plan is built from Phase 1 inventory and Phase 2 supplemental signals.
 
 ```bash
 # Read a memory before touching it:
-akm show memories/<name> --detail full
+akm show memories/<name>
 
 # Update or create via stdin:
 akm remember --name "<name>" --force <<'EOF'

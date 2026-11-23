@@ -1,6 +1,6 @@
 {
   "name": "akm-stash",
-  "description": "Official akm onboarding stash for discovery, publishing, proposal review, task source v4 assets, and improvement workflows on akm-cli 0.9.7.",
+  "description": "Official akm onboarding stash for discovery, publishing, proposal review, task assets, and self-improvement on akm-cli 0.10.261130.",
   "tags": [
     "akm",
     "official",
@@ -15,8 +15,7 @@
     "command",
     "knowledge",
     "skill",
-    "task",
-    "workflow"
+    "task"
   ],
   "author": "itlackey",
   "license": "MPL-2.0"

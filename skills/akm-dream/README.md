@@ -45,10 +45,10 @@ akm index
 akm search "dream consolidate memories"
 ```
 
-### Single-asset clone
+### Single-asset import
 
 ```bash
-akm clone "github:itlackey/akm-stash//skills/akm-dream"
+akm import "github:itlackey/akm-stash//skills/akm-dream" --asset-ref
 ```
 
 ### Standalone
@@ -64,11 +64,10 @@ bun run dream
 
 ## Relationship to `akm improve memory`
 
-As of akm-cli 0.9.17-alpha.9, `akm improve memory` runs consolidation
-natively: it proposes promoting a memory into `knowledge/`, and flags
+`akm improve memory` runs consolidation natively: it proposes promoting a memory into `knowledge/`, and flags
 near-duplicate or superseding memory pairs for retirement — both land as
-reviewable proposals (`akm proposal accept`/`reject`), never applied
-directly. It does not merge, delete, resolve relative dates, or write
+proposals (`akm proposal accept`/`reject`); a live run accepts and commits
+the ones whose quality check passed, and `--dry-run` writes nothing. It does not merge, delete, resolve relative dates, or write
 contradiction edges for these memories; those stay a person's job. Reach for
 `akm improve memory --dry-run` first — it covers the common case without
 dream's staged review overhead.
@@ -164,8 +163,8 @@ akm-dream/
 ```
 
 The skill uses `akm` commands for authoritative reads, writes, and
-indexing: `akm show`, `akm remember`, `akm index`, `akm log`,
-and `akm config path --all`.
+indexing: `akm show`, `akm remember`, `akm index`, `akm doctor log`,
+and `akm doctor info`.
 
 ## Safety
 
@@ -186,9 +185,9 @@ and `akm config path --all`.
 
 ## Compatibility
 
-- akm `>= 0.9.7` (uses the 0.9.7 command surface: `akm proposal extract`,
-  `akm bundle add`, `[bundle//]conceptId` refs — see `references/breaking-changes.md`
-  in the `akm-migrate` skill if you're consolidating memories on an older install)
+- akm `>= 0.10.261130` (uses `akm doctor info`, `akm doctor log`, `akm proposal extract`,
+  `akm bundle add`, `[bundle//]conceptId` refs; see the `akm-migrate` skill if you are
+  upgrading from an older install)
 - Bun `>= 1.1.0` (uses `Bun.spawn`)
 - Works on Linux and macOS. Windows is untested but should work under WSL.
 

@@ -1,7 +1,7 @@
 ---
 description: Decision tree and fix playbook for common akm improve pipeline issues. Use when a health report shows anomalies and you need to identify root causes and apply fixes.
 tags: [akm-health, troubleshooting, tuning, improve]
-updated: 2026-08-31
+updated: 2026-11-23
 ---
 
 # akm Health Troubleshooting Playbook
@@ -17,17 +17,16 @@ later ones.
 
 | Check | Fix |
 |---|---|
-| `state-db-schema` | Do not attempt ad hoc database edits. Read the built-in `akm help migrate 0.9.2` cutover note; when it names an exceptional pre-release ledger, follow its `akm upgrade --force` recovery procedure. |
+| `state-db-schema` | Do not attempt ad hoc database edits. Run `akm migrate status`; if it reports pending work, `akm migrate apply` applies it. Otherwise read the check's `message` and `evidence`. |
 | `state-db-round-trip` | Disk full or permissions issue. Check `df -h` and the path in evidence. |
-| `default-engine` / `default-llm-engine` / `configured-engines` | Run `akm setup` to configure an engine, then correct the named engine, model map, or credential binding from the check evidence. |
-| `task-log-backing` | Log files were deleted. Safe to ignore if intentional; otherwise check backup. |
-| `active-runs` | A run is stuck. Kill the process, then clean the stale run: `akm task doctor`. |
+| `connections-and-harnesses` | Read `evidence.rows`. Run `akm setup` to add a connection or enable a harness, then fix the row that warns: an unset key variable, an endpoint that does not answer, a harness binary that is not installed, or a kind of work with nothing to run on. |
+| `active-runs` | A run is stuck. Kill the process, then check `scheduler` in `akm doctor` output. |
 
-An advisory named `plugin-version` is not a state-database failure. If its
-evidence says `stale: true`, run the update command named in its message. If
-`admitted: false`, update the plugin to a release whose `versionRange` admits
-the running CLI; until then that plugin is inactive even though AKM itself is
-healthy. An unavailable remote tag lookup is treated as unknown, not stale.
+A `plugin-version`, `codex-plugin-version`, `opencode-plugin-version` or
+`opencode-v2-plugin-version` advisory is not a state-database failure. Its
+message says which side is older. A plugin ahead of the CLI: run `akm upgrade`.
+A plugin behind the CLI: update the plugin once its channel has a newer build
+(`akm upgrade` checks and updates it). A failed lookup is `unknown`, not stale.
 
 ---
 
@@ -45,10 +44,10 @@ jump of > 10 pp between windows.
 
 ```bash
 # Step 1 — delta
-akm health --since 8h --window-compare 8h --format json
+akm doctor --since 8h --window-compare 8h --format json
 
 # Step 2 — per-run to find spread vs concentrated
-akm health --since 48h --group-by run --format json
+akm doctor --since 48h --group-by run --format json
 ```
 
 **If JNA is elevated uniformly across all recent runs with no specific inflection:**
@@ -59,7 +58,7 @@ akm health --since 48h --group-by run --format json
 Do NOT reduce pool size yet.
 
 **If JNA rose but guard skips stayed flat and wall time didn't drop:**
-→ LLM degradation (Hypothesis C). Check engine configuration, API health, `reflect.failed`.
+→ LLM degradation (Hypothesis C). Check connection and harness configuration, API health, `reflect.failed`.
 
 ### The key discriminating signal
 
@@ -90,7 +89,7 @@ akm improve memory --task "add concise one-line descriptions to memories missing
 
 **Hypothesis C (LLM degradation):**
 ```bash
-akm health --since 1h --format json   # check engine-related hard checks
+akm doctor --since 1h --format json   # check the connections-and-harnesses hard check
 akm improve memories/<known-ref> --dry-run  # targeted test on known-good memory
 ```
 
@@ -115,7 +114,7 @@ description: One-line summary for MEMORY.md index.
 ---
 ```
 
-**Verify:** Re-run `akm health --since 24h` and check `merge_missing_description` drops in the next consolidation run.
+**Verify:** Re-run `akm doctor --since 24h` and check `merge_missing_description` drops in the next consolidation run.
 
 ---
 
@@ -135,14 +134,14 @@ many memories that shouldn't be in scope.
 **Fix:**
 ```bash
 # Check which runs had failures
-akm health --since 7d --group-by run --format json | \
+akm doctor --since 7d --group-by run --format json | \
   jq '.runs[] | select(.consolidation.failedChunks > 0) | {id, completedAt, failedChunks: .consolidation.failedChunks}'
 ```
 If failures cluster around a time window, correlate with API rate limits or
 model availability. Consider reducing chunk size in config.
 
 ### 4c. Memory pool has very large files
-Graph extraction and consolidation both slow down on large markdown files.
+Consolidation slows down on large markdown files.
 
 **Fix:**
 ```bash
@@ -174,32 +173,7 @@ Watch for whether `written > 0` on recent memories after new sessions.
 
 ---
 
-## 6. Graph extraction truncations or failures
-
-**Symptom:** `graphExtraction.truncations > 0` or `graphExtraction.failures > 0`.
-
-### 6a. Document too large (truncations)
-The extraction LLM hit its context window on one or more files.
-
-**Identify:**
-```bash
-akm health --since 24h --group-by run --format json | \
-  jq '.runs[] | select(.graphExtraction.truncations > 0) | {id, truncations: .graphExtraction.truncations}'
-```
-
-**Fix:** Find the large files and split them. Knowledge documents and memories
-over ~50 KB are candidates. Run `akm lint` to identify unusually large assets.
-
-### 6b. API failures
-**Check:** `graphExtraction.failures > 0`.
-**Fix:** Check engine configuration (`akm health` hard checks). If the engine
-is healthy, check API rate limits or model availability in the
-configured LLM provider. A single transient failure is acceptable; persistent
-failures need investigation.
-
----
-
-## 7. Distill never running
+## 6. Distill never running
 
 **Symptom:** `distill.queued == 0` across many runs, `configDisabled > 0`.
 
@@ -217,7 +191,7 @@ If distill is enabled but `queued` is still 0 after multiple runs, check `skippe
 
 ---
 
-## 8. Reflect: high `skippedByReason.type-filter`
+## 6. Reflect: high `skippedByReason.type-filter`
 
 **Symptom:** `reflect.skippedByReason.type-filter` is consistently high.
 
@@ -232,7 +206,7 @@ akm config get improve.strategies.default.processes.reflect.assetTypes
 
 ---
 
-## 9. `akm proposal extract` finding nothing
+## 6. `akm proposal extract` finding nothing
 
 **Symptom:** `akm proposal extract --auto --dry-run` returns no candidates.
 
@@ -265,7 +239,7 @@ akm config get improve.strategies.default.processes.reflect.assetTypes
 
 ---
 
-## 10. Periodic health degradation (trend regression)
+## 6. Periodic health degradation (trend regression)
 
 **Symptom:** `--window-compare` shows `pctChange < -10` on key metrics (a
 regression greater than 10%; `pctChange` uses percent units, not a 0–1 ratio).
@@ -274,11 +248,11 @@ Run a targeted investigation:
 
 ```bash
 # Find the run where it went wrong
-akm health --since 7d --group-by run --format json | \
+akm doctor --since 7d --group-by run --format json | \
   jq '[.runs[] | {id, completedAt, wallTimeMs, promoted: .consolidation.promoted}] | sort_by(.completedAt)'
 
 # Compare explicit windows across the regression boundary
-akm health \
+akm doctor \
   --windows 'name=before,since=<ISO-before>,until=<ISO-regression>' \
   --windows 'name=after,since=<ISO-regression>' \
   --format json | jq '.windows, .deltas'
@@ -299,12 +273,10 @@ Common regression causes:
 | `judgedNoAction` jumps > 10 pp in one window | Cohort shift (B) or LLM degradation (C) — diagnose first | Run `jna-diagnosis.md` steps before acting |
 | `judgedNoAction` > 70%, rising gradually over weeks | Pool saturation (A) | Reduce `poolSize` only after ruling out B |
 | `judgedNoAction` high, guard skips also dropped | Cohort shift (B) — LLM correct | Clear proposal backlog, fix missing descriptions |
-| `judgedNoAction` high, guard skips flat, wall time flat | LLM degradation (C) | Check engine configuration + API health |
+| `judgedNoAction` high, guard skips flat, wall time flat | LLM degradation (C) | Check connection and harness configuration + API health |
 | `merge_missing_description` large | Memories lack frontmatter | `akm improve memory --task "add descriptions"` |
-| `consolidation.failedChunks` > 5% | API errors or oversized chunks | Check engine configuration, reduce chunk size |
+| `consolidation.failedChunks` > 5% | API errors or oversized chunks | Check connection and harness configuration, reduce chunk size |
 | `memoryInference.yieldRate` < 0.1 | Pool saturated or no fresh memories | Run `akm proposal extract --auto` |
-| `graphExtraction.truncations` > 0 | Oversized files | Find and split large assets |
-| `graphExtraction.failures` > 1 | API / model issue | Check engine configuration + LLM provider |
 | `distill.queued == 0` for weeks | Distill disabled or no signal | Enable distill; run `akm proposal extract` |
 | `reflect.cooldown` always high | Cooldown too long for cadence | Reduce cooldown in config |
 | `wallTime.p95` >> `median` | Outlier chunks or API latency | Check `failedChunks`; inspect large memories |

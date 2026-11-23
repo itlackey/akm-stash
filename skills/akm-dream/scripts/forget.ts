@@ -13,7 +13,7 @@
  *   1. The ref MUST resolve to type `memory` (a `memories/` conceptId).
  *      Refuse anything else.
  *   2. The resolved path MUST live inside `<stash>/memories/`. We
- *      compute that prefix from `akm config path --all`, never trust
+ *      compute that prefix from `akm doctor info` (`bundleDir`), never trust
  *      the path returned by `akm show` blindly.
  *   3. The resolved path MUST exist on disk. We don't try to "clean
  *      up" stale index entries — that's `akm index`'s job.

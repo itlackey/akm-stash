@@ -2,12 +2,12 @@
 description: Use when an agent needs the current registry index schema and install metadata fields for published bundles.
 tags: [akm, registry, schema]
 quality: curated
-updated: 2026-08-31
+updated: 2026-11-23
 ---
 
 # akm Registry Index Schema
 
-> **Version target:** akm-cli 0.9.7 accepts registry index versions 2 and 3.
+> **Version target:** akm-cli 0.10.261130 accepts registry index versions 2 and 3.
 
 The official registry publishes a static `index.json`. akm fetches and caches
 that file, then searches it for matching stashes with `akm search --from
@@ -27,7 +27,7 @@ CLI noun for an installed source is now "bundle."
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `version` | `2` or `3` | yes | Consumers accept these two wire versions only. |
+| `version` | `2` or `3` | yes | Both share this format; akm warns once about any other version. |
 | `updatedAt` | ISO 8601 string | yes | Registry build timestamp. |
 | `stashes` | array | yes | Published stash entries. |
 
@@ -42,7 +42,7 @@ CLI noun for an installed source is now "bundle."
   "description": "Use when you need deployment and release automation assets.",
   "homepage": "https://github.com/your-org/your-stash",
   "tags": ["deploy", "release"],
-  "assetTypes": ["skill", "workflow"],
+  "assetTypes": ["skill", "task"],
   "author": "your-org",
   "license": "MPL-2.0"
 }
@@ -57,26 +57,24 @@ CLI noun for an installed source is now "bundle."
 | `description` | string | recommended | Primary search/rerank signal. |
 | `homepage` | URL | recommended | Human-readable docs. |
 | `tags` | string[] | recommended | Lowercase search keywords. |
-| `assetTypes` | string[] | recommended | Any of `script`, `skill`, `command`, `agent`, `knowledge`, `instruction`, `workflow`, `env`, `secret`, `memory`, `lesson`, `task`, `session`, `fact` (AKM's own `KNOWN_TYPES`), or a foreign/adapter-owned type (e.g. an `llm-wiki` page kind). Not a strict validation gate — an unrecognized type still round-trips. |
+| `assetTypes` | string[] | recommended | Any of `script`, `skill`, `command`, `agent`, `knowledge`, `instruction`, `rule`, `workflow`, `env`, `secret`, `memory`, `lesson`, `task`, `session`, `fact` (AKM's own `KNOWN_TYPES`), or a foreign/adapter-owned type (e.g. an `llm-wiki` page kind). Not a strict validation gate — an unrecognized type still round-trips. |
 | `author` | string | optional | User or org. |
 | `license` | SPDX string | recommended | Surfaced before install. |
 
-## Notes for 0.9.7 users
+## Notes
 
-- The old `kits[]` top-level array is long gone; use `stashes[]` only.
-- The legacy registry boolean `curated` is no longer part of the current
-  surface. Prefer richer descriptions, tags, and per-asset metadata instead of
-  relying on a single curation flag.
+- Use the `stashes[]` array only.
+- There is no registry-level `curated` flag. Prefer richer descriptions, tags,
+  and per-asset metadata.
 - Search-hit `quality` such as `curated` or `proposed` is an **asset-level**
   concept, not a stash-level registry boolean.
-- `wiki` was retired as an AKM-owned asset type in 0.9.0. The Karpathy-style
-  LLM wiki structure (`schema.md` + `pages/`) is now a first-class **bundle
-  format** — its page kinds are foreign types in `assetTypes`/`assets`
-  entries, not an AKM-owned `wiki` type. There is no dedicated `akm wiki`
-  command family; a wiki bundle is installed and searched like any other
-  source.
-- Install a discovered stash with `akm bundle add <ref>` (the retired `akm
-  add` spelling moved under the `bundle` group in 0.9.0).
+- The Karpathy-style LLM wiki structure (`schema.md` + `pages/`) is a
+  **bundle format**: its page kinds are foreign types in `assetTypes`/`assets`
+  entries, not an AKM-owned `wiki` type. A wiki bundle is installed and
+  searched like any other source.
+- Install a discovered stash with `akm bundle add <ref>`.
+- To be listed in the official registry, give the npm package the `akm-stash`
+  keyword or the GitHub repo the `akm-stash` topic, or add a manual entry.
 
 ## Minimum viable entry
 

@@ -1,7 +1,7 @@
 ---
 name: akm-quickstart
 description: "Use when an agent needs to bootstrap akm in a fresh environment: install the CLI, initialize the stash, configure discovery, and verify the toolchain before install, search, improve, or tasks operations."
-updated: 2026-08-31
+updated: 2026-11-23
 ---
 
 # akm Quickstart
@@ -12,7 +12,7 @@ skills can run without setup errors.
 ## When to use
 
 - The user asks you to use akm and `akm` is not on PATH.
-- `akm info` or `akm --version` fails.
+- `akm doctor info` or `akm --version` fails.
 - The working stash does not exist yet.
 
 ## Steps
@@ -20,15 +20,15 @@ skills can run without setup errors.
 ### 1. Detect current state
 
 ```bash
-command -v akm && akm --version && akm info || true
+command -v akm && akm --version && akm doctor info || true
 ```
 
-If `akm` is present and `akm info` succeeds, skip to step 4.
+If `akm` is present and `akm doctor info` succeeds, skip to step 4.
 
 ### 2. Install the CLI
 
-AKM 0.9.7 requires Node.js 22 or newer for npm-compatible installs. Bun and
-the standalone binary remain supported alternatives.
+akm 0.10 needs Node.js 22 or newer for npm-compatible installs. Bun and
+the standalone binary are supported alternatives.
 
 Prefer the package manager already used in the environment:
 
@@ -46,14 +46,16 @@ For environments without Node, use the standalone installer from the
 ```bash
 akm setup
 # or, for a non-interactive flow:
+akm setup --yes
+# or only the bundle directory:
 akm bundle create
 akm index
 ```
 
 Expected type directories include `scripts/`, `skills/`, `commands/`,
-`agents/`, `knowledge/`, `workflows/`, `memories/`, `env/`, `secrets/`,
-`lessons/`, `tasks/`, `instructions/`, `sessions/`, and `facts/` when you
-start authoring those assets. An LLM
+`agents/`, `knowledge/`, `memories/`, `env/`, `secrets/`, `lessons/`,
+`tasks/`, `instructions/`, `rules/`, `sessions/`, and `facts/` when you
+start authoring those assets (`workflows/` is deprecated; use `tasks/`). An LLM
 wiki bundle (`schema.md` + `pages/`) is a separate installable source, not a
 directory inside this stash.
 
@@ -64,26 +66,21 @@ akm registry list
 akm search akm --from registry
 ```
 
-If the registry is empty, add the official one explicitly:
+The official registry is configured by default. If it is missing, add it:
 
 ```bash
-akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/index.json --name official
+akm registry add https://raw.githubusercontent.com/itlackey/akm-registry/main/index.json --name akm-registry
 ```
 
 ### 5. Confirm readiness
 
 ```bash
-akm info
-akm help migrate 0.9.2
+akm doctor
 akm proposal list
 ```
 
-Only proceed once `akm info` succeeds. On 0.9.7 (the built-in migration page
-remains named `0.9.2` because that was the durable source/plan cutover):
-- `akm proposal list` and `akm proposal extract --auto --dry-run` should both work.
-- The old `reflect` / `distill` / `extract` / `propose` / `vault` / `wiki`
-  commands are removed with no compatibility alias — do not use them in new
-  automation. `reflect`/`distill` folded into `akm improve`; `extract`/
-  `propose` moved to `akm proposal extract`/`akm proposal new`.
-- `akm improve` has no confidence-gated auto-accept — every generated
-  proposal lands `pending`.
+Only proceed once `akm doctor` exits 0 (4 is a warning to read, 1 a failure).
+Each deprecated command prints one stderr line naming its replacement; use the
+replacement in new automation (`akm doctor info` for `info`, `akm run <ref>`
+for `task run`, `agent` and `command run`). `akm improve` queues proposals for
+review; accept them with `akm proposal accept`.

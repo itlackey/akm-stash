@@ -159,7 +159,7 @@ judgments deterministic. A never-paired/all-error run establishes no safety gain
   enrichment, summary, schema-repair, or promotion-planning cases.
 - **Priorities/cases:** intended processes run with integrity preserved, useful
   repairs/outputs, correct no-op/defer behavior, then total resource cost. Check
-  unchanged assets, source boundaries, skipped/unavailable engines, partial
+  unchanged assets, source boundaries, skipped/unavailable connections or harnesses, partial
   budgets, retries, repeated runs, and interrupted execution.
 - **Setup:** distinguish isolated process strategies from the shipped strategy.
   The checked bakeoff uses `--process` and per-process strategies; it does not

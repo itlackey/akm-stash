@@ -1,10 +1,10 @@
 version: 4
 name: nightly-improve-cycle
 description: "Nightly extract + improve pass: harvests session knowledge and
-  queues improvement proposals without modifying live assets."
+  runs improve; proposals that fail its quality check stay pending for review."
 when_to_use: "Use when the stash should run a nightly pass that harvests session
-  knowledge and proposes reusable updates without directly modifying live
-  assets."
+  knowledge and proposes reusable updates, leaving anything improve does not
+  accept for a person to review."
 tags:
   - scheduled
   - improve
@@ -13,7 +13,7 @@ tags:
 uses: akm/command
 with:
   content: |
-    Run a non-destructive nightly extract and improvement pass for the current AKM stash.
+    Run a nightly extract and improvement pass for the current AKM stash.
 
     1. Verify the installed `akm` supports `improve`, `proposal extract`, and `proposal`.
     2. Inspect the current queue with `akm proposal list --status pending --format json`.
@@ -24,10 +24,11 @@ with:
 
     4. Run one whole-stash improve pass:
 
-        akm improve --no-sync --no-push --task "Review the current stash for stale guidance, outdated CLI references, missing task-asset coverage, and reusable improvements. Generate only proposal-queue entries; do not edit live assets directly."
+        akm improve --no-sync --no-push --task "Review the current stash for stale guidance, outdated CLI references, missing task-asset coverage, and reusable improvements."
 
     5. Check the queue again with `akm proposal list --status pending --format json`.
-    6. Do not accept or reject proposals automatically.
+    6. Do not accept or reject proposals yourself. `akm improve` accepts only the
+       proposals whose quality check passed; leave the rest pending.
     7. Finish with a concise summary that includes:
        - pending proposal count before and after,
        - whether extract and improve both succeeded,

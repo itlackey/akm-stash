@@ -1,7 +1,7 @@
 ---
 name: akm-autoresearch
 description: "Use when a developer wants autonomous experiments to discover ways to improve a specific AKM process: establish a baseline, explore hypotheses with akm-eval, keep promising candidates, and report reproducible findings within the authorized research session."
-updated: 2026-10-21
+updated: 2026-11-23
 ---
 
 # AKM Autoresearch
@@ -113,7 +113,7 @@ revision; do not repeat the research or claim later unmeasured changes passed.
 Research alone does not authorize publication, installation, or deployment.
 
 Shared links assume the full stash or both skill directories. A single-skill
-`akm clone` copies only that directory: resolve missing shared documents in the
+`akm import <ref> --asset-ref` copies only that directory: resolve missing shared documents in the
 source stash at its recorded revision. The corresponding paths are available
 in the [source repository](https://github.com/itlackey/akm-stash/tree/main/skills/akm-measured-improvement);
 record the revision actually read rather than silently mixing versions.

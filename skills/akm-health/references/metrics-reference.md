@@ -1,12 +1,12 @@
 ---
-description: Complete field glossary and signal thresholds for akm health output (schemaVersion 3). Use when interpreting health report numbers or setting alert thresholds.
+description: Complete field glossary and signal thresholds for akm doctor output (schemaVersion 3). Use when interpreting health report numbers or setting alert thresholds.
 tags: [akm-health, metrics, reference, thresholds]
-updated: 2026-08-29
+updated: 2026-11-23
 ---
 
 # akm Health Metrics Reference
 
-Schema version: **3** (`akm health --format json` → `schemaVersion: 3`)
+Schema version: **3** (`akm doctor --format json` → `schemaVersion: 3`)
 
 ## Top-level fields
 
@@ -17,7 +17,7 @@ Schema version: **3** (`akm health --format json` → `schemaVersion: 3`)
 | `since` | ISO timestamp | Start of the reporting window |
 | `hardChecks[]` | array | Deterministic pass/fail checks (see below) |
 | `advisories[]` | array | Non-fatal warnings |
-| `metrics` | object | Task fail rate, agent fail rate, probe latency, and LLM usage |
+| `metrics` | object | Task fail rate, agent fail rate, stuck runs, and LLM usage |
 | `improve` | object | Improve pipeline metrics (main section) |
 | `runs[]` | array, optional | Per-improve-run summaries when `--group-by run` or `--report` is used |
 | `windows[]` / `deltas` | optional | Explicit or duration-window comparison projections |
@@ -32,16 +32,14 @@ Each entry has `name`, `status` (`pass`/`warn`/`fail`), `kind`, `confidence`, `m
 | Check name | What it validates |
 |---|---|
 | `state-db-schema` | state.db exists and required tables are present |
-| `state-db-round-trip` | state.db append/read round-trip (durationMs) |
+| `state-db-round-trip` | state.db append/read round-trip (durationMs); `unknown` with `--read-only` |
+| `state-db-integrity` | state.db passes `PRAGMA integrity_check` |
+| `state-db-migrations` | pending state.db migrations applied on open (names them in `evidence.applied`) |
 | `task-history-read` | task_history rows readable for the window |
-| `task-log-backing` | every task_history log_path resolves on disk |
 | `active-runs` | no stuck active runs past stale threshold |
-| `default-engine` | default agent engine is configured and available |
-| `model-map-files` | installed/user model-map files are usable |
-| `selected-model-aliases` | selected model aliases resolve for their engine |
-| `default-llm-engine` | default LLM engine is configured and available |
-| `configured-engines` | explicitly configured engines are available |
-| `active-improve-strategy` | enabled improve processes can resolve their engines/credentials |
+| `connections-and-harnesses` | one row per connection and harness, then per kind of work (`improve`, `judges`, `agents`, `extract`, `enrich`, `index`, `embedding`) with the connection or harness and model it resolves to |
+| `index-sources` | sources the last `akm index` could not scan completely |
+| `semantic-search` | what the last index recorded about semantic search, against the current vector count |
 
 Any non-`pass` hard check is a **blocking issue** — fix before interpreting improve metrics.
 
@@ -54,9 +52,7 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | `taskFailRate` | Fraction of task runs that failed | 0 | < 0.05 | ≥ 0.05 |
 | `agentFailureRate` | Fraction of agent invocations that failed | 0 | < 0.1 | ≥ 0.1 |
 | `stuckActiveRuns` | Runs exceeding stale threshold | 0 | — | > 0 |
-| `logBackingRate` | Fraction of logs with on-disk backing | 1.0 | > 0.95 | ≤ 0.95 |
-| `probeRoundTripMs` | state.db round-trip latency (ms) | < 50 | 50–200 | > 200 |
-| `llmUsage` | Token and duration totals, with `byStage`, `byProcess`, and `byEngine` breakdowns | Inspect trends | — | — |
+| `llmUsage` | Token and duration totals, with `byStage`, `byProcess`, and `byEngine` (keyed by connection or harness name) breakdowns | Inspect trends | — | — |
 
 ---
 
@@ -69,9 +65,6 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | `invoked` | Total improve invocations in window | — | — |
 | `completed` | Completed without error | `completed == invoked` | any gap |
 | `skipped` | Total skipped (all reasons) | — | — |
-| `plannedRefs` | Refs selected for improvement | > 0 | 0 (nothing to improve) |
-| `strategyFilteredRefs` | Refs filtered by the active improve strategy | — | — |
-| `coverageGapCount` | Coverage gap proposals generated | ≥ 0 | — |
 
 ### `skipReasons` (top-level)
 
@@ -89,9 +82,9 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | Field | Meaning | ✅ | ⚠️ |
 |---|---|---|---|
 | `ok` | Reflects that ran and produced output | > 0 | 0 over several runs |
+| `rejected` | Rejected after the model call | 0–few | many |
 | `cooldown` | Skipped because cooldown period hasn't elapsed | — | — |
 | `failed` | LLM or write errors | 0 | > 0 |
-| `guardRejected` | Rejected by post-LLM quality guards | 0–few | many |
 | `skippedByReason` | Typed histogram of skip reasons (e.g. `type-filter`, `raw-wiki`) | low counts | accumulating type-filter |
 
 **Key insight:** `skippedByReason` replaced a single collapsed counter. If `type-filter` is high, the profile is excluding asset types that have signal. If `raw-wiki` is high, wiki raw/ pages are being scanned unnecessarily.
@@ -105,7 +98,6 @@ Any non-`pass` hard check is a **blocking issue** — fix before interpreting im
 | `skippedByReason.no new signal since last proposal` | No new content to distill | High is normal | — |
 | `skippedByReason.type-filter` | Asset type excluded by profile | Few | Many |
 | `llmFailed` | LLM call failed | 0 | > 0 |
-| `qualityRejected` | Below quality threshold | 0–few | many |
 | `judgeRejected` | Rejected by judge pass | 0–few | many |
 | `validatorRejected` | Rejected by proposal validator | 0–few | many |
 | `configDisabled` | Distill disabled in config | 0 | — |
@@ -127,9 +119,10 @@ are the primary tuning targets.
 | `deleted` | Memories deleted | ≥ 0 | — | — |
 | `contradicted` | Contradiction edges written | ≥ 0 | — | — |
 | **`judgedNoAction`** | LLM saw memory but proposed nothing | < 50% of processed | 50–70% | > 70% |
-| `mergedSecondaries` | Secondary memories consumed in merges | — | — | — |
-| `failedChunkMemories` | Memories in failed chunks | < 5% of processed | 5–10% | > 10% |
 | `failedChunks / totalChunks` | Chunk failure rate | < 2% | 2–5% | > 5% |
+| `pairsJudged` | Pair-pass pairs that returned a verdict | — | — | — |
+| `failedPairs` | Pairs that did not settle (transport, parse, cancelled); retried next run | 0 | > 0 | — |
+| `deferredPairs` | Valid retirement decisions held by the same-run guard; `null` when an older result lacks a count | — | — | — |
 | `durationMs` | Total consolidation wall time | < 2 min | 2–10 min | > 10 min |
 
 **`judgedNoAction` interpretation:** If ≥50% of processed memories get no proposed action, the LLM is not finding actionable signal. Common causes:
@@ -166,13 +159,11 @@ Memory inference creates `.derived.md` sibling files from accumulated evidence.
 | Field | Meaning | ✅ Healthy | ⚠️ Warn |
 |---|---|---|---|
 | `considered` | Pool of eligible memories | > 0 | — |
-| `cacheHits` | Memories skipped (already derived) | High is good | — |
-| `freshAttempts` | New inference attempts | > 0 per run | 0 for many runs |
-| `splitParents` | Memories that produced new .derived files | ≥ 0 | — |
+| `freshAttempts` | Parents that actually hit the LLM | > 0 per run | 0 for many runs |
+| `noChange` | Explicit no-change decisions (restraint, not failure); summed per run | — | — |
 | `written` | New .derived files written | ≥ 0 | — |
 | **`yieldRate`** | `written / yieldEligibleConsidered` | > 0.30 | 0.10–0.30 | < 0.10 |
 | `skippedNoFacts` | Attempted but LLM found no facts | Low | High |
-| `skippedChildExists` | Skipped because .derived already exists | — | — |
 | `durationMs` | Wall time for inference phase | < 2 min | > 5 min |
 
 **`yieldRate` interpretation:**
@@ -180,24 +171,6 @@ Memory inference creates `.derived.md` sibling files from accumulated evidence.
 - `0.3–0.5` — acceptable; pool may be saturating.
 - `< 0.3` — low signal. Either pool is saturated (all recent memories already have .derived), or signal quality is low.
 - `= 0` over multiple runs — inference is not running or all candidates are cached.
-
----
-
-## `improve.graphExtraction`
-
-| Field | Meaning | ✅ Healthy | ⚠️ Warn | 🔴 Critical |
-|---|---|---|---|---|
-| `extractedFiles` | Files processed this run | ≥ 0 | — | — |
-| `entities` | Entities extracted | > 0 if files > 0 | — | — |
-| `relations` | Relations extracted | > 0 if files > 0 | — | — |
-| `cacheHitRate` | Fraction from cache | High is good | — | — |
-| `truncations` | Files truncated due to size | 0 | 1–3 | > 3 |
-| `failures` | Extraction failures | 0 | 1 | > 1 |
-| `durationMs` | Wall time | < 5 min | 5–15 min | > 15 min |
-
-**Truncations:** A truncation means a document exceeded the LLM context window. Check which files are being extracted and whether they can be split or summarized.
-
-**Failures:** Extraction failures are LLM call errors. Check engine configuration and API health. A single failure is usually transient; multiple failures indicate a systematic issue.
 
 ---
 
@@ -209,20 +182,6 @@ Memory inference creates `.derived.md` sibling files from accumulated evidence.
 |---|---|---|---|
 | `medianMs` | < 3 min | 3–10 min | > 10 min |
 | `p95Ms` | < 10 min | 10–20 min | > 20 min |
-
-### `byPhase`
-
-Consolidation dominates total wall time. Use phase breakdown to identify bottlenecks.
-
-| Phase | ✅ Median | ⚠️ Warn |
-|---|---|---|
-| `consolidation` | < 2 min | > 5 min |
-| `graphExtraction` | < 30 s | > 2 min |
-| `memoryInference` | < 10 s | > 1 min |
-
-If consolidation p95 is >> median, there are outlier chunks taking disproportionate time.
-Check `failedChunks` — a small number of very large or structurally complex memory groups
-can cause tail latency spikes.
 
 ---
 

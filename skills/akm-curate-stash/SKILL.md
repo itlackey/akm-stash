@@ -1,14 +1,14 @@
 ---
 name: akm-curate-stash
-description: "Given a user goal, search configured bundle sources and registries, compare overlapping assets, security-review locally inspectable candidates, then clone selected assets into a reviewable bundle. Use when the user says 'build me a bundle for X', 'find the best assets for Y', 'curate a toolkit for Z', or 'assemble assets to help me with...'"
-updated: 2026-08-29
+description: "Given a user goal, search configured bundle sources and registries, compare overlapping assets, security-review locally inspectable candidates, then import selected assets into a reviewable bundle. Use when the user says 'build me a bundle for X', 'find the best assets for Y', 'curate a toolkit for Z', or 'assemble assets to help me with...'"
+updated: 2026-11-23
 ---
 
 # AKM Curate Bundle
 
 This skill builds a goal-specific mini-bundle by discovering the best available
 assets across all sources, comparing overlapping candidates, screening them for
-security issues, and cloning the winners into a new directory the user can
+security issues, and importing the winners into a new directory the user can
 review, add as a source, or selectively import from.
 
 **Arguments:**
@@ -60,11 +60,11 @@ akm curate "<angle>" --from all --limit 8 --format json
 This is the highest-signal pass: the curate ranker applies LLM reranking and
 surfaces the most relevant assets from both local bundles and registries.
 
-On akm 0.9.7, a separate local-only pass can load the ranked content in one
-combined token budget:
+A separate local-only pass can load the ranked content in one combined token
+budget:
 
 ```bash
-akm curate "<angle>" --from local --limit 8 --pack 12000 --format json
+akm curate "<angle>" --from local --limit 8 --max-tokens 12000 --format json
 ```
 
 Packed JSON is a bare array of `{ ref, tokens, content }` items. Use it to
@@ -81,16 +81,16 @@ curate ranker ranked lower:
 akm search "<angle>" --from all --limit 20 --format json
 ```
 
-### 2c. Registry-specific sweep with asset-level results
+### 2c. Registry-specific sweep
 
 ```bash
-akm search "<goal summary>" --from registry --assets --format json
-akm search "<angle>" --from registry --assets --format json
+akm search "<goal summary>" --from registry --detail normal --format json
+akm search "<angle>" --from registry --detail normal --format json
 ```
 
-The `--assets` flag returns registry asset metadata (`assetType`, `assetName`,
-description, source stash, and an install action), not a locally resolvable
-asset ref. It surfaces candidates from bundles you have not added yet.
+Registry hits describe whole bundles: `name`, `description`, `installRef` and an
+install `action`. They are not locally resolvable asset refs. This pass
+surfaces candidates from bundles you have not added yet.
 
 ### 2d. Type-targeted passes
 
@@ -100,7 +100,7 @@ For goals where a specific asset type is clearly most useful, add targeted passe
 akm search "<goal>" --from all --type skill --limit 10 --format json
 akm search "<goal>" --from all --type knowledge --limit 10 --format json
 akm search "<goal>" --from all --type agent --limit 5 --format json
-akm search "<goal>" --from all --type workflow --limit 5 --format json
+akm search "<goal>" --from all --type task --limit 5 --format json
 ```
 
 ### Candidate collection
@@ -113,11 +113,10 @@ record:
 - `type` — asset type
 - `angle` — which search angle surfaced it
 
-For a registry asset hit, record `assetType`, `assetName`, `stash.id`,
-`stash.name`, `registryName`, and its offered `action` (`akm bundle add
-<install-ref>`); it has no usable `ref` until the source is installed and
-indexed. Deduplicate local candidates by ref and registry candidates by
-stash-id plus asset type/name.
+For a registry hit, record `name`, `description`, `installRef` and its offered
+`action` (`akm bundle add <install-ref>`); it has no usable `ref` until the
+source is installed and indexed. Deduplicate local candidates by ref and
+registry candidates by `installRef`.
 
 ---
 
@@ -129,8 +128,8 @@ when their descriptions address the same user need (even if worded differently).
 For each **locally indexed** overlap group, inspect the candidates:
 
 ```bash
-akm show <ref-a> --detail full --format json
-akm show <ref-b> --detail full --format json
+akm show <ref-a> --format json
+akm show <ref-b> --format json
 ```
 
 `akm show` is local-index only. Do not pass it a registry hit or synthesize a
@@ -173,7 +172,7 @@ intend to clone.
 For each selected **locally indexed** candidate, read the full content:
 
 ```bash
-akm show <ref> --detail full --format json
+akm show <ref> --format json
 ```
 
 Check for every item in this list. A single **BLOCK** finding stops that asset
@@ -199,7 +198,7 @@ user.
 | **Broad filesystem access** | `find /`, `ls ~`, reading files outside stash | Warn; include only if goal requires it |
 | **Network calls** | `curl`, `wget`, API calls in executable positions | Warn; note the endpoint |
 | **Hardcoded paths** | An absolute path baked into one user's home directory instead of a relative or `$HOME`-rooted one | Warn; may not work on user's system |
-| **Stale commands** | References `akm vault`, `akm reflect`, `akm distill`, `akm extract`, `akm tasks`, `akm add`, or a `type:name` ref | Warn; commands/ref grammar removed or renamed in 0.9.0 |
+| **Stale commands** | References a removed command (`akm vault`, `akm reflect`, `akm distill`, `akm extract`, `akm tasks`, `akm add`), a `type:name` ref, or a command deprecated in 0.10 (`akm clone`, `akm health`, `akm task run`, `akm workflow run`, `akm env run`) | Warn; the command or ref grammar is removed or replaced (see STABILITY.md) |
 | **Hot permissions** | Requests `--force`, `--yes`, or destructive flags without confirmation gate | Warn; review before executing |
 | **Third-party model calls** | Instructs use of a specific external API (OpenAI, Anthropic) without configuration opt-in | Warn; may incur cost |
 
@@ -234,21 +233,21 @@ DEST="$HOME/akm-curated/$GOAL_SLUG"
 mkdir -p "$DEST"
 ```
 
-### 5b. Clone each selected, security-cleared asset
+### 5b. Import each selected, security-cleared asset
 
 ```bash
-akm clone <ref> --dest "$DEST" --force
+akm import <ref> --asset-ref --dest "$DEST" --force
 ```
 
-Run for each PASS or WARN candidate. `akm clone` places the asset in the
+Run for each PASS or WARN candidate. `--asset-ref` copies the asset and `--dest` places the asset in the
 correct type subdirectory inside `$DEST` (e.g. `$DEST/skills/review-pr/SKILL.md`).
 
-For a registry-only candidate, do not treat its metadata as a cloneable ref.
+For a registry-only candidate, do not treat its metadata as an importable ref.
 Ask the user before running its offered `akm bundle add <install-ref>` action;
-after it is installed, indexed, and security-reviewed, clone the resulting
-canonical local ref. `akm clone github:owner/repo//skills/name` is supported
-only as a clone-specific source-locator exception, never as a substitute for
-an inspected `akm show` ref.
+after it is installed, indexed, and security-reviewed, import the resulting
+canonical local ref. `akm import github:owner/repo//skills/name --asset-ref` is
+supported only as a source-locator exception, never as a substitute for an
+inspected `akm show` ref.
 
 Do not clone any BLOCK candidate under any circumstances.
 
@@ -376,8 +375,8 @@ To import individual assets:
   block and suggest they inspect the source independently.
 - **Always show both security blocks and quality rejects** in the final report.
   The user needs the full picture of what was found.
-- **Do not modify the user's primary stash.** All `akm clone` calls must use
-  `--dest $DEST`. Never call `akm clone` without `--dest`.
-- **Inspect before selecting.** Always run `akm show <ref> --detail full` for
+- **Do not modify the user's primary stash.** All `akm import --asset-ref` calls must use
+  `--dest $DEST`. Never call it without `--dest`.
+- **Inspect before selecting.** Always run `akm show <ref>` for
   locally indexed assets before committing one. Registry metadata alone is
   insufficient for both quality and security assessment.

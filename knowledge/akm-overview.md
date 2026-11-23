@@ -1,33 +1,31 @@
 ---
-description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.9.7 surfaces.
+description: Use when an agent needs a quick conceptual overview of akm, its asset types, and the major 0.10.261130 surfaces.
 tags: [akm, overview, concepts]
 quality: curated
-updated: 2026-08-31
+updated: 2026-11-23
 refs: []
 ---
 
 # akm Overview for Agents
 
-> **Version target:** akm-cli 0.9.7
+> **Version target:** akm-cli 0.10.261130
 
 **akm** is a CLI package manager for AI-agent assets.
 It gives coding assistants (Claude Code, OpenCode, Codex, Cursor, Copilot,
 Qwen, etc.) a unified way to discover, install, run, and improve the skills,
-commands, agents, knowledge, workflows, LLM wikis, env configs, secrets, memories,
+commands, agents, knowledge, rules, LLM wikis, env configs, secrets, memories,
 lessons, and tasks they need.
 
 Canonical repo: <https://github.com/itlackey/akm>
 Official registry: <https://github.com/itlackey/akm-registry>
 
-> **Terminology.** "Stash" as a noun was retired in 0.9.0 in favor of
-> **bundle** everywhere — env vars, config keys, and JSON fields all say
-> `bundle` now:
+> **Terminology.** The CLI noun is **bundle**; "stash" survives only in
+> legacy names such as this repo's name and the registry index's `stashes[]`
+> array:
 >
 > - **working bundle** — the local editable directory (default `~/akm`).
 > - **bundle** — a shareable directory of assets published to GitHub, npm,
->   git, a website source, or another provider. Registries still discover and
->   list them as "stashes" in some legacy naming (e.g. the registry index's
->   `stashes[]` array), but the CLI noun is `bundle`.
+>   git, a website source, or another provider.
 
 ## The three moving parts
 
@@ -51,20 +49,20 @@ indexing confidence and maintainability.
 | `command` | Prompt template with placeholders. | `commands/review-stash.md` |
 | `agent` | Specialized subagent prompt. | `agents/security-reviewer.md` |
 | `knowledge` | Reference docs with navigation. | `knowledge/api-reference.md` |
-| `workflow` | Structured, stateful, steps-driven procedure. | `workflows/release.md` |
+| `rule` | Short agent rule, printed by `akm rules`. | `rules/no-force-push.md` |
+| `workflow` | Deprecated: steps-driven procedure; tasks replace it in 0.11. | `workflows/release.md` |
 | `env` | Group of related config/credential values for an app or service. | `env/prod.env` |
 | `secret` | Single whole-file secret (token, key, cert). | `secrets/deploy-key` |
 | `memory` | Context fragments recalled from external systems. | `memories/team-notes.md` |
 | `lesson` | Distilled guidance learned from feedback or reflection. | `lessons/search-ranking.md` |
-| `task` | Scheduled prompt, command, or workflow execution. | `tasks/daily-review.yml` |
+| `task` | Scheduled or on-demand list of akm commands, shell lines, or prompts. | `tasks/daily-review.yml` |
 | `instruction` | Plain reference doc, same shape as knowledge. | `instructions/deploy-notes.md` |
 | `session` | Generated session-extraction record. | `sessions/claude/<id>.md` |
 | `fact` | Durable bundle-level semantic knowledge. | `facts/team-timezone.md` |
 
-The legacy `vault` type and the `akm wiki` command family are both gone. An
-LLM wiki (Karpathy-style `schema.md` + `pages/`) is a first-class **bundle
-format**, recognized and indexed automatically — there is no dedicated `wiki`
-asset type or verb group.
+An LLM wiki (Karpathy-style `schema.md` + `pages/`) is a **bundle format**,
+recognized and indexed automatically; it has no asset type or command group of
+its own.
 
 ## Ref format
 
@@ -83,85 +81,74 @@ Examples:
 - `official-stash//knowledge/akm-cli-reference`
 - `acme-stash//lessons/docker-healthchecks`
 
-The pre-0.9.0 colon grammar (a type name, a colon, then the asset name) was
-retired with no compatibility alias — a colon-style ref fails to resolve. The short,
-bundle-omitted form is input sugar: it resolves against the default bundle,
-then installation-priority order. Source locators such as
+A colon-style ref (a type name, a colon, then the asset name) does not
+resolve. The short, bundle-omitted form is input sugar: it resolves against
+the default bundle, then installation-priority order. Source locators such as
 `github:itlackey/akm-stash` and `npm:@acme/stash` belong to `akm bundle add`;
-only `akm clone` accepts a source locator plus `//conceptId`. Use `akm show
-<ref>` to inspect a locally indexed asset.
-Use `akm workflow run <ref>` for workflow runs and `akm task run <id>` for
-scheduled task assets.
+only `akm import --asset-ref` accepts a source locator plus `//conceptId`. Use
+`akm show <ref>` to inspect a locally indexed asset and `akm run <ref>` to run
+an agent, command, script, or task.
 
-## 0.9.7 execution and authoring rules
+## Execution and authoring rules (0.10.261130)
 
-- **Task source v4 only.** A task is `tasks/<id>.yml` with `version: 4`,
-  exactly one `uses:` or `run:` target, optional `schedule:`, and per-binding
-  `enabled`. Deterministically convertible v2/v3 sources are read through an
-  in-memory v4 shim with a warning; migrate them on disk with `akm migrate
-  apply --dry-run` then `akm migrate apply`.
-- **Durable workflow plan v5.** Workflow runs freeze `irVersion: 5` and
-  `hashVersion: 7`. Older plans remain inspectable but must be abandoned and
-  restarted from current source; `akm workflow plan <ref>` validates a fresh
-  freeze without publishing a run.
-- **Task history vocabulary.** JSON `target.kind` is `command`, `shell`,
-  `script`, `workflow`, or `unknown`; downstream consumers must not branch on
-  the retired `prompt` value.
-- **Current ref and registry boundaries.** Generic refs use
-  `[bundle-slug//]conceptId`; registry discovery is separate from the local
-  index, so a registry hit is inspected at its source/homepage until installed.
-- **Health schema v3.** `akm health` returns task/engine telemetry in
-  `metrics` and improve telemetry in `improve`; per-run output uses
-  `--group-by run`. It also reports installed Claude plugin versions and warns
-  when the plugin is stale or its declared AKM range excludes the running CLI.
-- **Search match provenance.** Normal/full and agent-shaped local hits may
-  include `matchStage` (`exact`, `prefix`, or `relaxed`). A `searchMode` of
-  `fts-fallback` means semantic search failed live for that query and AKM used
-  lexical results instead.
-- **Packed curation.** `akm curate <query> --pack <tokens>` returns ranked
-  local assets' content in one combined budget. It drops lower-ranked whole
-  assets first, resolves fragments like `akm show`, and never packs registry
-  hits.
-- **Website manifests.** Adding an origin-root website probes `/llms.txt`
-  and uses its same-origin links as the crawl frontier when present.
-- **Scheduler recovery.** `akm task sync --dry-run` previews reconciliation;
-  `akm task prune` previews entries whose descriptor or bundle disappeared,
-  and `akm task prune --yes` removes only those computed orphans.
-- **Reference repair.** Lint validates legacy `type:slug` xrefs and resolves
-  derived memories plus prune tombstones. After reviewing `akm lint`, use
-  `akm lint --prune-dangling-edges` only to drop genuinely missing belief
-  edges.
-- **Improve presets.** `frequent` and `memory-focus` are removed.
-  `thorough` and `catchup` can run judged, capped triage drains, with
-  promotion gated by `experimental.improveAutonomy`.
+- **Run assets by ref.** `akm run <ref>` runs an agent (`--prompt`), a command
+  (`--arguments`), a script, or a task. `akm run --env <ref> --secret
+  <ref>:<VAR> scripts/<file>` runs a script with env assets and secrets
+  injected. `akm agent`, `akm command run`, `akm task run`, `akm env run` and
+  `akm secret run` are Deprecated and go in 0.11.
+- **Tasks are the automation unit.** A task is `tasks/<id>.yml`. Task source v5
+  (`version: 5-beta.1`, Experimental) is a list of akm commands (`run:`,
+  `exec:`, `prompt:`) run in order, with inputs, `${name}` results, a state
+  file, and resume at the failed step. Task source v4 (`version: 4`) keeps
+  working through 0.10.x. `akm import <file> --type task` adds a task; `akm
+  task enable <ref>` schedules it.
+- **Workflows are Deprecated.** Tasks replace them in 0.11; `akm migrate apply
+  workflows/<name>.md` writes `tasks/<name>.yml`.
+- **One doctor.** `akm doctor` is the health check; `akm doctor info`, `log`,
+  `metrics`, `explain <ref>` and `scheduler sync` replace `akm health`, `info`,
+  `log`, `metrics`, `task explain` and `task sync`.
+- **Refs and registries.** Generic refs use `[bundle-slug//]conceptId`;
+  registry discovery is separate from the local index, so a registry hit is
+  inspected at its source/homepage until installed.
+- **Search match provenance.** Normal and full local hits may include
+  `matchStage` (`exact`, `prefix`, `relaxed`). A `searchMode` of `fts-fallback`
+  means semantic search failed for that query and akm used keyword results.
+- **Budgeted reads.** `akm curate <query> --max-tokens <n>` returns ranked
+  local assets' content in one combined budget. `akm show <ref> --outline`
+  lists a document's sections; `akm show <ref>#<slug>` reads one.
+- **Improve is proposal-first.** `akm improve` writes proposals and accepts and
+  commits the ones whose quality check passed; the rest wait for `akm proposal
+  accept`. Only `default` and `consolidate` are built-in strategies.
+- **Reference repair.** After reviewing `akm lint`, use `akm lint
+  --prune-dangling-edges` only to drop genuinely missing belief edges.
 
 ## Essential commands at a glance
 
 ```bash
 akm setup
 akm search "deploy"
-akm curate "plan a safe deployment" --pack 8000 --format json
-akm show skills/review-pr --shape agent
+akm curate "plan a safe deployment" --max-tokens 8000
+akm show skills/review-pr --outline
 akm bundle add github:owner/repo
-akm workflow run workflows/release
+akm run tasks/release
 akm feedback skills/review-pr --negative --reason "too generic"
 akm proposal extract --auto
 akm improve skills/review-pr
 akm proposal list
-akm health
+akm doctor
 akm search --type task
 ```
 
 ## Where to go next
 
-- Install or clone a bundle → `skills/install-akm-stash`
+- Install a bundle or import one asset → `skills/install-akm-stash`
 - Publish a bundle → `skills/publish-akm-stash`
 - Review proposals (case-by-case) → `akm proposal show <id>` / `akm proposal
   diff <id>`, then `akm proposal accept|reject`
-- Drain the pending backlog (automated) → `akm proposal drain --policy
-  personal-stash` or the `processes.triage` improve strategy pre-pass
+- Drain the pending backlog (automated) → `akm proposal drain --dry-run`, then
+  `--promote --yes`, or the `processes.triage` pre-pass inside `akm improve`
 - Turn repeated feedback into reusable lessons → `akm improve <ref>` (distills
-  feedback into lesson proposals natively in akm-cli 0.9.7)
+  feedback into lesson proposals)
 - Harvest session knowledge → `akm proposal extract --auto` then `akm
   proposal list`
 - Tune the improve pipeline → `knowledge/akm-improve-and-extract`

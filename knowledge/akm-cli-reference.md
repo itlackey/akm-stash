@@ -1,38 +1,51 @@
 ---
-description: Use when an agent needs the main akm-cli 0.9.7 commands, flags, proposal review flow, and workflow or task authoring rules in one place.
+description: Use when an agent needs the main akm-cli 0.10.261130 commands, flags, proposal review flow, and task authoring rules in one place.
 tags: [akm, cli, reference]
 quality: curated
-updated: 2026-08-31
+updated: 2026-11-23
 ---
 
 # akm CLI Reference
 
 Quick reference for the main `akm` surfaces an agent is likely to use.
-Current as of **0.9.7** (2026-08-31). For authoritative syntax, run
-`akm <cmd> --help`.
+Current as of **0.10.261130**. For authoritative syntax, run
+`akm help <cmd>` or `akm <cmd> --help`; `akm hints` prints the short agent
+guide. Commands marked *Deprecated* still work in 0.10.x, print one notice on
+stderr naming the replacement, and are removed in 0.11.
 
 ## Global output controls
 
 | Flag | Purpose |
 |---|---|
-| `--format json\|text\|yaml\|jsonl\|md\|html` | Choose the output format. |
-| `--detail brief\|normal\|full` | Choose how much data to return (verbosity). |
-| `--shape human\|agent\|summary` | Choose the output projection. `--shape agent` is the compact agent mode; `--shape summary` is valid only on `akm show`. |
+| `--format json\|jsonl\|yaml\|text\|md` | Choose the output format (`json` by default). `yaml` is Deprecated. |
+| `--detail brief\|normal\|full` | Choose how much data to return. `agent` (a token-lean view of `search`, `curate`, `show`) is Deprecated: use `normal`. |
+| `--output <file>` | Write rendered output to a file. Deprecated: redirect stdout. |
 | `--quiet` / `--verbose` | Suppress warnings or emit extra diagnostics. |
+| `--config <file>` | Use another config file for one call; put it before the command. |
+
+`--shape` no longer exists. `--format html` no longer exists (use `md`).
 
 ## Setup & system
 
 | Command | Purpose |
 |---|---|
-| `akm setup` | Guided first-run wizard: config, bundle dir, providers, registries, and initial index. |
-| `akm bundle create [--dir <path>]` | Scaffold the working bundle skeleton only (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `instructions/`, `workflows/`, `memories/`, `env/`, `secrets/`, `lessons/`, `tasks/`, `sessions/`, `facts/`). Use `setup` for full first-time onboarding. |
-| `akm index [--full]` | Build or refresh the local search index. |
-| `akm info` | Print version, configured sources, registries, and index/search capabilities (`bundleDir`, not the retired `stashDir`). |
-| `akm health` | Health and telemetry probe: emits schemaVersion 3 checks, metrics, recent improve-pipeline rollups, and installed Claude-plugin compatibility/staleness advisories. |
-| `akm config get <key>` / `set <key> <value>` / `list` / `unset <key>` | Read or write configuration. `akm config show` was removed — use `list`. |
-| `akm migrate status` / `akm migrate apply [--dry-run]` | Inspect or atomically convert task-v2 and task-v3 sources to task source v4. |
-| `akm upgrade` | Self-update the CLI. |
-| `akm help migrate <version>` | Preview release notes and migration guidance. |
+| `akm setup` | Guided first-run wizard: agent programs, connection, embeddings, bundle directory, registries, initial index. Scripted: `akm setup --yes` (add `--endpoint <url>`, `--harness <a,b>`, `--embedding <model\|local\|off>`, `--no-probe` to answer a question each). |
+| `akm bundle create [--dir <path>]` | Scaffold the working bundle skeleton only (`scripts/`, `skills/`, `commands/`, `agents/`, `knowledge/`, `instructions/`, `rules/`, `memories/`, `env/`, `secrets/`, `lessons/`, `tasks/`, `sessions/`, `facts/`). The path goes through `--dir`; a positional path is a usage error. |
+| `akm index [--full]` | Build or refresh the local search index. An index build never waits for another: it skips and exits 0. |
+| `akm doctor` | Runtime health, durable state, scheduler, connections, harnesses, improve telemetry. Exit 0 ok, 4 warning, 1 failure. `--read-only --no-probe` inspects offline without writes. |
+| `akm doctor info` | Version, configured bundles, registries, index and search capabilities. |
+| `akm doctor log [--task <id>] [--limit N]` | Event stream, or one task's run history. |
+| `akm doctor metrics [usage\|improve\|assets] [--since 7d]` | Read-only usage and outcome reports (Experimental payload). |
+| `akm doctor scheduler sync [--dry-run] [--prune [--yes]] [--rebind]` | Reconcile (or prune orphaned) OS scheduler entries for scheduled tasks. |
+| `akm doctor explain <ref>` | Print what a task would run, read-only and secret-free. |
+| `akm doctor prompt <ref>` | Show the reflect prompt for one asset without a model call. |
+| `akm config get <key>` / `set <key> <value>` / `list` / `unset <key>` / `path` / `diff` | Read or write configuration. |
+| `akm migrate status` / `akm migrate apply [<task-file>...]` | Inspect or apply pending migrations; named task files convert to task source v5. |
+| `akm upgrade` | Self-update the CLI and the installed harness plugins. |
+
+*Deprecated:* `akm health` (use `akm doctor`), `akm info` (use `akm doctor
+info`), `akm log` (use `akm doctor log`), `akm metrics` (use `akm doctor
+metrics`), `akm help migrate` (read the changelog and migration guide).
 
 ## Discovery
 
@@ -40,31 +53,34 @@ Current as of **0.9.7** (2026-08-31). For authoritative syntax, run
 |---|---|
 | `akm search <query>` | Search local bundle content by default. |
 | `akm search <query> --from registry` | Search only registries. |
-| `akm search <query> --from all` | Merge local and registry discovery. |
-| `akm search <query> --type <type>` | Filter by asset type (`script`, `skill`, `command`, `agent`, `knowledge`, `instruction`, `workflow`, `env`, `secret`, `memory`, `lesson`, `task`, `session`, `fact`). |
-| `akm search "memories/projectA/"` | ConceptId-prefix enumeration — a query ending in `/` lists a subtree instead of keyword-matching. |
-| `akm search <query> --filter user=alice --filter agent=claude` | Restrict results to matching scope metadata. |
-| `akm search <query> --include-proposed` | Include assets with `quality: "proposed"`. |
-| `akm curate <query>` | Return a compact shortlist plus suggested next commands. |
-| `akm curate <query> --pack <tokens>` | Return ranked local assets' full content in one combined token budget. Lower-ranked whole assets are dropped first; registry hits are omitted from packed output. |
+| `akm search <query> --from all` | Merge local and registry discovery. `--from <bundle-name>` limits a search to one bundle. |
+| `akm search <query> --type <type>` | Filter by asset type (`script`, `skill`, `command`, `agent`, `knowledge`, `instruction`, `rule`, `workflow`, `env`, `secret`, `memory`, `lesson`, `task`, `session`, `fact`). |
+| `akm search "memories/projectA/"` | ConceptId-prefix enumeration: a query ending in `/` lists a subtree instead of keyword-matching. |
+| `akm search <query> --filter key=value` | Require matching frontmatter. `--prefer key=value` only ranks matches higher. |
+| `akm search <query> --include quality=proposed` | Include assets with `quality: "proposed"`. `--include type=session` includes session assets. |
+| `akm curate <query>` | Return a compact shortlist with previews and follow-up commands. |
+| `akm curate <query> --max-tokens <n>` | Return the ranked local assets' content in one combined token budget. Lower-ranked whole assets are dropped first; registry hits are never packed. |
 | `akm show <ref>` / `akm show <ref>#<fragment>` | Display a locally indexed asset; `#fragment` selects one markdown section by heading slug. |
-| `akm show <ref> --filter key=value` | Require a scope match when resolving the asset. |
-| `akm registry list` / `akm registry add <url> --name <alias>` / `akm registry remove <url-or-name>` | Manage discovery registries. Searching a registry is `akm search --from registry` — there is no `akm registry search`. |
+| `akm show <ref> --outline` | Outline (`toc` with each heading's slug) and brief metadata, no body. |
+| `akm show <ref>#<slug> --lead [--max-tokens N]` | One section plus the document lead; `--max-tokens` bounds the body. |
+| `akm rules` | Print the rules that apply here, in full (Experimental). |
+| `akm registry list` / `akm registry add <url> --name <alias>` / `akm registry remove <url-or-name>` | Manage discovery registries. Searching a registry is `akm search --from registry`. |
 
-Generic asset refs use the 0.9.7 `[bundle-slug//]conceptId[#fragment]`
-grammar — `skills/code-review`, `memories/vpn-note`, and a bundle-qualified
-knowledge ref written as `<bundle-slug>//knowledge/<asset>`. `github:owner/repo` and `npm:@scope/pkg` are
-source locators for `akm bundle add`, not generic `show` or search-result
-refs. `akm clone` is the narrow exception: it accepts a supported source
-locator plus `//conceptId`. The pre-0.9.0 `type:name` colon grammar was
-removed with no compatibility alias.
+Refs use the `[bundle-slug//]conceptId[#fragment]` grammar:
+`skills/code-review`, `memories/vpn-note`, `<bundle-slug>//knowledge/<asset>`.
+`github:owner/repo` and `npm:@scope/pkg` are source locators for `akm bundle
+add`, not `show` or search-result refs.
 
-Local search hits at `--detail normal`, `--detail full`, or `--shape agent`
-may include `matchStage: "exact" | "prefix" | "relaxed"`, identifying which
-stage of the progressive lexical AND-to-OR ladder produced the candidate.
-It is omitted for pure-semantic contributions and registry hits. The response
-also reports `searchMode`; `fts-fallback` means a semantic attempt failed for
-that query and AKM returned lexical results with a sanitized warning.
+Local search hits at `--detail normal` or `full` may include `matchStage`
+(`exact`, `prefix`, `relaxed`). The response reports `searchMode`;
+`fts-fallback` means a semantic attempt failed for that query and akm returned
+keyword results with a warning.
+
+*Deprecated:* `search --include-proposed` (use `--include quality=proposed`),
+`search --include-sessions` (use `--include type=session`), `search
+--by-usage` (use `akm doctor metrics assets`), `curate --pack` (use
+`--max-tokens`), `show --context lead` and `--max-chars` (use `--lead` and
+`--max-tokens`).
 
 ## Sources and install flows
 
@@ -74,187 +90,158 @@ that query and AKM returned lexical results with a sanitized warning.
 | `akm bundle list` | List configured sources. |
 | `akm bundle update [--all\|<target>] [--force]` | Refresh managed sources. |
 | `akm bundle remove <target>` | Remove a configured source and reindex. |
-| `akm clone <ref> [--dest <dir>] [--name <new-name>] [--bundle <name>]` | Copy a single asset into a writable bundle or a custom destination. For clone only, a GitHub/npm source locator plus `//conceptId` is also accepted. |
+| `akm import <ref> --asset-ref [--dest <dir>] [--name <new-name>] [--bundle <name>]` | Copy a single asset into a writable bundle or a custom destination. A GitHub/npm source locator plus `//conceptId` is also accepted. |
 
-For an origin-root website URL, 0.9.7 probes `/llms.txt` first and uses its
-same-origin links as the crawl frontier when present. Specific-page URLs and
-sites without that file retain the normal crawler. Off-origin manifest links
-are ignored, and `llms-full.txt` is not consumed.
-
-`akm add`/`akm list`/`akm remove`/`akm update` are retired 0.8 spellings —
-the whole group moved under `akm bundle`. To update akm itself, use `akm
-upgrade`, not `akm bundle update`.
+To update akm itself, use `akm upgrade`, not `akm bundle update`.
+*Deprecated:* `akm clone` (use `akm import <ref> --asset-ref`).
 
 ## Execution and authoring
 
 | Command | Purpose |
 |---|---|
-| `akm workflow run <ref\|run-id>` | Start, resume, or continue a workflow run to completion, failure, or an explicit limit. There is no separate `start`/`next`/`complete`. |
-| `akm workflow status <ref\|run-id>` / `akm workflow list [--active]` / `akm workflow resume <run-id>` | Inspect or resume runs. |
-| `akm workflow plan <ref>` | Compile and freeze a workflow graph read-only before a durable run. |
-| `akm workflow create <name> [--print] [--from <file>]` | Author a unified markdown workflow (frontmatter `params`/`steps` + step sections in the body). `--print` prints the starter template without writing; JSON output names its write root `bundleDir`. There is no `akm workflow template` or `validate` — use `akm lint --type workflows`. |
-| `akm task add <id> --schedule "..." --prompt "..."` | Register a scheduled prompt task. |
-| `akm task add <id> --schedule "..." --command "..."` | Register a scheduled shell command task. |
-| `akm task run <id>` / `akm task explain <ref>` / `akm task history` / `akm task doctor` / `akm task sync [--dry-run] [--rebind]` | Execute, explain read-only resolution, inspect, diagnose, or reconcile task assets. `--dry-run` previews without scheduler writes. |
-| `akm task prune [--id <id1,id2>] [--yes]` | Preview orphaned scheduler entries that no longer resolve to a live bundle; `--yes` removes the printed candidates. Live entries are never pruned. |
-| `akm lint [--fix] [--type <type>]` | Report bundle structure and reference findings. `--fix` applies ordinary repairs. |
-| `akm lint --prune-dangling-edges` | Opt-in removal of `supersededBy`/`contradictedBy` edges whose target has neither a live file nor a prune tombstone. It is not implied by `--fix`; review plain lint output first. |
-| `akm search --type task` / `akm show tasks/<id>` | Enumerate or inspect task assets — there is no `task list`/`task show`. |
-| `akm remember "<text>"` | Append a memory fragment to the working bundle. |
+| `akm run <ref>` | Run an asset by its ref: a task (declared input flags), an agent (`--prompt`), a command (`--arguments`), or a script. |
+| `akm run [--env <ref>] [--secret <ref>:<VAR>] scripts/<file> [args]` | Run a script with env assets and secrets injected. akm's flags go before the ref; everything after it is the script's own. |
+| `akm run <task-ref> --resume` | Continue the most recent failed run of a version 5 task at the step that failed. |
+| `akm exec [--env <ref>] [--secret <ref>:<VAR>] -- <cmd>` | Run any command with env and secrets injected. Experimental; off until `experimental.exec` is `true`. |
+| `akm import <file> --type task` | Add a task file to the bundle. Then `akm task enable <ref>` to schedule it. |
+| `akm task enable <ref>` / `akm task disable <ref>` | Turn a task's schedule on or off on this host. |
+| `akm lint [--fix] [--type <type>] [<file>]` | Report bundle structure and reference findings. `--fix` applies ordinary repairs; a file outside every bundle needs `--type`. |
+| `akm lint --prune-dangling-edges` | Opt-in removal of `supersededBy`/`contradictedBy` edges whose target is gone. Not implied by `--fix`. |
+| `akm search --type task` / `akm show tasks/<id>` | Enumerate or inspect task assets. |
+| `akm remember "<text>"` | Record a memory in the working bundle (`--description`, `--tag`, `--expires`, `--source`). |
 | `akm import <file\|url\|->` | Ingest a knowledge document into the bundle. |
-| `akm feedback <ref> --positive` | Record positive feedback. |
-| `akm feedback <ref> --negative --reason "why it missed"` | Record negative feedback with a durable reason. |
-| `akm sync -m "msg" [--no-push]` | Commit and optionally push the git-backed working bundle (`--no-push` to skip the push). Replaces the retired `akm save`. |
+| `akm feedback <ref> --positive` | Record that the asset helped (ranking only). |
+| `akm feedback <ref> --negative --reason "what is wrong and what it should say"` | Flag wrong or stale content. Add `--replace "<current>" --with "<fixed>" --source "<where verified>"` for an exact fix. |
+| `akm sync -m "msg" [--no-push]` | Commit and optionally push the git-backed working bundle. |
 
-> ⚠️ **Task files must be `.yml` and use `version: 4`.** A task selects exactly
-> one top-level target: `uses:` (an `akm/command`, `commands/`, `scripts/`, or
-> `workflows/` ref) or `run:` (one explicit shell string). `with:` is only for
-> `uses: akm/command`; task controls such as `timeout` are top-level. Scheduling
-> is optional and each list binding owns its `enabled:` state. AKM 0.9.7
-> auto-reads deterministically convertible v2/v3 files as v4 with a deprecation
-> warning and no source write; use `akm migrate apply --dry-run` then `akm
-> migrate apply` to rewrite them and silence the warning. There is no task
-> enable/disable/remove/list/show command — edit the
-> YAML and run `akm task sync`, or use `akm search --type task`.
+*Deprecated, removed in 0.11:* `akm agent` and `akm command run` (use `akm run
+<ref>`); `akm task run` (use `akm run <task-ref>`); `akm task add` (use `akm
+import <file> --type task`); `akm task sync|prune|doctor|explain|history` (use
+`akm doctor scheduler sync [--prune]`, `akm doctor`, `akm doctor explain`, `akm
+doctor log --task <id>`); every `akm workflow` command (workflows become tasks;
+`akm migrate apply workflows/<name>.md` writes `tasks/<name>.yml`).
 
-## Proposal queue and self-improvement (0.9.7)
+Slash-command assets under `commands/` use the literal `$ARGUMENTS`
+placeholder; `akm run commands/<name> --arguments "<text>"` substitutes it.
+Positional `$1`/`$2` are not expanded by akm.
+
+### Task files
+
+A task is a pure-YAML file at `tasks/<id>.yml`. Two sources are read in 0.10:
+
+- **Task source v5** (`version: 5-beta.1`, Experimental). A task is a list of
+  akm commands run in order: `run: <ref>` is `akm run`, `exec: <command>` is
+  `akm exec`, `prompt: <text>` is `akm exec --prompt`. A step takes the
+  command's own options (`env`, `secret`, `cwd`, `timeout`, `max-retries`,
+  `inherit`, and `harness`, `connection`, `model` for agent steps). `inputs:`
+  declares the task's flags, `${name}` fills an input or an earlier step's
+  result into `prompt:`, `arguments:` or `args:`, and a script step reads all
+  state as JSON from the file named by `AKM_TASK_STATE`. `lock: true` allows
+  one run at a time. A failed step stops the run; `akm run <task> --resume`
+  continues it. Task steps do not need `experimental.exec`. `akm migrate apply
+  <task-file>` converts a v4 file; 0.11 refuses `version: 4`.
+- **Task source v4** (`version: 4`). One top-level target, `uses:` (`akm/command`
+  or a `commands/` or `scripts/` ref) or `run:` (one shell line), optional
+  `schedule:` entries and `timeout:`. Unchanged through 0.10.x.
+
+Check a file with `akm lint <file> --type tasks` and preview it with `akm doctor
+explain <ref>`. Reconcile schedules with `akm doctor scheduler sync --dry-run`
+then without `--dry-run`.
+
+## Proposal queue and self-improvement
 
 | Command | Purpose |
 |---|---|
-| `akm proposal extract [--type claude\|opencode\|--auto] [--since <window>] [--dry-run]` | Extract durable insights from native session files (Claude Code, OpenCode) and queue them as proposals. `--auto` iterates all available harnesses; `--since` sets the discovery window (default 24h). There is no `--watch`/`--debounce-ms` — schedule it as a task instead. |
-| `akm improve [ref\|type] [--task "..."] [--strategy <name>] [--dry-run]` | Propose improvements to an existing asset, type, or the whole bundle. Runs memory consolidation and lesson distillation when enabled in the active strategy. **`improve` never auto-promotes** — every proposal lands `pending`; there is no confidence-gated `--auto-accept`. |
+| `akm proposal extract [--sessions claude\|codex\|opencode \| --auto] [--since <window>] [--dry-run]` | Extract durable insights from native session files and queue them as proposals. `--auto` iterates all available harnesses; `--since` sets the discovery window (default 24h). `--type` is a Deprecated alias of `--sessions`. There is no `--watch`: schedule it as a task. |
+| `akm improve [ref\|type] [--task "..."] [--strategy <name>] [--limit N] [--dry-run]` | Propose improvements to an existing asset, type, or the whole bundle. Gate-passed proposals are accepted and committed by default; the rest wait as `pending`. |
 | `akm proposal new <type> <name> --task "..."` | Draft a brand-new asset and queue it as a proposal. |
-| `akm proposal list [--status pending\|accepted\|rejected\|reverted]` | List proposal-queue entries. Bare `akm proposal` (no verb) is a usage error — name the verb. |
-| `akm proposal show <id>` | Render a proposal. |
+| `akm proposal list [--status pending\|accepted\|rejected\|reverted] [--generator <name>]` | List proposal-queue entries. A bare `akm proposal` runs `list`. |
+| `akm proposal show <id>` | Render a proposal with its validation findings. |
 | `akm proposal diff <id>` | Diff a proposal against the live asset. Accepts a UUID, a UUID prefix, or an asset ref. |
-| `akm proposal accept <id>` | Validate and promote a proposal into the bundle. |
+| `akm proposal accept <id>...` | Validate and promote proposals into the bundle; one git commit for several ids. |
 | `akm proposal reject <id> --reason "..."` | Reject and archive a proposal. |
-| `akm proposal revert <id>` | Roll back a previously accepted proposal (full id/ref only — no UUID prefix, no batch revert). |
-| `akm proposal accept --generator <name> [--max-diff-lines N] -y` / `akm proposal reject --generator <name> --reason "..." -y` | Bulk-accept or bulk-reject every pending proposal from one generator (e.g. `reflect`, `distill`, `extract`). Requires `-y`/`--yes` in non-interactive mode. |
-| `akm proposal drain [--policy <preset\|path>] [--promote] [--yes] [--dry-run] [--max-accepts N] [--max-diff-lines N] [--older-than D] [--judgment] [--strategy <name>]` | Drain the standing **pending** backlog by a deterministic policy. **Mutating** when `--promote` is set. See below. |
-| `akm health [--since <window>] [--window-compare <window>] [--report]` | Probe runtime health and improve-pipeline metrics. |
+| `akm proposal reopen <id>` | Undo a rejection: move it back to `pending`. |
+| `akm proposal revert <id>` | Roll back a previously accepted proposal. |
+| `akm proposal accept --generator <name> [--max-diff-lines N] [--older-than D] -y` / `akm proposal reject --generator <name> --reason "..."` | Bulk-accept or bulk-reject every pending proposal from one generator (`reflect`, `distill`, `extract`, ...). Bulk accept needs `-y`/`--yes` without a terminal; add `--dry-run` to preview. |
+| `akm proposal drain [--promote] [--yes] [--dry-run] [--max-accepts N] [--older-than D] [--judgment] [--strategy <name>]` | Drain the standing **pending** backlog by one rule. Experimental. |
 
-The flat verbs `akm extract`, `akm propose`, `akm proposals`, `akm accept`,
-`akm reject`, `akm diff`, `akm revert`, `akm reflect`, and `akm distill` were
-all removed in 0.9.0 — use the `akm proposal <verb>` forms above (`reflect`
-and `distill` folded into `akm improve`).
+*Deprecated:* `akm improve report` (use `akm doctor metrics improve`), `akm
+improve judge` and `akm judge` (use `akm doctor judge`), `akm improve
+--show-prompt` (use `akm doctor prompt`), `akm improve --require-feedback-signal`,
+`--timeout-ms` (use `--timeout`).
 
-### `akm proposal drain` — deterministic backlog triage
+### `akm proposal drain`: backlog triage
 
-`akm proposal drain` clears the standing pending backlog using a
-deterministic triage **policy**, so you no longer need a manual agent
-session to keep the queue from growing. For case-by-case review of
-individual drafts, use the per-id `akm proposal show|diff|accept|reject`
-flow — see `knowledge/akm-proposals-and-lessons`.
+One rule decides each pending proposal. A proposal whose quality judge passed
+on its current content is accepted (unless its target changed since it was
+minted: that one is rejected as `stale-target`). An empty diff is rejected.
+Reflect and distill proposals deferred for review, and everything the
+proactive-maintenance lane produced, are left for a person. The optional
+judgment tier (`--judgment`) may accept only consolidate promotions; any other
+kind it would accept is left for a person.
 
-Default mode is **queue** (stage/reject-empty only — never promotes); pass
-`--promote` to actually accept matching proposals. Promotion commits to git
-and has no batch revert, so `--dry-run` first.
-
-Built-in presets (`--policy`):
-
-| Preset | Accepts | Rejects | Leaves pending |
-|---|---|---|---|
-| `personal-stash` | extract w/ real content; reflect ≤80 lines; consolidate ≤ band | empty diffs | consolidate mid-band, distill dups, contradictions |
-| `conservative` | small extract + consolidate only | empty diffs | everything else |
-| `manual` | nothing | empty diffs | everything else |
-
-`--policy <path>` loads a custom policy file. Key flags:
-
-- `--promote` — actually accept (default is stage-only queue mode).
-- `--yes` — required for promotion in non-interactive mode.
-- `--dry-run` — list accept/reject/defer decisions without writing.
-- `--max-accepts N` — hard per-run accept ceiling (overflow → `skippedByCap`).
-- `--max-diff-lines N` — defer (never promote) accepts above this size.
-- `--older-than D` — only consider proposals older than D days.
-- `--judgment` — opt into the judgment tier (llm by default; agent/sdk per config)
-  for deferred mid-band/dup/contradiction items.
-- `--strategy <name>` — read the triage block (policy, apply mode, ceilings,
-  judgment) from an improve strategy instead.
+A bare drain **queues**: it stages decisions and writes nothing to assets.
+`--promote` accepts, asks for confirmation first, and needs `--yes` without a
+terminal. Promotion commits to git, so `--dry-run` first.
 
 ```bash
-# Preview what the personal-stash policy would do:
-akm proposal drain --policy personal-stash --dry-run
-
-# Actually drain (promote) the backlog non-interactively:
-akm proposal drain --policy personal-stash --promote --yes
+akm proposal drain --dry-run
+akm proposal drain --promote --yes
+akm proposal drain --max-accepts 10 --older-than 7 --promote --yes
 ```
 
-Triage also runs automatically as a **pre-pass inside `akm improve`** when
-`processes.triage` is enabled in the active strategy — see
+Key flags: `--max-accepts N` (hard per-run ceiling; overflow is reported as
+`skippedByCap`), `--older-than D` (only proposals older than D days),
+`--judgment` (enable the judgment tier for this drain), `--strategy <name>`
+(read the triage block from an improve strategy). There are no `--policy`
+presets.
+
+Triage also runs automatically as a **pre-pass inside `akm improve`**: the
+`default` strategy runs it in `promote` mode with judgment off. See
 `knowledge/akm-improve-and-extract`.
 
-### Improve strategies (formerly "profiles")
+### Improve strategies
 
-`akm improve --profile <name>` was renamed to `akm improve --strategy
-<name>` in 0.9.0; presets moved from `profiles.improve.<name>` in config to
-`improve.strategies.<name>`. There is no confidence-gated `--auto-accept`
-flag anymore — improve always writes to the proposal queue, never directly
-to a live asset.
+`akm improve --strategy <name>` selects a strategy; the order is `--strategy`,
+config `improve.strategy`, then built-in `default`. The built-ins are
+**`default`** and **`consolidate`**. A strategy named `quick`, `thorough`,
+`catchup`, `reflect-distill` or `proactive-maintenance` is an ordinary
+user-defined strategy that inherits `default`, not a built-in. Custom strategies
+live under `improve.strategies.<name>`. A strategy says which processes run and
+how they are tuned, never where they run (`improve.connection`,
+`improve.harness`, or `--connection`/`--harness`/`--model` choose that).
 
-The 0.9.7 built-ins are `default`, `quick`, `thorough`,
-`graph-refresh`, `consolidate`, `catchup`, `reflect-distill`, and
-`proactive-maintenance`. `frequent` and `memory-focus` were removed; a
-custom strategy with either name now merges over `default`, so make any
-relied-on process or sync behavior explicit. `thorough` and `catchup` use
-judged promotion with caps, but the autonomy gate demotes them to queue mode
-unless `experimental.improveAutonomy` is enabled.
+## Env and secrets
 
-## Wikis, env, and secrets
+An LLM wiki (`schema.md` + `pages/`) is a **bundle format**, not an asset
+type: `akm bundle add` it like any other source; there is no `akm wiki`.
 
 | Command | Purpose |
 |---|---|
-| — | An LLM wiki (`schema.md` + `pages/`) is a **bundle format**, not an akm asset type — there is no `akm wiki` command family. `akm bundle add` it like any other source; its pages are indexed and searchable automatically. |
 | `akm env list` | List all env refs. |
 | `akm env path <ref> [--quiet]` | Print the absolute file path for an env asset (for `--env-file` consumers). |
-| `akm env run <ref> -- <cmd>` | Inject env into a child command without values reaching stdout. |
-| `akm env create <name> [--from-file <path>]` | Create or ingest an existing `.env` file (mode 0600; refuses to clobber). |
+| `akm env create <ref> [--from-file <path>]` | Create or ingest an existing `.env` file (mode 0600; refuses to clobber). Refs are full: `env/prod`. |
 | `akm env export <ref> --out <file>` | Write re-serialized export lines to a file (mode 0600; never prints to stdout). |
 | `akm env remove <ref>` | Delete an env asset. |
 | `akm secret list` | List secret refs. |
-| `akm secret set <ref>` (value via stdin or `--from-file`) | Store a whole-file secret. Value never goes through chat/argv. |
-| `akm secret run <ref> <VAR> -- <cmd>` | Inject secret value into child process environment. |
+| `akm secret set <ref>` (value via stdin, `--from-file` or `--from-env`) | Store a whole-file secret. The value never goes through chat or argv. |
 | `akm secret remove <ref> --yes` | Delete a secret. |
 
-The legacy `vault` type and `akm vault ...` command family are gone. There
-is also no `akm env set`/`akm env unset` — edit the `.env` file directly;
-akm loads it as-is.
-
-## Workflow authoring contract (0.9.7)
-
-akm 0.9.7 workflows are unified markdown documents with:
-
-- frontmatter carrying the asset envelope plus the orchestration graph:
-  `params` (JSON-Schema-typed), `steps` (an ordered list of `{ id, unit?,
-  map?, route?, inputs?, output? }`), optional `defaults` and `budget`.
-- exactly one `## <step-id>` heading per declared step, matching a frontmatter
-  `steps[].id` exactly — no `# Workflow:` title prefix, no `Step:`/`Step ID:`
-  lines.
-- an optional `### gate` sub-heading inside a step section: the step's
-  completion rubric, evaluated fail-closed by `workflow.judgeEngine` when
-  non-empty. Omitted or empty skips validation.
-
-Durable workflow plans produced by this release use `irVersion: 5` and
-`hashVersion: 7`. Earlier plans remain inspectable and may be abandoned, but
-cannot be resumed or advanced; abandon them and start a fresh run from current
-source instead.
-
-The old frontmatter-free `## Step: <title>` / `Step ID:` / `### Instructions`
-/ `### Completion Criteria` heading contract is retired — a workflow written
-that way fails `akm lint --type workflows` with `invalid-workflow-structure`
-findings and is skipped entirely by `akm index`. Run `akm workflow create
-<name> --print` for a starter template.
+To use their values, put the command in a script asset and run
+`akm run --env env/prod --secret secrets/deploy-key:DEPLOY_KEY scripts/<file>`.
+*Deprecated:* `akm env run` and `akm secret run`.
 
 ## Good defaults for agents
 
-- Prefer `akm show <ref> --shape agent` when you need execution-ready output.
 - Prefer `akm curate <query>` before raw `search` when the task is "find the
   best asset for this job."
-- Add `--pack <tokens>` when the task needs the chosen local content now;
-  keep ordinary curate output when refs and follow-up actions are enough.
-- Treat proposal content as draft material until it has been explicitly
-  accepted.
-- Use `--from all` only when you intentionally want local + registry results
+- Add `--max-tokens <n>` to `curate` when the task needs the chosen local
+  content now; keep ordinary curate output when refs and follow-up actions are
+  enough.
+- Use `akm show <ref> --outline`, then `akm show <ref>#<slug>`, for a large
+  document.
+- Treat proposal content as draft material until it has been accepted.
+- Use `--from all` only when you intentionally want local and registry results
   in one pass.
-- For recurring work, prefer `akm task add` over ad hoc cron notes in docs or
-  shell history.
+- For recurring work, write a task file and schedule it, instead of ad hoc
+  cron notes in docs or shell history.

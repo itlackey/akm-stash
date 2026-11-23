@@ -222,14 +222,7 @@ export async function* akmStream<T = unknown>(
 /** Load a single memory's content. */
 export async function showMemory(ref: string): Promise<MemoryShow | null> {
   try {
-    return await akm<MemoryShow>([
-      "show",
-      ref,
-      "--format",
-      "json",
-      "--detail",
-      "full",
-    ]);
+    return await akm<MemoryShow>(["show", ref, "--format", "json"]);
   } catch (err) {
     if (err instanceof AkmError && /not found/i.test(err.stderr)) return null;
     throw err;
@@ -247,19 +240,13 @@ export async function rememberMemory(
   return await akm<{ ref: string }>(args, { stdin: content });
 }
 
-/** Resolve the working bundle directory via `akm config path --all`. */
+/** Resolve the working bundle directory via `akm doctor info`. */
 export async function getStashDir(): Promise<string> {
-  const out = await akm<{ bundle?: string; config?: string; cache?: string; index?: string }>([
-    "config",
-    "path",
-    "--all",
-    "--format",
-    "json",
-  ]);
-  const dir = out.bundle ?? null;
+  const out = await akm<{ bundleDir?: string }>(["doctor", "info", "--format", "json"]);
+  const dir = out.bundleDir ?? null;
   if (!dir) {
     throw new Error(
-      "Could not resolve the working bundle directory from `akm config path --all`. Run `akm setup` first.",
+      "Could not resolve the working bundle directory from `akm doctor info`. Run `akm setup` first.",
     );
   }
   return dir;
@@ -275,11 +262,10 @@ export async function indexStash(verbose = false): Promise<unknown> {
 /** Read recent feedback events from akm's append-only event stream. */
 export async function listFeedbackEvents(limit = 50): Promise<FeedbackEvent[]> {
   const result = await akm<{ events?: FeedbackEvent[] }>([
+    "doctor",
     "log",
     "--type",
     "feedback",
-    "--detail",
-    "full",
     "--format",
     "json",
   ]);
